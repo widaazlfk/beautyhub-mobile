@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
+
+    <!-- Nama Produk -->
+    <!-- `layout_toStartOf` digunakan untuk memastikan teks tidak bertindih dengan kuantiti -->
+    <TextView
+        android:id="@+id/tv_item_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@+id/tv_item_quantity"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="16dp"
+        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+        android:textColor="@android:color/black"
+        tools:text="Nama Produk Yang Sangat Panjang Sekali" />
+
+    <!-- Kuantiti -->
+    <!-- `layout_toStartOf` digunakan untuk memastikan ia berada sebelum harga -->
+    <TextView
+        android:id="@+id/tv_item_quantity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toStartOf="@+id/tv_item_price"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="16dp"
+        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+        android:textColor="?android:attr/textColorSecondary"
+        tools:text="x2" />
+
+    <!-- Harga Item -->
+    <!-- `layout_alignParentEnd` meletakkannya di hujung kanan sekali -->
+    <TextView
+        android:id="@+id/tv_item_price"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        tools:text="RM99.99" />
+
+</RelativeLayout>

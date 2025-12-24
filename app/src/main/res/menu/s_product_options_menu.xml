@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Pilihan untuk mengemas kini produk -->
+    <item
+        android:id="@+id/menu_edit_product"
+        android:title="Edit Product"
+        android:icon="@drawable/ic_edit" /> <!-- Ikon pilihan -->
+
+    <!-- Pilihan untuk memadam produk -->
+    <item
+        android:id="@+id/menu_delete_product"
+        android:title="Delete Product"
+        android:icon="@drawable/ic_delete" /> <!-- Ikon pilihan -->
+
+</menu>

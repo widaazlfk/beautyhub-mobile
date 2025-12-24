@@ -1,0 +1,3554 @@
+{
+  "Products": {
+    "prod_001": {
+      "productId": "prod_001",
+      "name": "Demica Treatment Lotion",
+      "description": "Lightweight moisturizer for daily hydration. Suitable for all skin types.",
+      "price": 49.9,
+      "category": "Moisturizers",
+      "brand": "Demica",
+      "ingredients": "Centella, Salicylic Acid, Provitamin B5",
+      "skinType": "All Skin Types",
+      "stock": 150,
+      "imageUrls": [
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1764249131/jqmke116qxdtpukbcx4j.jpg",
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766427539/demica_misturiser_jegtr7.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_001a",
+          "name": "Normal Skin",
+          "priceModifier": 0,
+          "stock": 50,
+          "sku": "DM001-NS",
+          "isDefault": true
+        },
+        {
+          "id": "var_001b",
+          "name": "Dry Skin",
+          "priceModifier": 0,
+          "stock": 50,
+          "sku": "DM001-DS",
+          "isDefault": false
+        },
+        {
+          "id": "var_001c",
+          "name": "Oily Skin",
+          "priceModifier": 0,
+          "stock": 50,
+          "sku": "DM001-OS",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.5,
+      "soldCount": 342,
+      "discountPrice": 44.0,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "prrJtKhVRedZTqhyAubBWcTHfHz2",
+      "sellerName": "Demica Beauty",
+      "sellerProfileImageUrl": "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766427626/demica_logo_m4vhen.jpg",
+      "isPreloaded": true
+    },
+    "prod_002": {
+      "productId": "prod_002",
+      "name": "Demica Whitening Soap",
+      "description": "pH-balanced foam cleanser that removes impurities without stripping skin.",
+      "price": 29.9,
+      "category": "Cleansers",
+      "brand": "Demica",
+      "ingredients": "Green Tea Extract, Chamomile, Glycerin",
+      "skinType": "Sensitive Skin",
+      "stock": 200,
+      "imageUrls": [
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766427821/demica_soap_febw7p.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.3,
+      "soldCount": 189,
+      "discountPrice": 25.0,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "prrJtKhVRedZTqhyAubBWcTHfHz2",
+      "sellerName": "Demica Beauty",
+      "sellerProfileImageUrl": "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766427626/demica_logo_m4vhen.jpg",
+      "isPreloaded": true
+    },
+    "prod_003": {
+      "productId": "prod_003",
+      "name": "Demica UV Tone Up Sunscreen",
+      "description": "Non-greasy sunscreen with broad spectrum protection.",
+      "price": 49.9,
+      "category": "Sunscreens",
+      "brand": "Demica",
+      "ingredients": "Niacinamide, Centella, Vitamin E",
+      "skinType": "All Skin Types",
+      "stock": 120,
+      "imageUrls": [
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766429071/sunscreen_demica_khm6us.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.7,
+      "soldCount": 256,
+      "discountPrice": 44.0,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "prrJtKhVRedZTqhyAubBWcTHfHz2",
+      "sellerName": "Demica Beauty",
+      "sellerProfileImageUrl": "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766427626/demica_logo_m4vhen.jpg",
+      "isPreloaded": true
+    },
+    "prod_004": {
+      "productId": "prod_004",
+      "name": "Demica Whitening Booster Honeydew",
+      "description": "Brightening serum with 15% Vitamin C for radiant skin.",
+      "price": 49.0,
+      "category": "Serums",
+      "brand": "Demica",
+      "ingredients": "Glutathione, Pearl Extract, Glycerin",
+      "skinType": "Dull Skin",
+      "stock": 80,
+      "imageUrls": [
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766428219/demica_serum_kopwrq.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.6,
+      "soldCount": 134,
+      "discountPrice": 0,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "prrJtKhVRedZTqhyAubBWcTHfHz2",
+      "sellerName": "Demica Beauty",
+      "sellerProfileImageUrl": "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766427626/demica_logo_m4vhen.jpg",
+      "isPreloaded": true
+    },
+    "prod_005": {
+      "productId": "prod_005",
+      "name": "Demica Lipmatte",
+      "description": "Long Wear & Rich Color Payoff This special lipmate is formulated with natural ingredients to help moisturize the lips, reduce dryness, and deliver a soft, long-lasting tint.",
+      "price": 17.9,
+      "category": "Lipstick",
+      "brand": "Demica",
+      "ingredients": "Rose Water, Hyaluronic Acid, Aloe Vera",
+      "skinType": "All Skin Types",
+      "stock": 95,
+      "imageUrls": [
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766429736/demica_truffle_hwscd3.jpg",
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766429750/demica_sweet_yjelix.jpg",
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766429764/demica_stellar_p91ige.jpg"
+      ],
+      "variants": [
+          {
+            "id": "var_005a",
+            "name": "Truffle",
+            "priceModifier": 0,
+            "stock": 23,
+            "sku": "DM091-NS",
+            "isDefault": true
+          },
+        {
+          "id": "var_005b",
+          "name": "Sweet",
+          "priceModifier": 0,
+          "stock": 67,
+          "sku": "DM004-NS",
+          "isDefault": true
+        },
+        {
+          "id": "var_005c",
+          "name": "Stellar",
+          "priceModifier": 0,
+          "stock": 5,
+          "sku": "DM001-NS",
+          "isDefault": true
+        }
+        ],
+      "averageRating": 4.2,
+      "soldCount": 87,
+      "discountPrice": 10.0,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "prrJtKhVRedZTqhyAubBWcTHfHz2",
+      "sellerName": "Demica Beauty",
+      "sellerProfileImageUrl": "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766427626/demica_logo_m4vhen.jpg",
+      "isPreloaded": true
+    },
+    "prod_006": {
+      "productId": "prod_006",
+      "name": "Demica Cushion Foundation",
+      "description": "Get that effortlessly flawless look with DEMICA Cushion Foundation, a lightweight formula that offers buildable full coverage for all-day comfort and radiance.",
+      "price": 59.9,
+      "category": "Foundations",
+      "brand": "Demica",
+      "ingredients": "Bentonite Clay, Charcoal, Tea Tree Oil",
+      "skinType": "All Skin Type",
+      "stock": 110,
+      "imageUrls": [
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766430080/demica_buttermilk_ve3mdz.jpg",
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766430090/demica_vanilla_kupq67.jpg",
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766430100/demica_creme_brulee_urfqbg.jpg"
+
+      ],
+      "variants": [
+        {
+          "id": "var_006a",
+          "name": "Buttermilk",
+          "priceModifier": 0,
+          "stock": 67,
+          "sku": "DM094-NS",
+          "isDefault": true
+        },
+        {
+          "id": "var_006b",
+          "name": "Vanilla",
+          "priceModifier": 0,
+          "stock": 67,
+          "sku": "DM904-NS",
+          "isDefault": true
+        },
+        {
+          "id": "var_006c",
+          "name": "Creme Brulee",
+          "priceModifier": 0,
+          "stock": 67,
+          "sku": "DM804-NS",
+          "isDefault": true
+        }
+      ],
+      "averageRating": 4.4,
+      "soldCount": 92,
+      "discountPrice": 35.0,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "prrJtKhVRedZTqhyAubBWcTHfHz2",
+      "sellerName": "Demica Beauty",
+      "sellerProfileImageUrl": "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766427626/demica_logo_m4vhen.jpg",
+      "isPreloaded": true
+    },
+    "prod_007": {
+      "productId": "prod_007",
+      "name": "ANAS Lip Duo",
+      "description": "Enhance your lip game with the ANAS LIP DUO, featuring the ANAS Velvet Matte Liquid Lipstick and ANAS Super Shine Lip Gloss.",
+      "price": 49.9,
+      "category": "Lipstick",
+      "brand": "ANAS",
+      "ingredients": "Vitamin E, Vitamin C, Olive Oil, Almond Oil",
+      "skinType": "All Skin Types",
+      "stock": 200,
+      "imageUrls": [
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766430547/anas_lip_duo_ngrgqf.webp",
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766430556/anas_berlin_wh7typ.webp",
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766430567/anas_jakarta_hyreom.webp",
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766430576/anas_kl_j7jdjw.webp"
+
+      ],
+      "variants": [
+        {
+          "id": "var_007a",
+          "name": "Berlin",
+          "priceModifier": 0,
+          "stock": 80,
+          "sku": "AN001-RR",
+          "isDefault": true
+        },
+        {
+          "id": "var_007b",
+          "name": "Jakarta",
+          "priceModifier": 0,
+          "stock": 60,
+          "sku": "AN001-NP",
+          "isDefault": false
+        },
+        {
+          "id": "var_007c",
+          "name": "Kuala Lumpur",
+          "priceModifier": 2.0,
+          "stock": 60,
+          "sku": "AN001-BW",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.5,
+      "soldCount": 178,
+      "discountPrice": 0,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "lEBxrjmaMEZooDBCSCrKIXvrEj12",
+      "sellerName": "ANAS Cosmetics",
+      "sellerProfileImageUrl": "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766430732/anas_logo_lmiuh5.png",
+      "isPreloaded": true
+    },
+    "prod_008": {
+      "productId": "prod_008",
+      "name": "SYEDEWA Liquid Eyeliner - Nude",
+      "description": "Waterproof liquid eyeliner with precise brush tip.",
+      "price": 24.5,
+      "category": "Eyeliner",
+      "brand": "Syedewa",
+      "ingredients": "Carbon Black, Acrylate Copolymer",
+      "skinType": "All Skin Types",
+      "stock": 150,
+      "imageUrls": [
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766589231/syedewa_eyeliner_jb1vof.jpg",
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766589241/sd_line_hvsvz5.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.3,
+      "soldCount": 145,
+      "discountPrice": 21.9,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "QrHV78fKIWhLK0SijtgFtMMkF3H3",
+      "sellerName": "Syedewa Cosmetics",
+      "sellerProfileImageUrl": "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766431512/syedewa_logo_wlxtsa.png",
+      "isPreloaded": true
+    },
+    "prod_009": {
+      "productId": "prod_009",
+      "name": "ANAS Lip Moist Serum",
+      "description": "Lip treatment specifically designed to hydrate your lips, nourish them, and rejuvenate them.",
+      "price": 49.9,
+      "category": "Serums",
+      "brand": "ANAS",
+      "ingredients": "Vitamin E, Collagen, Ceramide, Honey, SPF15++",
+      "skinType": "All Skin Type",
+      "stock": 120,
+      "imageUrls": [
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766431128/anas_lip_serum_xboqkp.webp",
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766431139/anas_watermelon_blgzob.webp",
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766431150/anas_rose_pink_v34wbr.webp"
+      ],
+      "variants": [
+        {
+          "id": "var_009a",
+          "name": "Watermelon",
+          "priceModifier": 0,
+          "stock": 40,
+          "sku": "AN012-LB",
+          "isDefault": true
+        },
+        {
+          "id": "var_009b",
+          "name": "Rose Pink",
+          "priceModifier": 0,
+          "stock": 40,
+          "sku": "AN012-NB",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.2,
+      "soldCount": 96,
+      "discountPrice": 34.9,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "lEBxrjmaMEZooDBCSCrKIXvrEj12",
+      "sellerName": "ANAS Cosmetics",
+      "sellerProfileImageUrl": "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766430732/anas_logo_lmiuh5.png",
+      "isPreloaded": true
+    },
+    "prod_010": {
+      "productId": "prod_010",
+      "name": "SYEDEWA Velvet Lipstick",
+      "description": "SYEDEWA Lipstick Velvet Finish glides easily on the lips and instantly sets to a sheer finish.",
+      "price": 72.9,
+      "category": "Lipstick",
+      "brand": "Syedewa",
+      "ingredients": "Jojoba Oil, Sweet Almond Oil, and Vitamin E",
+      "skinType": "All Skin Types",
+      "stock": 180,
+      "imageUrls": [
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766588618/syedewa_lipstick_kagulp.jpg",
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766588624/syedewa_brown_v8pe67.jpg",
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766588637/syedewa_nude_i4upvy.jpg",
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766588704/syedewa_pink_uerneo.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_0010a",
+          "name": "Brown",
+          "priceModifier": 0,
+          "stock": 40,
+          "sku": "SD012-NB",
+          "isDefault": false
+        },
+        {
+          "id": "var_0010b",
+          "name": "Nude",
+          "priceModifier": 0,
+          "stock": 40,
+          "sku": "SD012-NB",
+          "isDefault": false
+        },
+        {
+          "id": "var_0010c",
+          "name": "Pink",
+          "priceModifier": 0,
+          "stock": 40,
+          "sku": "SD012-NB",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.4,
+      "soldCount": 112,
+      "discountPrice": 0,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "QrHV78fKIWhLK0SijtgFtMMkF3H3",
+      "sellerName": "Syedewa Cosmetics",
+      "sellerProfileImageUrl": "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766431512/syedewa_logo_wlxtsa.png",
+      "isPreloaded": true
+    },
+    "prod_011": {
+      "productId": "prod_011",
+      "name": "WAWA Cover Cushion - Fair Cool",
+      "description": "Provides full coverage to effectively conceal blemishes, uneven skin tone, and imperfections while maintaining a natural finish.",
+      "price": 49.0,
+      "category": "Foundation",
+      "brand": "WAWA",
+      "ingredients": "Hyaluronic Acid, Vitamin E, SPF 15",
+      "skinType": "Normal to Dry",
+      "stock": 90,
+      "imageUrls": [
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766589734/cushion-foundation-r-copy-jbaW730iovoz0OPqeUgs_ohulqv.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.6,
+      "soldCount": 167,
+      "discountPrice": 40.5,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "LvdOWPH3ydXpds6aoXF5R92HP7x1",
+      "sellerName": "WAWA Cosmetics",
+      "sellerProfileImageUrl": "LvdOWPH3ydXpds6aoXF5R92HP7x1",
+      "isPreloaded": true
+    },
+    "prod_012": {
+      "productId": "prod_012",
+      "name": "WAWA Dewy Glow Liquid Blusher Cream",
+      "description": "Creamy blusher for checkbone.",
+      "price": 29.0,
+      "category": "Blusher",
+      "brand": "WAWA Cosmetics",
+      "ingredients": "Vitamin K, Arnica",
+      "skinType": "All Skin Types",
+      "stock": 140,
+      "imageUrls": [
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766590117/dewy-glow-liquid-blush-r-fSpkMYjxw74p9hC2QyTd_uqtqrd.jpg"
+      ],
+      "variants": [
+        {
+        "id": "var_0012a",
+        "name": "Morning Rose",
+        "priceModifier": 0,
+        "stock": 40,
+        "sku": "WA012-NB",
+        "isDefault": false
+        },
+        {
+          "id": "var_0012b",
+          "name": "Sunset Peach",
+          "priceModifier": 0,
+          "stock": 40,
+          "sku": "WA012-NB",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.3,
+      "soldCount": 98,
+      "discountPrice": 25.0,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "LvdOWPH3ydXpds6aoXF5R92HP7x1",
+      "sellerName": "WAWA Cosmetics",
+      "sellerProfileImageUrl": "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766431516/wawa_logo_jmovpr.png",
+      "isPreloaded": true
+    },
+    "prod_013": {
+      "productId": "prod_013",
+      "name": "WAWA Pore Primer",
+      "description": "Smoothing primer for flawless makeup application.",
+      "price": 35.0,
+      "category": "Primer",
+      "brand": "WAWA Cosmetics",
+      "ingredients": "Dimethicone, Dimethicone Crosspolymer, Tridecyl Trimelitate, Dimethicone / Vinyl Dimethicone Crosspolymer, Melaleuca Alternifolia (Tea Tree) Extract, Tocopheryl Acetate (Ve), Retinyl Palmitate (Va), Silica, Phenoxyethanol",
+      "skinType": "All Skin Types",
+      "stock": 110,
+      "imageUrls": [
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766590516/wawa-pore-primer-QqzHRveRrZcPWu8oGTQt_mglqsi.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.4,
+      "soldCount": 76,
+      "discountPrice": 0,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "LvdOWPH3ydXpds6aoXF5R92HP7x1",
+      "sellerName": "WAWA Cosmetics",
+      "sellerProfileImageUrl": "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766431516/wawa_logo_jmovpr.png",
+      "isPreloaded": true
+    },
+    "prod_014": {
+      "productId": "prod_014",
+      "name": "WAWA Pro Perfecting Cover Compact Powder",
+      "description": "The brightening compact powder with soft silky finish to give the natural glow. Formulated with skin beautifying powder with liquid foundation effect.\n\nNet Wt : 10g 0.35Oz",
+      "price": 29.9,
+      "category": "Powder",
+      "brand": "WAWA",
+      "ingredients": "Mica, Corn Starch, Zinc Stearate, Silica, Squalane, Sesame Oil, Lauroyl Lysine, Macadamia Seed Oil, Cocoa Seed Butter, and Shea Butter",
+      "skinType": "All Skin Type",
+      "stock": 70,
+      "imageUrls": [
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766591235/wawa_powder_jz2w22.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.7,
+      "soldCount": 89,
+      "discountPrice": 0,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "LvdOWPH3ydXpds6aoXF5R92HP7x1",
+      "sellerName": "WAWA Cosmetics",
+      "sellerProfileImageUrl": "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766431516/wawa_logo_jmovpr.png",
+      "isPreloaded": true
+    },
+    "prod_015": {
+      "productId": "prod_015",
+      "name": "WAWA Perfect Winged Eyeliner Stamp",
+      "description": "The wing stamp eyeliner was found to help people practice their cat eyeliner in easy way.\nThis new version have been upgraded in terms of colour\n8 hours persistence\nSmudge proof\nWaterproof effect.\n90% have recommended to makeup beginner.",
+      "price": 19.0,
+      "category": "Eyeliner",
+      "brand": "WAWA",
+      "ingredients": "Water, Glycerin, C12-15 Alkyl/Benzoate, Cetearyl Alcohol, Bentonite, Squalane, Polybinyl, Candelilla Cera, Peg-100 Stearate, Beeswax, Polysorbate 20, Pvp, Phenoxyethanol, Triethanolamine, Methylparaben, Propylparaben, Tocopherol, Parfum, Iron Oxides.",
+      "skinType": "All Skin Type",
+      "stock": 85,
+      "imageUrls": [
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766591642/wawa_eyeliner_ah39kk.jpg",
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766591665/wawa_eyeliner_1_xr2aro.jpg",
+        "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766591682/wawa_eyeliner_2_pd1ynr.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.5,
+      "soldCount": 67,
+      "discountPrice": 0,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "LvdOWPH3ydXpds6aoXF5R92HP7x1",
+      "sellerName": "WAWA Cosmetics",
+      "sellerProfileImageUrl": "https://res.cloudinary.com/de5ctrpk5/image/upload/v1766431516/wawa_logo_jmovpr.png",
+      "isPreloaded": true
+    },
+
+    "prod_016": {
+      "productId": "prod_016",
+      "name": "Safi Rania Illuminating Cream Foundation",
+      "description": "Halal-certified foundation with light-reflecting particles for a radiant glow.",
+      "price": 42.9,
+      "category": "Foundations",
+      "brand": "Safi",
+      "ingredients": "Niacinamide, Hyaluronic Acid, Pearl Extract",
+      "skinType": "All Skin Types",
+      "stock": 120,
+      "imageUrls": [
+        "https://example.com/images/safi_foundation.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_016a",
+          "name": "Porcelain",
+          "priceModifier": 0,
+          "stock": 40,
+          "sku": "SF001-PC",
+          "isDefault": true
+        },
+        {
+          "id": "var_016b",
+          "name": "Natural",
+          "priceModifier": 0,
+          "stock": 40,
+          "sku": "SF001-NT",
+          "isDefault": false
+        },
+        {
+          "id": "var_016c",
+          "name": "Honey",
+          "priceModifier": 0,
+          "stock": 40,
+          "sku": "SF001-HN",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.2,
+      "soldCount": 215,
+      "discountPrice": 36.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_017": {
+      "productId": "prod_017",
+      "name": "Safi Rania Illuminating Cream Foundation",
+      "description": "Halal-certified foundation with light-reflecting particles for a radiant glow.",
+      "price": 44.5,
+      "category": "Foundations",
+      "brand": "Safi",
+      "ingredients": "Niacinamide, Hyaluronic Acid, Pearl Extract",
+      "skinType": "All Skin Types",
+      "stock": 95,
+      "imageUrls": [
+        "https://example.com/images/safi_foundation.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_017a",
+          "name": "Porcelain",
+          "priceModifier": 0,
+          "stock": 35,
+          "sku": "SF001-PC-G",
+          "isDefault": true
+        },
+        {
+          "id": "var_017b",
+          "name": "Natural",
+          "priceModifier": 0,
+          "stock": 30,
+          "sku": "SF001-NT-G",
+          "isDefault": false
+        },
+        {
+          "id": "var_017c",
+          "name": "Honey",
+          "priceModifier": 0,
+          "stock": 30,
+          "sku": "SF001-HN-G",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.2,
+      "soldCount": 178,
+      "discountPrice": 39.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_018": {
+      "productId": "prod_018",
+      "name": "Chuck's Honey Cream",
+      "description": "Soothing moisturizer infused with natural Manuka honey for deep hydration.",
+      "price": 32.5,
+      "category": "Moisturizers",
+      "brand": "Chuck's",
+      "ingredients": "Manuka Honey, Oat Extract, Shea Butter",
+      "skinType": "Dry, Sensitive Skin",
+      "stock": 85,
+      "imageUrls": [
+        "https://example.com/images/chucks_honey.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.6,
+      "soldCount": 320,
+      "discountPrice": 28.0,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_019": {
+      "productId": "prod_019",
+      "name": "Chuck's Honey Cream",
+      "description": "Soothing moisturizer infused with natural Manuka honey for deep hydration.",
+      "price": 33.9,
+      "category": "Moisturizers",
+      "brand": "Chuck's",
+      "ingredients": "Manuka Honey, Oat Extract, Shea Butter",
+      "skinType": "Dry, Sensitive Skin",
+      "stock": 70,
+      "imageUrls": [
+        "https://example.com/images/chucks_honey.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.6,
+      "soldCount": 290,
+      "discountPrice": 29.5,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_020": {
+      "productId": "prod_020",
+      "name": "Silkygirl 24H Stay Fresh Foundation",
+      "description": "Long-lasting foundation with oil control and SPF 25, stays fresh for 24 hours.",
+      "price": 15.9,
+      "category": "Foundations",
+      "brand": "Silkygirl",
+      "ingredients": "Tea Tree Oil, SPF 25, Vitamin E",
+      "skinType": "Oily, Combination Skin",
+      "stock": 150,
+      "imageUrls": [
+        "https://example.com/images/silkygirl_foundation.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_020a",
+          "name": "Ivory",
+          "priceModifier": 0,
+          "stock": 50,
+          "sku": "SG024-IV",
+          "isDefault": true
+        },
+        {
+          "id": "var_020b",
+          "name": "Sand Beige",
+          "priceModifier": 0,
+          "stock": 50,
+          "sku": "SG024-SB",
+          "isDefault": false
+        },
+        {
+          "id": "var_020c",
+          "name": "Caramel",
+          "priceModifier": 0,
+          "stock": 50,
+          "sku": "SG024-CR",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.1,
+      "soldCount": 410,
+      "discountPrice": 12.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_021": {
+      "productId": "prod_021",
+      "name": "Silkygirl 24H Stay Fresh Foundation",
+      "description": "Long-lasting foundation with oil control and SPF 25, stays fresh for 24 hours.",
+      "price": 16.5,
+      "category": "Foundations",
+      "brand": "Silkygirl",
+      "ingredients": "Tea Tree Oil, SPF 25, Vitamin E",
+      "skinType": "Oily, Combination Skin",
+      "stock": 135,
+      "imageUrls": [
+        "https://example.com/images/silkygirl_foundation.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_021a",
+          "name": "Ivory",
+          "priceModifier": 0,
+          "stock": 45,
+          "sku": "SG024-IV-G",
+          "isDefault": true
+        },
+        {
+          "id": "var_021b",
+          "name": "Sand Beige",
+          "priceModifier": 0,
+          "stock": 45,
+          "sku": "SG024-SB-G",
+          "isDefault": false
+        },
+        {
+          "id": "var_021c",
+          "name": "Caramel",
+          "priceModifier": 0,
+          "stock": 45,
+          "sku": "SG024-CR-G",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.1,
+      "soldCount": 380,
+      "discountPrice": 14.0,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_022": {
+      "productId": "prod_022",
+      "name": "Elianto Hydrating Lip Tint",
+      "description": "Water-based lip tint that provides a natural flush of color with a lightweight feel.",
+      "price": 12.9,
+      "category": "Lipstick",
+      "brand": "Elianto",
+      "ingredients": "Rose Water, Cherry Extract, Vitamin E",
+      "skinType": "All Skin Types",
+      "stock": 200,
+      "imageUrls": [
+        "https://example.com/images/elianto_liptint.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_022a",
+          "name": "Cherry Red",
+          "priceModifier": 0,
+          "stock": 70,
+          "sku": "EL101-CR",
+          "isDefault": true
+        },
+        {
+          "id": "var_022b",
+          "name": "Coral Pink",
+          "priceModifier": 0,
+          "stock": 70,
+          "sku": "EL101-CP",
+          "isDefault": false
+        },
+        {
+          "id": "var_022c",
+          "name": "Rose Nude",
+          "priceModifier": 0,
+          "stock": 60,
+          "sku": "EL101-RN",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.3,
+      "soldCount": 520,
+      "discountPrice": 9.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_023": {
+      "productId": "prod_023",
+      "name": "Elianto Hydrating Lip Tint",
+      "description": "Water-based lip tint that provides a natural flush of color with a lightweight feel.",
+      "price": 13.5,
+      "category": "Lipstick",
+      "brand": "Elianto",
+      "ingredients": "Rose Water, Cherry Extract, Vitamin E",
+      "skinType": "All Skin Types",
+      "stock": 180,
+      "imageUrls": [
+        "https://example.com/images/elianto_liptint.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_023a",
+          "name": "Cherry Red",
+          "priceModifier": 0,
+          "stock": 60,
+          "sku": "EL101-CR-G",
+          "isDefault": true
+        },
+        {
+          "id": "var_023b",
+          "name": "Coral Pink",
+          "priceModifier": 0,
+          "stock": 60,
+          "sku": "EL101-CP-G",
+          "isDefault": false
+        },
+        {
+          "id": "var_023c",
+          "name": "Rose Nude",
+          "priceModifier": 0,
+          "stock": 60,
+          "sku": "EL101-RN-G",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.3,
+      "soldCount": 480,
+      "discountPrice": 11.0,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_024": {
+      "productId": "prod_024",
+      "name": "Safi Dermalogical Serum",
+      "description": "Advanced anti-aging serum with Synake and Retinol to reduce fine lines.",
+      "price": 24.9,
+      "category": "Serums",
+      "brand": "Safi",
+      "ingredients": "Synake Peptide, Retinol, Vitamin C",
+      "skinType": "Mature Skin, All Skin Types",
+      "stock": 90,
+      "imageUrls": [
+        "https://example.com/images/safi_serum.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.4,
+      "soldCount": 180,
+      "discountPrice": 19.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_025": {
+      "productId": "prod_025",
+      "name": "Safi Dermalogical Serum",
+      "description": "Advanced anti-aging serum with Synake and Retinol to reduce fine lines.",
+      "price": 25.9,
+      "category": "Serums",
+      "brand": "Safi",
+      "ingredients": "Synake Peptide, Retinol, Vitamin C",
+      "skinType": "Mature Skin, All Skin Types",
+      "stock": 75,
+      "imageUrls": [
+        "https://example.com/images/safi_serum.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.4,
+      "soldCount": 155,
+      "discountPrice": 21.5,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_026": {
+      "productId": "prod_026",
+      "name": "Lumi Beauty Vitamin Glow Serum",
+      "description": "Illuminating serum with Kakadu Plum and Vitamin C for a healthy-looking glow.",
+      "price": 32.9,
+      "category": "Serums",
+      "brand": "Lumi Beauty",
+      "ingredients": "Kakadu Plum, Vitamin C, Hyaluronic Acid",
+      "skinType": "Dull Skin, All Skin Types",
+      "stock": 110,
+      "imageUrls": [
+        "https://example.com/images/lumi_serum.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.5,
+      "soldCount": 230,
+      "discountPrice": 28.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_027": {
+      "productId": "prod_027",
+      "name": "Lumi Beauty Vitamin Glow Serum",
+      "description": "Illuminating serum with Kakadu Plum and Vitamin C for a healthy-looking glow.",
+      "price": 34.5,
+      "category": "Serums",
+      "brand": "Lumi Beauty",
+      "ingredients": "Kakadu Plum, Vitamin C, Hyaluronic Acid",
+      "skinType": "Dull Skin, All Skin Types",
+      "stock": 95,
+      "imageUrls": [
+        "https://example.com/images/lumi_serum.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.5,
+      "soldCount": 210,
+      "discountPrice": 30.0,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_028": {
+      "productId": "prod_028",
+      "name": "Cuura Pure Beauty Oil",
+      "description": "Lightweight multi-purpose oil with ceramide and ferments for hydration and barrier support.",
+      "price": 39.9,
+      "category": "Face Oils",
+      "brand": "Cuura",
+      "ingredients": "Ceramide, Rice Ferment, Jojoba Oil",
+      "skinType": "Dry, Dehydrated Skin",
+      "stock": 65,
+      "imageUrls": [
+        "https://example.com/images/cuura_oil.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.7,
+      "soldCount": 145,
+      "discountPrice": 34.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_029": {
+      "productId": "prod_029",
+      "name": "Cuura Pure Beauty Oil",
+      "description": "Lightweight multi-purpose oil with ceramide and ferments for hydration and barrier support.",
+      "price": 41.5,
+      "category": "Face Oils",
+      "brand": "Cuura",
+      "ingredients": "Ceramide, Rice Ferment, Jojoba Oil",
+      "skinType": "Dry, Dehydrated Skin",
+      "stock": 55,
+      "imageUrls": [
+        "https://example.com/images/cuura_oil.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.7,
+      "soldCount": 125,
+      "discountPrice": 36.0,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_030": {
+      "productId": "prod_030",
+      "name": "Olumes Satin Cream Moisturizer",
+      "description": "Rich moisturizer with satin-like finish, perfect for nighttime repair.",
+      "price": 27.9,
+      "category": "Moisturizers",
+      "brand": "Olumes",
+      "ingredients": "Squalane, Shea Butter, Peptides",
+      "skinType": "Dry, Mature Skin",
+      "stock": 100,
+      "imageUrls": [
+        "https://example.com/images/olumes_cream.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.3,
+      "soldCount": 195,
+      "discountPrice": 23.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_031": {
+      "productId": "prod_031",
+      "name": "Olumes Satin Cream Moisturizer",
+      "description": "Rich moisturizer with satin-like finish, perfect for nighttime repair.",
+      "price": 29.0,
+      "category": "Moisturizers",
+      "brand": "Olumes",
+      "ingredients": "Squalane, Shea Butter, Peptides",
+      "skinType": "Dry, Mature Skin",
+      "stock": 85,
+      "imageUrls": [
+        "https://example.com/images/olumes_cream.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.3,
+      "soldCount": 170,
+      "discountPrice": 25.5,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_032": {
+      "productId": "prod_032",
+      "name": "Pretty Suci Lip Velvet",
+      "description": "Velvety matte liquid lipstick with intense color payoff and comfortable wear.",
+      "price": 18.9,
+      "category": "Lipstick",
+      "brand": "Pretty Suci",
+      "ingredients": "Vitamin E, Jojoba Oil, Mango Butter",
+      "skinType": "All Skin Types",
+      "stock": 175,
+      "imageUrls": [
+        "https://example.com/images/pretty_suci_lip.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_032a",
+          "name": "Brick Red",
+          "priceModifier": 0,
+          "stock": 60,
+          "sku": "PS201-BR",
+          "isDefault": true
+        },
+        {
+          "id": "var_032b",
+          "name": "Mauve",
+          "priceModifier": 0,
+          "stock": 60,
+          "sku": "PS201-MV",
+          "isDefault": false
+        },
+        {
+          "id": "var_032c",
+          "name": "Nude Peach",
+          "priceModifier": 0,
+          "stock": 55,
+          "sku": "PS201-NP",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.4,
+      "soldCount": 310,
+      "discountPrice": 15.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_033": {
+      "productId": "prod_033",
+      "name": "Pretty Suci Lip Velvet",
+      "description": "Velvety matte liquid lipstick with intense color payoff and comfortable wear.",
+      "price": 19.5,
+      "category": "Lipstick",
+      "brand": "Pretty Suci",
+      "ingredients": "Vitamin E, Jojoba Oil, Mango Butter",
+      "skinType": "All Skin Types",
+      "stock": 160,
+      "imageUrls": [
+        "https://example.com/images/pretty_suci_lip.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_033a",
+          "name": "Brick Red",
+          "priceModifier": 0,
+          "stock": 55,
+          "sku": "PS201-BR-G",
+          "isDefault": true
+        },
+        {
+          "id": "var_033b",
+          "name": "Mauve",
+          "priceModifier": 0,
+          "stock": 55,
+          "sku": "PS201-MV-G",
+          "isDefault": false
+        },
+        {
+          "id": "var_033c",
+          "name": "Nude Peach",
+          "priceModifier": 0,
+          "stock": 50,
+          "sku": "PS201-NP-G",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.4,
+      "soldCount": 290,
+      "discountPrice": 17.0,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_034": {
+      "productId": "prod_034",
+      "name": "Cathy Doll BB Cream",
+      "description": "All-in-one BB cream with skincare benefits, SPF 35, and light coverage.",
+      "price": 22.9,
+      "category": "BB Creams",
+      "brand": "Cathy Doll",
+      "ingredients": "SPF 35, Niacinamide, Aloe Vera",
+      "skinType": "All Skin Types",
+      "stock": 140,
+      "imageUrls": [
+        "https://example.com/images/cathy_bb.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_034a",
+          "name": "Light",
+          "priceModifier": 0,
+          "stock": 70,
+          "sku": "CD301-LI",
+          "isDefault": true
+        },
+        {
+          "id": "var_034b",
+          "name": "Natural",
+          "priceModifier": 0,
+          "stock": 70,
+          "sku": "CD301-NT",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.0,
+      "soldCount": 420,
+      "discountPrice": 18.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_035": {
+      "productId": "prod_035",
+      "name": "Cathy Doll BB Cream",
+      "description": "All-in-one BB cream with skincare benefits, SPF 35, and light coverage.",
+      "price": 23.9,
+      "category": "BB Creams",
+      "brand": "Cathy Doll",
+      "ingredients": "SPF 35, Niacinamide, Aloe Vera",
+      "skinType": "All Skin Types",
+      "stock": 125,
+      "imageUrls": [
+        "https://example.com/images/cathy_bb.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_035a",
+          "name": "Light",
+          "priceModifier": 0,
+          "stock": 65,
+          "sku": "CD301-LI-G",
+          "isDefault": true
+        },
+        {
+          "id": "var_035b",
+          "name": "Natural",
+          "priceModifier": 0,
+          "stock": 60,
+          "sku": "CD301-NT-G",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.0,
+      "soldCount": 390,
+      "discountPrice": 20.5,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_036": {
+      "productId": "prod_036",
+      "name": "Ai Beauty Heartlight Sunscreen SPF50+",
+      "description": "Lightweight, gentle sunscreen for all skin types and tones, suitable for daily use.",
+      "price": 25.9,
+      "category": "Sunscreens",
+      "brand": "Ai Beauty Co",
+      "ingredients": "SPF50+ PA++++, Hyaluronic Acid, Centella Asiatica",
+      "skinType": "All Skin Types, Sensitive Skin",
+      "stock": 130,
+      "imageUrls": [
+        "https://example.com/images/ai_sunscreen.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.6,
+      "soldCount": 270,
+      "discountPrice": 22.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_037": {
+      "productId": "prod_037",
+      "name": "Ai Beauty Heartlight Sunscreen SPF50+",
+      "description": "Lightweight, gentle sunscreen for all skin types and tones, suitable for daily use.",
+      "price": 26.9,
+      "category": "Sunscreens",
+      "brand": "Ai Beauty Co",
+      "ingredients": "SPF50+ PA++++, Hyaluronic Acid, Centella Asiatica",
+      "skinType": "All Skin Types, Sensitive Skin",
+      "stock": 115,
+      "imageUrls": [
+        "https://example.com/images/ai_sunscreen.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.6,
+      "soldCount": 240,
+      "discountPrice": 23.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_038": {
+      "productId": "prod_038",
+      "name": "Chandra Skin Dewy Lip Butter (Tinted)",
+      "description": "Hydrating lip butter with a hint of tint, leaves lips soft and supple.",
+      "price": 14.9,
+      "category": "Lip Balm",
+      "brand": "Chandra Skin",
+      "ingredients": "Squalane, Shea Butter, Jojoba Oil",
+      "skinType": "All Skin Types",
+      "stock": 190,
+      "imageUrls": [
+        "https://example.com/images/chandra_lip.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_038a",
+          "name": "Rosy",
+          "priceModifier": 0,
+          "stock": 65,
+          "sku": "CS401-RS",
+          "isDefault": true
+        },
+        {
+          "id": "var_038b",
+          "name": "Peachy",
+          "priceModifier": 0,
+          "stock": 65,
+          "sku": "CS401-PC",
+          "isDefault": false
+        },
+        {
+          "id": "var_038c",
+          "name": "Berry",
+          "priceModifier": 0,
+          "stock": 60,
+          "sku": "CS401-BY",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.5,
+      "soldCount": 380,
+      "discountPrice": 12.5,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_039": {
+      "productId": "prod_039",
+      "name": "Chandra Skin Dewy Lip Butter (Tinted)",
+      "description": "Hydrating lip butter with a hint of tint, leaves lips soft and supple.",
+      "price": 15.5,
+      "category": "Lip Balm",
+      "brand": "Chandra Skin",
+      "ingredients": "Squalane, Shea Butter, Jojoba Oil",
+      "skinType": "All Skin Types",
+      "stock": 175,
+      "imageUrls": [
+        "https://example.com/images/chandra_lip.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_039a",
+          "name": "Rosy",
+          "priceModifier": 0,
+          "stock": 60,
+          "sku": "CS401-RS-G",
+          "isDefault": true
+        },
+        {
+          "id": "var_039b",
+          "name": "Peachy",
+          "priceModifier": 0,
+          "stock": 60,
+          "sku": "CS401-PC-G",
+          "isDefault": false
+        },
+        {
+          "id": "var_039c",
+          "name": "Berry",
+          "priceModifier": 0,
+          "stock": 55,
+          "sku": "CS401-BY-G",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.5,
+      "soldCount": 350,
+      "discountPrice": 13.5,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_040": {
+      "productId": "prod_040",
+      "name": "The Mineraw Glow Serum Face Oil",
+      "description": "Lightweight face oil that nourishes and imparts a natural radiance.",
+      "price": 34.0,
+      "category": "Face Oils",
+      "brand": "The Mineraw",
+      "ingredients": "Jojoba Oil, Sea Buckthorn, Rosehip Oil",
+      "skinType": "Dry, Dull Skin",
+      "stock": 70,
+      "imageUrls": [
+        "https://example.com/images/mineraw_oil.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.4,
+      "soldCount": 160,
+      "discountPrice": 29.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_041": {
+      "productId": "prod_041",
+      "name": "The Mineraw Glow Serum Face Oil",
+      "description": "Lightweight face oil that nourishes and imparts a natural radiance.",
+      "price": 35.5,
+      "category": "Face Oils",
+      "brand": "The Mineraw",
+      "ingredients": "Jojoba Oil, Sea Buckthorn, Rosehip Oil",
+      "skinType": "Dry, Dull Skin",
+      "stock": 60,
+      "imageUrls": [
+        "https://example.com/images/mineraw_oil.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.4,
+      "soldCount": 140,
+      "discountPrice": 31.0,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_042": {
+      "productId": "prod_042",
+      "name": "Putryana Clarifying Gel Cleanser",
+      "description": "Gentle gel cleanser that removes impurities without stripping skin.",
+      "price": 19.9,
+      "category": "Cleansers",
+      "brand": "Putryana",
+      "ingredients": "Tea Tree, Green Tea, Aloe Vera",
+      "skinType": "Oily, Acne-Prone Skin",
+      "stock": 165,
+      "imageUrls": [
+        "https://example.com/images/putryana_cleanser.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.3,
+      "soldCount": 290,
+      "discountPrice": 16.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_043": {
+      "productId": "prod_043",
+      "name": "Putryana Clarifying Gel Cleanser",
+      "description": "Gentle gel cleanser that removes impurities without stripping skin.",
+      "price": 20.9,
+      "category": "Cleansers",
+      "brand": "Putryana",
+      "ingredients": "Tea Tree, Green Tea, Aloe Vera",
+      "skinType": "Oily, Acne-Prone Skin",
+      "stock": 150,
+      "imageUrls": [
+        "https://example.com/images/putryana_cleanser.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.3,
+      "soldCount": 260,
+      "discountPrice": 18.0,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_044": {
+      "productId": "prod_044",
+      "name": "Yello Skincare Root Turmeric Clay Mask",
+      "description": "Purifying and brightening mask made with root turmeric to improve skin clarity.",
+      "price": 22.5,
+      "category": "Face Masks",
+      "brand": "Yello Skincare",
+      "ingredients": "Root Turmeric, Kaolin Clay, Neem",
+      "skinType": "Oily, Combination, Dull Skin",
+      "stock": 110,
+      "imageUrls": [
+        "https://example.com/images/yello_mask.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.6,
+      "soldCount": 190,
+      "discountPrice": 19.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_045": {
+      "productId": "prod_045",
+      "name": "Yello Skincare Root Turmeric Clay Mask",
+      "description": "Purifying and brightening mask made with root turmeric to improve skin clarity.",
+      "price": 23.5,
+      "category": "Face Masks",
+      "brand": "Yello Skincare",
+      "ingredients": "Root Turmeric, Kaolin Clay, Neem",
+      "skinType": "Oily, Combination, Dull Skin",
+      "stock": 95,
+      "imageUrls": [
+        "https://example.com/images/yello_mask.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.6,
+      "soldCount": 170,
+      "discountPrice": 20.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_046": {
+      "productId": "prod_046",
+      "name": "Estée Lauder Double Wear Stay-in-Place Foundation",
+      "description": "Long-wear, full coverage foundation that stays flawless for up to 24 hours.",
+      "price": 62.0,
+      "category": "Foundations",
+      "brand": "Estée Lauder",
+      "ingredients": "SPF 10, Vitamin E, Antioxidants",
+      "skinType": "All Skin Types",
+      "stock": 80,
+      "imageUrls": [
+        "https://example.com/images/esteelauder_foundation.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_046a",
+          "name": "1C1 Cool Bone",
+          "priceModifier": 0,
+          "stock": 30,
+          "sku": "ELDW-1C1",
+          "isDefault": true
+        },
+        {
+          "id": "var_046b",
+          "name": "2N1 Desert Beige",
+          "priceModifier": 0,
+          "stock": 30,
+          "sku": "ELDW-2N1",
+          "isDefault": false
+        },
+        {
+          "id": "var_046c",
+          "name": "3W1 Tawny",
+          "priceModifier": 0,
+          "stock": 20,
+          "sku": "ELDW-3W1",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.8,
+      "soldCount": 540,
+      "discountPrice": 0,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Sephora_MY_01",
+      "sellerName": "Sephora Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/sephora.jpg",
+      "isPreloaded": false
+    },
+    "prod_047": {
+      "productId": "prod_047",
+      "name": "Estée Lauder Advanced Night Repair Synchronized Multi-Recovery Complex",
+      "description": "Iconic serum that repairs the look of past damage and prevents future damage while you sleep.",
+      "price": 115.0,
+      "category": "Serums",
+      "brand": "Estée Lauder",
+      "ingredients": "ChronoluxCB™ Technology, Hyaluronic Acid",
+      "skinType": "All Skin Types",
+      "stock": 65,
+      "imageUrls": [
+        "https://example.com/images/esteelauder_serum.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.9,
+      "soldCount": 890,
+      "discountPrice": 0,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_EsteeLauder_Official",
+      "sellerName": "Estée Lauder Official",
+      "sellerProfileImageUrl": "https://example.com/sellers/esteelauder.jpg",
+      "isPreloaded": false
+    },
+    "prod_048": {
+      "productId": "prod_048",
+      "name": "Estée Lauder Pure Color Envy Sculpting Lipstick",
+      "description": "Creamy, hydrating lipstick with intense color payoff and a satin finish.",
+      "price": 45.0,
+      "category": "Lipstick",
+      "brand": "Estée Lauder",
+      "ingredients": "Vitamin E, Mango Butter, Murumuru Butter",
+      "skinType": "All Skin Types",
+      "stock": 120,
+      "imageUrls": [
+        "https://example.com/images/esteelauder_lipstick.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_048a",
+          "name": "130 Insatiable Ivory",
+          "priceModifier": 0,
+          "stock": 40,
+          "sku": "ELPC-130",
+          "isDefault": true
+        },
+        {
+          "id": "var_048b",
+          "name": "420 Rebellious Rose",
+          "priceModifier": 0,
+          "stock": 40,
+          "sku": "ELPC-420",
+          "isDefault": false
+        },
+        {
+          "id": "var_048c",
+          "name": "130 Insatiable Ivory",
+          "priceModifier": 0,
+          "stock": 40,
+          "sku": "ELPC-130",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.7,
+      "soldCount": 320,
+      "discountPrice": 0,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Sephora_MY_01",
+      "sellerName": "Sephora Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/sephora.jpg",
+      "isPreloaded": false
+    },
+    "prod_049": {
+      "productId": "prod_049",
+      "name": "M.A.C Studio Fix Fluid SPF 15 Foundation",
+      "description": "A modern foundation that combines a natural matte finish and medium-buildable coverage with broad spectrum SPF 15 protection.",
+      "price": 41.0,
+      "category": "Foundations",
+      "brand": "M.A.C",
+      "ingredients": "SPF 15, Vitamin E",
+      "skinType": "All Skin Types",
+      "stock": 110,
+      "imageUrls": [
+        "https://example.com/images/mac_foundation.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_049a",
+          "name": "NC15",
+          "priceModifier": 0,
+          "stock": 40,
+          "sku": "MAC-NC15",
+          "isDefault": true
+        },
+        {
+          "id": "var_049b",
+          "name": "NC20",
+          "priceModifier": 0,
+          "stock": 40,
+          "sku": "MAC-NC20",
+          "isDefault": false
+        },
+        {
+          "id": "var_049c",
+          "name": "NC25",
+          "priceModifier": 0,
+          "stock": 30,
+          "sku": "MAC-NC25",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.6,
+      "soldCount": 680,
+      "discountPrice": 0,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Sephora_MY_01",
+      "sellerName": "Sephora Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/sephora.jpg",
+      "isPreloaded": false
+    },
+    "prod_050": {
+      "productId": "prod_050",
+      "name": "NARS Radiant Creamy Concealer",
+      "description": "A multi-action concealer that instantly covers dark circles, imperfections, and discoloration.",
+      "price": 36.0,
+      "category": "Concealers",
+      "brand": "NARS",
+      "ingredients": "Multi-Active Botanical Blend, Grape Seed Extract",
+      "skinType": "All Skin Types",
+      "stock": 95,
+      "imageUrls": [
+        "https://example.com/images/nars_concealer.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_050a",
+          "name": "Vanilla",
+          "priceModifier": 0,
+          "stock": 35,
+          "sku": "NARS-VAN",
+          "isDefault": true
+        },
+        {
+          "id": "var_050b",
+          "name": "Custard",
+          "priceModifier": 0,
+          "stock": 35,
+          "sku": "NARS-CUS",
+          "isDefault": false
+        },
+        {
+          "id": "var_050c",
+          "name": "Ginger",
+          "priceModifier": 0,
+          "stock": 25,
+          "sku": "NARS-GIN",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.8,
+      "soldCount": 720,
+      "discountPrice": 0,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Sephora_MY_01",
+      "sellerName": "Sephora Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/sephora.jpg",
+      "isPreloaded": false
+    },
+    "prod_051": {
+      "productId": "prod_051",
+      "name": "Charlotte Tilbury Matte Revolution Lipstick - Pillow Talk",
+      "description": "Iconic matte lipstick in the universally-flattering Pillow Talk shade.",
+      "price": 48.0,
+      "category": "Lipstick",
+      "brand": "Charlotte Tilbury",
+      "ingredients": "Lipstick Tree Extract, 3D Pigments",
+      "skinType": "All Skin Types",
+      "stock": 85,
+      "imageUrls": [
+        "https://example.com/images/charlottetilbury_lip.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_051a",
+          "name": "Pillow Talk Original",
+          "priceModifier": 0,
+          "stock": 85,
+          "sku": "CT-PTO",
+          "isDefault": true
+        }
+      ],
+      "averageRating": 4.9,
+      "soldCount": 950,
+      "discountPrice": 0,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Sephora_MY_01",
+      "sellerName": "Sephora Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/sephora.jpg",
+      "isPreloaded": false
+    },
+    "prod_052": {
+      "productId": "prod_052",
+      "name": "Fwee Blurry Pudding Pot Blush",
+      "description": "A soft, blurring cream blush with a pudding-like texture for a natural flushed look.",
+      "price": 18.9,
+      "category": "Blush",
+      "brand": "Fwee",
+      "ingredients": "Jojoba Oil, Murumuru Butter",
+      "skinType": "All Skin Types",
+      "stock": 155,
+      "imageUrls": [
+        "https://example.com/images/fwee_blush.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_052a",
+          "name": "Apricot",
+          "priceModifier": 0,
+          "stock": 55,
+          "sku": "FWEE-APR",
+          "isDefault": true
+        },
+        {
+          "id": "var_052b",
+          "name": "Mauve",
+          "priceModifier": 0,
+          "stock": 50,
+          "sku": "FWEE-MAU",
+          "isDefault": false
+        },
+        {
+          "id": "var_052c",
+          "name": "Pink",
+          "priceModifier": 0,
+          "stock": 50,
+          "sku": "FWEE-PIN",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.4,
+      "soldCount": 280,
+      "discountPrice": 16.5,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Sephora_MY_01",
+      "sellerName": "Sephora Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/sephora.jpg",
+      "isPreloaded": false
+    },
+    "prod_053": {
+      "productId": "prod_053",
+      "name": "Haus Labs by Lady Gaga Triclone Skin Tech Hydrating Foundation",
+      "description": "Clean, skin-centric foundation with skincare benefits and a radiant, second-skin finish.",
+      "price": 58.0,
+      "category": "Foundations",
+      "brand": "Haus Labs",
+      "ingredients": "Fermented Arnica, Hyaluronic Acid, Kakadu Plum",
+      "skinType": "All Skin Types",
+      "stock": 70,
+      "imageUrls": [
+        "https://example.com/images/hauslabs_foundation.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_053a",
+          "name": "040 Fair Neutral",
+          "priceModifier": 0,
+          "stock": 25,
+          "sku": "HAUS-040",
+          "isDefault": true
+        },
+        {
+          "id": "var_053b",
+          "name": "100 Light Cool",
+          "priceModifier": 0,
+          "stock": 25,
+          "sku": "HAUS-100",
+          "isDefault": false
+        },
+        {
+          "id": "var_053c",
+          "name": "190 Medium Neutral",
+          "priceModifier": 0,
+          "stock": 20,
+          "sku": "HAUS-190",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.7,
+      "soldCount": 410,
+      "discountPrice": 0,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Sephora_MY_01",
+      "sellerName": "Sephora Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/sephora.jpg",
+      "isPreloaded": false
+    },
+    "prod_054": {
+      "productId": "prod_054",
+      "name": "Bobbi Brown Vitamin Enriched Face Base",
+      "description": "A luxurious primer and moisturizer in one, infused with vitamins and shea butter.",
+      "price": 72.0,
+      "category": "Primer",
+      "brand": "Bobbi Brown",
+      "ingredients": "Vitamin B, C, E, Shea Butter, Squalane",
+      "skinType": "Dry, Normal Skin",
+      "stock": 60,
+      "imageUrls": [
+        "https://example.com/images/bobbibrown_primer.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.8,
+      "soldCount": 380,
+      "discountPrice": 0,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Sephora_MY_01",
+      "sellerName": "Sephora Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/sephora.jpg",
+      "isPreloaded": false
+    },
+    "prod_055": {
+      "productId": "prod_055",
+      "name": "So Natural Makeup Setting FIXX Mist",
+      "description": "Long-lasting setting spray that locks makeup in place for up to 16 hours.",
+      "price": 19.9,
+      "category": "Setting Sprays",
+      "brand": "So Natural",
+      "ingredients": "Green Tea, Aloe Vera, Rose Water",
+      "skinType": "All Skin Types",
+      "stock": 130,
+      "imageUrls": [
+        "https://example.com/images/sonatural_spray.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.2,
+      "soldCount": 340,
+      "discountPrice": 16.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_056": {
+      "productId": "prod_056",
+      "name": "So Natural Makeup Setting FIXX Mist",
+      "description": "Long-lasting setting spray that locks makeup in place for up to 16 hours.",
+      "price": 20.9,
+      "category": "Setting Sprays",
+      "brand": "So Natural",
+      "ingredients": "Green Tea, Aloe Vera, Rose Water",
+      "skinType": "All Skin Types",
+      "stock": 115,
+      "imageUrls": [
+        "https://example.com/images/sonatural_spray.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.2,
+      "soldCount": 310,
+      "discountPrice": 18.0,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_057": {
+      "productId": "prod_057",
+      "name": "Clef Skincare Revitalising Night Serum",
+      "description": "Multi-functional night serum to treat and uproot skin issues while you sleep.",
+      "price": 41.0,
+      "category": "Serums",
+      "brand": "Clef Skincare",
+      "ingredients": "Bakuchiol, Peptides, Niacinamide",
+      "skinType": "All Skin Types",
+      "stock": 85,
+      "imageUrls": [
+        "https://example.com/images/clef_serum.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.5,
+      "soldCount": 175,
+      "discountPrice": 36.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_058": {
+      "productId": "prod_058",
+      "name": "Clef Skincare Revitalising Night Serum",
+      "description": "Multi-functional night serum to treat and uproot skin issues while you sleep.",
+      "price": 42.5,
+      "category": "Serums",
+      "brand": "Clef Skincare",
+      "ingredients": "Bakuchiol, Peptides, Niacinamide",
+      "skinType": "All Skin Types",
+      "stock": 75,
+      "imageUrls": [
+        "https://example.com/images/clef_serum.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.5,
+      "soldCount": 155,
+      "discountPrice": 38.0,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_059": {
+      "productId": "prod_059",
+      "name": "Kayman Beauty Hydrating Gel Moisturizer",
+      "description": "Oil-free gel moisturizer for lightweight hydration, perfect for oily and combination skin.",
+      "price": 26.5,
+      "category": "Moisturizers",
+      "brand": "Kayman Beauty",
+      "ingredients": "Hyaluronic Acid, Aloe Vera, Green Tea",
+      "skinType": "Oily, Combination Skin",
+      "stock": 140,
+      "imageUrls": [
+        "https://example.com/images/kayman_gel.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.4,
+      "soldCount": 230,
+      "discountPrice": 22.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_060": {
+      "productId": "prod_060",
+      "name": "Kayman Beauty Hydrating Gel Moisturizer",
+      "description": "Oil-free gel moisturizer for lightweight hydration, perfect for oily and combination skin.",
+      "price": 27.5,
+      "category": "Moisturizers",
+      "brand": "Kayman Beauty",
+      "ingredients": "Hyaluronic Acid, Aloe Vera, Green Tea",
+      "skinType": "Oily, Combination Skin",
+      "stock": 125,
+      "imageUrls": [
+        "https://example.com/images/kayman_gel.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.4,
+      "soldCount": 210,
+      "discountPrice": 24.0,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_061": {
+      "productId": "prod_061",
+      "name": "Alha Alfa Matte Lip Color",
+      "description": "Highly pigmented matte lip color with a comfortable, non-drying formula.",
+      "price": 16.9,
+      "category": "Lipstick",
+      "brand": "Alha Alfa",
+      "ingredients": "Vitamin E, Jojoba Oil",
+      "skinType": "All Skin Types",
+      "stock": 165,
+      "imageUrls": [
+        "https://example.com/images/alhaalfa_lip.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_061a",
+          "name": "Ruby",
+          "priceModifier": 0,
+          "stock": 55,
+          "sku": "AA501-RU",
+          "isDefault": true
+        },
+        {
+          "id": "var_061b",
+          "name": "Spice",
+          "priceModifier": 0,
+          "stock": 55,
+          "sku": "AA501-SP",
+          "isDefault": false
+        },
+        {
+          "id": "var_061c",
+          "name": "Nude",
+          "priceModifier": 0,
+          "stock": 55,
+          "sku": "AA501-NU",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.3,
+      "soldCount": 270,
+      "discountPrice": 13.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_062": {
+      "productId": "prod_062",
+      "name": "Alha Alfa Matte Lip Color",
+      "description": "Highly pigmented matte lip color with a comfortable, non-drying formula.",
+      "price": 17.5,
+      "category": "Lipstick",
+      "brand": "Alha Alfa",
+      "ingredients": "Vitamin E, Jojoba Oil",
+      "skinType": "All Skin Types",
+      "stock": 150,
+      "imageUrls": [
+        "https://example.com/images/alhaalfa_lip.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_062a",
+          "name": "Ruby",
+          "priceModifier": 0,
+          "stock": 50,
+          "sku": "AA501-RU-G",
+          "isDefault": true
+        },
+        {
+          "id": "var_062b",
+          "name": "Spice",
+          "priceModifier": 0,
+          "stock": 50,
+          "sku": "AA501-SP-G",
+          "isDefault": false
+        },
+        {
+          "id": "var_062c",
+          "name": "Nude",
+          "priceModifier": 0,
+          "stock": 50,
+          "sku": "AA501-NU-G",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.3,
+      "soldCount": 250,
+      "discountPrice": 15.0,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_063": {
+      "productId": "prod_063",
+      "name": "Breena Beauty Makeup Sponge (2-Pack)",
+      "description": "Latex-free beauty blenders for seamless foundation and concealer application.",
+      "price": 9.9,
+      "category": "Makeup Tools",
+      "brand": "Breena Beauty",
+      "ingredients": "Polyurethane Foam",
+      "skinType": "All Skin Types",
+      "stock": 200,
+      "imageUrls": [
+        "https://example.com/images/breena_sponge.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_063a",
+          "name": "Pink",
+          "priceModifier": 0,
+          "stock": 100,
+          "sku": "BB601-PK",
+          "isDefault": true
+        },
+        {
+          "id": "var_063b",
+          "name": "Purple",
+          "priceModifier": 0,
+          "stock": 100,
+          "sku": "BB601-PR",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.0,
+      "soldCount": 510,
+      "discountPrice": 7.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_064": {
+      "productId": "prod_064",
+      "name": "Breena Beauty Makeup Sponge (2-Pack)",
+      "description": "Latex-free beauty blenders for seamless foundation and concealer application.",
+      "price": 10.5,
+      "category": "Makeup Tools",
+      "brand": "Breena Beauty",
+      "ingredients": "Polyurethane Foam",
+      "skinType": "All Skin Types",
+      "stock": 185,
+      "imageUrls": [
+        "https://example.com/images/breena_sponge.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_064a",
+          "name": "Pink",
+          "priceModifier": 0,
+          "stock": 95,
+          "sku": "BB601-PK-G",
+          "isDefault": true
+        },
+        {
+          "id": "var_064b",
+          "name": "Purple",
+          "priceModifier": 0,
+          "stock": 90,
+          "sku": "BB601-PR-G",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.0,
+      "soldCount": 480,
+      "discountPrice": 8.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_065": {
+      "productId": "prod_065",
+      "name": "Duck Cosmetics Luxury Powder Blush",
+      "description": "Silky powder blush with a matte finish for a natural-looking flush.",
+      "price": 21.9,
+      "category": "Blush",
+      "brand": "Duck Cosmetics",
+      "ingredients": "Mica, Vitamin E",
+      "skinType": "All Skin Types",
+      "stock": 125,
+      "imageUrls": [
+        "https://example.com/images/duck_blush.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_065a",
+          "name": "Peach Fizz",
+          "priceModifier": 0,
+          "stock": 45,
+          "sku": "DC701-PF",
+          "isDefault": true
+        },
+        {
+          "id": "var_065b",
+          "name": "Rose Quartz",
+          "priceModifier": 0,
+          "stock": 40,
+          "sku": "DC701-RQ",
+          "isDefault": false
+        },
+        {
+          "id": "var_065c",
+          "name": "Berry Kiss",
+          "priceModifier": 0,
+          "stock": 40,
+          "sku": "DC701-BK",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.2,
+      "soldCount": 195,
+      "discountPrice": 18.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_066": {
+      "productId": "prod_066",
+      "name": "Duck Cosmetics Luxury Powder Blush",
+      "description": "Silky powder blush with a matte finish for a natural-looking flush.",
+      "price": 22.9,
+      "category": "Blush",
+      "brand": "Duck Cosmetics",
+      "ingredients": "Mica, Vitamin E",
+      "skinType": "All Skin Types",
+      "stock": 110,
+      "imageUrls": [
+        "https://example.com/images/duck_blush.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_066a",
+          "name": "Peach Fizz",
+          "priceModifier": 0,
+          "stock": 40,
+          "sku": "DC701-PF-G",
+          "isDefault": true
+        },
+        {
+          "id": "var_066b",
+          "name": "Rose Quartz",
+          "priceModifier": 0,
+          "stock": 35,
+          "sku": "DC701-RQ-G",
+          "isDefault": false
+        },
+        {
+          "id": "var_066c",
+          "name": "Berry Kiss",
+          "priceModifier": 0,
+          "stock": 35,
+          "sku": "DC701-BK-G",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.2,
+      "soldCount": 175,
+      "discountPrice": 19.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_067": {
+      "productId": "prod_067",
+      "name": "NITA Cosmetics Eyeshadow Palette - Sunset Vibes",
+      "description": "12-pan eyeshadow palette with matte and shimmer shades inspired by sunset colors.",
+      "price": 29.9,
+      "category": "Eyeshadow",
+      "brand": "NITA Cosmetics",
+      "ingredients": "Mica, Talc, Vitamin E",
+      "skinType": "All Skin Types",
+      "stock": 90,
+      "imageUrls": [
+        "https://example.com/images/nita_palette.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_067a",
+          "name": "Sunset Vibes",
+          "priceModifier": 0,
+          "stock": 90,
+          "sku": "NITA-SV",
+          "isDefault": true
+        }
+      ],
+      "averageRating": 4.5,
+      "soldCount": 140,
+      "discountPrice": 25.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_068": {
+      "productId": "prod_068",
+      "name": "NITA Cosmetics Eyeshadow Palette - Sunset Vibes",
+      "description": "12-pan eyeshadow palette with matte and shimmer shades inspired by sunset colors.",
+      "price": 31.5,
+      "category": "Eyeshadow",
+      "brand": "NITA Cosmetics",
+      "ingredients": "Mica, Talc, Vitamin E",
+      "skinType": "All Skin Types",
+      "stock": 80,
+      "imageUrls": [
+        "https://example.com/images/nita_palette.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_068a",
+          "name": "Sunset Vibes",
+          "priceModifier": 0,
+          "stock": 80,
+          "sku": "NITA-SV-G",
+          "isDefault": true
+        }
+      ],
+      "averageRating": 4.5,
+      "soldCount": 125,
+      "discountPrice": 27.5,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_069": {
+      "productId": "prod_069",
+      "name": "Obsess Cosmetic Liquid Lipstick - Matte",
+      "description": "Transfer-proof liquid lipstick with intense pigmentation and a comfortable matte finish.",
+      "price": 17.9,
+      "category": "Lipstick",
+      "brand": "Obsess Cosmetic",
+      "ingredients": "Vitamin E, Avocado Oil",
+      "skinType": "All Skin Types",
+      "stock": 155,
+      "imageUrls": [
+        "https://example.com/images/obsess_lip.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_069a",
+          "name": "Boss Lady",
+          "priceModifier": 0,
+          "stock": 55,
+          "sku": "OC801-BL",
+          "isDefault": true
+        },
+        {
+          "id": "var_069b",
+          "name": "Sassy Mauve",
+          "priceModifier": 0,
+          "stock": 50,
+          "sku": "OC801-SM",
+          "isDefault": false
+        },
+        {
+          "id": "var_069c",
+          "name": "Nude Goal",
+          "priceModifier": 0,
+          "stock": 50,
+          "sku": "OC801-NG",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.4,
+      "soldCount": 240,
+      "discountPrice": 14.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_070": {
+      "productId": "prod_070",
+      "name": "Obsess Cosmetic Liquid Lipstick - Matte",
+      "description": "Transfer-proof liquid lipstick with intense pigmentation and a comfortable matte finish.",
+      "price": 18.5,
+      "category": "Lipstick",
+      "brand": "Obsess Cosmetic",
+      "ingredients": "Vitamin E, Avocado Oil",
+      "skinType": "All Skin Types",
+      "stock": 140,
+      "imageUrls": [
+        "https://example.com/images/obsess_lip.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_070a",
+          "name": "Boss Lady",
+          "priceModifier": 0,
+          "stock": 50,
+          "sku": "OC801-BL-G",
+          "isDefault": true
+        },
+        {
+          "id": "var_070b",
+          "name": "Sassy Mauve",
+          "priceModifier": 0,
+          "stock": 45,
+          "sku": "OC801-SM-G",
+          "isDefault": false
+        },
+        {
+          "id": "var_070c",
+          "name": "Nude Goal",
+          "priceModifier": 0,
+          "stock": 45,
+          "sku": "OC801-NG-G",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.4,
+      "soldCount": 220,
+      "discountPrice": 16.0,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_071": {
+      "productId": "prod_071",
+      "name": "Orkid Cosmetics Halal Lipstick - Satin",
+      "description": "Halal-certified lipstick with a satin finish, providing hydration and rich color.",
+      "price": 22.9,
+      "category": "Lipstick",
+      "brand": "Orkid Cosmetics",
+      "ingredients": "Olive Oil, Vitamin E, Beeswax",
+      "skinType": "All Skin Types",
+      "stock": 120,
+      "imageUrls": [
+        "https://example.com/images/orkid_lip.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_071a",
+          "name": "Terracotta",
+          "priceModifier": 0,
+          "stock": 40,
+          "sku": "OK901-TC",
+          "isDefault": true
+        },
+        {
+          "id": "var_071b",
+          "name": "Mauve Rose",
+          "priceModifier": 0,
+          "stock": 40,
+          "sku": "OK901-MR",
+          "isDefault": false
+        },
+        {
+          "id": "var_071c",
+          "name": "True Red",
+          "priceModifier": 0,
+          "stock": 40,
+          "sku": "OK901-TR",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.3,
+      "soldCount": 180,
+      "discountPrice": 19.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_072": {
+      "productId": "prod_072",
+      "name": "Orkid Cosmetics Halal Lipstick - Satin",
+      "description": "Halal-certified lipstick with a satin finish, providing hydration and rich color.",
+      "price": 23.9,
+      "category": "Lipstick",
+      "brand": "Orkid Cosmetics",
+      "ingredients": "Olive Oil, Vitamin E, Beeswax",
+      "skinType": "All Skin Types",
+      "stock": 105,
+      "imageUrls": [
+        "https://example.com/images/orkid_lip.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_072a",
+          "name": "Terracotta",
+          "priceModifier": 0,
+          "stock": 35,
+          "sku": "OK901-TC-G",
+          "isDefault": true
+        },
+        {
+          "id": "var_072b",
+          "name": "Mauve Rose",
+          "priceModifier": 0,
+          "stock": 35,
+          "sku": "OK901-MR-G",
+          "isDefault": false
+        },
+        {
+          "id": "var_072c",
+          "name": "True Red",
+          "priceModifier": 0,
+          "stock": 35,
+          "sku": "OK901-TR-G",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.3,
+      "soldCount": 160,
+      "discountPrice": 21.0,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_073": {
+      "productId": "prod_073",
+      "name": "Claire Organics Handmade Lavender Soap Bar",
+      "description": "Handmade soap bar with lavender essential oil for calming and cleansing the skin.",
+      "price": 8.9,
+      "category": "Cleansers",
+      "brand": "Claire Organics",
+      "ingredients": "Lavender Oil, Olive Oil, Coconut Oil",
+      "skinType": "All Skin Types, Sensitive Skin",
+      "stock": 180,
+      "imageUrls": [
+        "https://example.com/images/claire_soap.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.2,
+      "soldCount": 320,
+      "discountPrice": 6.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_074": {
+      "productId": "prod_074",
+      "name": "Claire Organics Handmade Lavender Soap Bar",
+      "description": "Handmade soap bar with lavender essential oil for calming and cleansing the skin.",
+      "price": 9.5,
+      "category": "Cleansers",
+      "brand": "Claire Organics",
+      "ingredients": "Lavender Oil, Olive Oil, Coconut Oil",
+      "skinType": "All Skin Types, Sensitive Skin",
+      "stock": 165,
+      "imageUrls": [
+        "https://example.com/images/claire_soap.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.2,
+      "soldCount": 295,
+      "discountPrice": 7.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_075": {
+      "productId": "prod_075",
+      "name": "Skinmade Cica Calming Repair Cream",
+      "description": "Science-backed cream to repair and soothe sensitive skin barriers with Cica and Ceramides.",
+      "price": 29.9,
+      "category": "Moisturizers",
+      "brand": "Skinmade",
+      "ingredients": "Cica, Ceramides, Madecassoside",
+      "skinType": "Sensitive, Irritated Skin",
+      "stock": 100,
+      "imageUrls": [
+        "https://example.com/images/skinmade_cream.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.7,
+      "soldCount": 210,
+      "discountPrice": 26.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_076": {
+      "productId": "prod_076",
+      "name": "Skinmade Cica Calming Repair Cream",
+      "description": "Science-backed cream to repair and soothe sensitive skin barriers with Cica and Ceramides.",
+      "price": 31.0,
+      "category": "Moisturizers",
+      "brand": "Skinmade",
+      "ingredients": "Cica, Ceramides, Madecassoside",
+      "skinType": "Sensitive, Irritated Skin",
+      "stock": 90,
+      "imageUrls": [
+        "https://example.com/images/skinmade_cream.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.7,
+      "soldCount": 190,
+      "discountPrice": 27.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_077": {
+      "productId": "prod_077",
+      "name": "L'Oreal Paris True Match Super-Blendable Foundation",
+      "description": "Foundation that matches skin tone and texture, with SPF and hydrating ingredients.",
+      "price": 19.9,
+      "category": "Foundations",
+      "brand": "L'Oreal Paris",
+      "ingredients": "SPF 17, Pro-Vitamin B5, Glycerin",
+      "skinType": "All Skin Types",
+      "stock": 160,
+      "imageUrls": [
+        "https://example.com/images/loreal_foundation.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_077a",
+          "name": "1N Ivory",
+          "priceModifier": 0,
+          "stock": 55,
+          "sku": "LOR-1N",
+          "isDefault": true
+        },
+        {
+          "id": "var_077b",
+          "name": "3W Golden Beige",
+          "priceModifier": 0,
+          "stock": 55,
+          "sku": "LOR-3W",
+          "isDefault": false
+        },
+        {
+          "id": "var_077c",
+          "name": "5N Buff Beige",
+          "priceModifier": 0,
+          "stock": 50,
+          "sku": "LOR-5N",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.5,
+      "soldCount": 580,
+      "discountPrice": 16.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_078": {
+      "productId": "prod_078",
+      "name": "L'Oreal Paris True Match Super-Blendable Foundation",
+      "description": "Foundation that matches skin tone and texture, with SPF and hydrating ingredients.",
+      "price": 20.9,
+      "category": "Foundations",
+      "brand": "L'Oreal Paris",
+      "ingredients": "SPF 17, Pro-Vitamin B5, Glycerin",
+      "skinType": "All Skin Types",
+      "stock": 145,
+      "imageUrls": [
+        "https://example.com/images/loreal_foundation.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_078a",
+          "name": "1N Ivory",
+          "priceModifier": 0,
+          "stock": 50,
+          "sku": "LOR-1N-G",
+          "isDefault": true
+        },
+        {
+          "id": "var_078b",
+          "name": "3W Golden Beige",
+          "priceModifier": 0,
+          "stock": 50,
+          "sku": "LOR-3W-G",
+          "isDefault": false
+        },
+        {
+          "id": "var_078c",
+          "name": "5N Buff Beige",
+          "priceModifier": 0,
+          "stock": 45,
+          "sku": "LOR-5N-G",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.5,
+      "soldCount": 540,
+      "discountPrice": 18.0,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_079": {
+      "productId": "prod_079",
+      "name": "Maybelline Fit Me Concealer",
+      "description": "Concealer that matches skin tones and covers imperfections without creasing.",
+      "price": 14.9,
+      "category": "Concealers",
+      "brand": "Maybelline",
+      "ingredients": "Kaolin Clay, Vitamin E",
+      "skinType": "All Skin Types",
+      "stock": 190,
+      "imageUrls": [
+        "https://example.com/images/maybelline_concealer.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_079a",
+          "name": "10 Fair",
+          "priceModifier": 0,
+          "stock": 65,
+          "sku": "MAY-10",
+          "isDefault": true
+        },
+        {
+          "id": "var_079b",
+          "name": "20 Sand",
+          "priceModifier": 0,
+          "stock": 65,
+          "sku": "MAY-20",
+          "isDefault": false
+        },
+        {
+          "id": "var_079c",
+          "name": "30 Cafe",
+          "priceModifier": 0,
+          "stock": 60,
+          "sku": "MAY-30",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.6,
+      "soldCount": 720,
+      "discountPrice": 11.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_080": {
+      "productId": "prod_080",
+      "name": "Maybelline Fit Me Concealer",
+      "description": "Concealer that matches skin tones and covers imperfections without creasing.",
+      "price": 15.5,
+      "category": "Concealers",
+      "brand": "Maybelline",
+      "ingredients": "Kaolin Clay, Vitamin E",
+      "skinType": "All Skin Types",
+      "stock": 175,
+      "imageUrls": [
+        "https://example.com/images/maybelline_concealer.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_080a",
+          "name": "10 Fair",
+          "priceModifier": 0,
+          "stock": 60,
+          "sku": "MAY-10-G",
+          "isDefault": true
+        },
+        {
+          "id": "var_080b",
+          "name": "20 Sand",
+          "priceModifier": 0,
+          "stock": 60,
+          "sku": "MAY-20-G",
+          "isDefault": false
+        },
+        {
+          "id": "var_080c",
+          "name": "30 Cafe",
+          "priceModifier": 0,
+          "stock": 55,
+          "sku": "MAY-30-G",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.6,
+      "soldCount": 680,
+      "discountPrice": 13.0,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_081": {
+      "productId": "prod_081",
+      "name": "Revlon ColorStay Overtime Lipcolor",
+      "description": "Two-step long-wearing lip color with a glossy top coat for all-day wear.",
+      "price": 21.9,
+      "category": "Lipstick",
+      "brand": "Revlon",
+      "ingredients": "Vitamin E, Aloe Vera",
+      "skinType": "All Skin Types",
+      "stock": 135,
+      "imageUrls": [
+        "https://example.com/images/revlon_lip.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_081a",
+          "name": "Everlasting Burgundy",
+          "priceModifier": 0,
+          "stock": 45,
+          "sku": "REV-EB",
+          "isDefault": true
+        },
+        {
+          "id": "var_081b",
+          "name": "Infinite Raspberry",
+          "priceModifier": 0,
+          "stock": 45,
+          "sku": "REV-IR",
+          "isDefault": false
+        },
+        {
+          "id": "var_081c",
+          "name": "Endless Nude",
+          "priceModifier": 0,
+          "stock": 45,
+          "sku": "REV-EN",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.4,
+      "soldCount": 290,
+      "discountPrice": 18.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_082": {
+      "productId": "prod_082",
+      "name": "Revlon ColorStay Overtime Lipcolor",
+      "description": "Two-step long-wearing lip color with a glossy top coat for all-day wear.",
+      "price": 22.9,
+      "category": "Lipstick",
+      "brand": "Revlon",
+      "ingredients": "Vitamin E, Aloe Vera",
+      "skinType": "All Skin Types",
+      "stock": 120,
+      "imageUrls": [
+        "https://example.com/images/revlon_lip.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_082a",
+          "name": "Everlasting Burgundy",
+          "priceModifier": 0,
+          "stock": 40,
+          "sku": "REV-EB-G",
+          "isDefault": true
+        },
+        {
+          "id": "var_082b",
+          "name": "Infinite Raspberry",
+          "priceModifier": 0,
+          "stock": 40,
+          "sku": "REV-IR-G",
+          "isDefault": false
+        },
+        {
+          "id": "var_082c",
+          "name": "Endless Nude",
+          "priceModifier": 0,
+          "stock": 40,
+          "sku": "REV-EN-G",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.4,
+      "soldCount": 270,
+      "discountPrice": 19.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_083": {
+      "productId": "prod_083",
+      "name": "Garnier Micellar Cleansing Water (400ml)",
+      "description": "All-in-1 micellar water that cleanses, removes makeup, and refreshes skin without rinsing.",
+      "price": 16.9,
+      "category": "Cleansers",
+      "brand": "Garnier",
+      "ingredients": "Micelles, Glycerin",
+      "skinType": "All Skin Types, Sensitive Skin",
+      "stock": 220,
+      "imageUrls": [
+        "https://example.com/images/garnier_micellar.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.7,
+      "soldCount": 850,
+      "discountPrice": 13.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_084": {
+      "productId": "prod_084",
+      "name": "Garnier Micellar Cleansing Water (400ml)",
+      "description": "All-in-1 micellar water that cleanses, removes makeup, and refreshes skin without rinsing.",
+      "price": 17.5,
+      "category": "Cleansers",
+      "brand": "Garnier",
+      "ingredients": "Micelles, Glycerin",
+      "skinType": "All Skin Types, Sensitive Skin",
+      "stock": 205,
+      "imageUrls": [
+        "https://example.com/images/garnier_micellar.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.7,
+      "soldCount": 790,
+      "discountPrice": 14.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_085": {
+      "productId": "prod_085",
+      "name": "Neutrogena Hydro Boost Water Gel",
+      "description": "Oil-free, fragrance-free water gel moisturizer with hyaluronic acid for intense hydration.",
+      "price": 24.9,
+      "category": "Moisturizers",
+      "brand": "Neutrogena",
+      "ingredients": "Hyaluronic Acid, Glycerin",
+      "skinType": "All Skin Types",
+      "stock": 150,
+      "imageUrls": [
+        "https://example.com/images/neutrogena_gel.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.8,
+      "soldCount": 620,
+      "discountPrice": 21.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_086": {
+      "productId": "prod_086",
+      "name": "Neutrogena Hydro Boost Water Gel",
+      "description": "Oil-free, fragrance-free water gel moisturizer with hyaluronic acid for intense hydration.",
+      "price": 25.9,
+      "category": "Moisturizers",
+      "brand": "Neutrogena",
+      "ingredients": "Hyaluronic Acid, Glycerin",
+      "skinType": "All Skin Types",
+      "stock": 135,
+      "imageUrls": [
+        "https://example.com/images/neutrogena_gel.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.8,
+      "soldCount": 580,
+      "discountPrice": 22.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_087": {
+      "productId": "prod_087",
+      "name": "Bio-essence Bird's Nest Aqua Moisturizing Cream",
+      "description": "Moisturizing cream with bird's nest extract to deeply hydrate and nourish the skin.",
+      "price": 28.9,
+      "category": "Moisturizers",
+      "brand": "Bio-essence",
+      "ingredients": "Bird's Nest Extract, Hyaluronic Acid",
+      "skinType": "Dry, Dehydrated Skin",
+      "stock": 110,
+      "imageUrls": [
+        "https://example.com/images/bioessence_cream.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.4,
+      "soldCount": 340,
+      "discountPrice": 24.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_088": {
+      "productId": "prod_088",
+      "name": "Bio-essence Bird's Nest Aqua Moisturizing Cream",
+      "description": "Moisturizing cream with bird's nest extract to deeply hydrate and nourish the skin.",
+      "price": 29.9,
+      "category": "Moisturizers",
+      "brand": "Bio-essence",
+      "ingredients": "Bird's Nest Extract, Hyaluronic Acid",
+      "skinType": "Dry, Dehydrated Skin",
+      "stock": 95,
+      "imageUrls": [
+        "https://example.com/images/bioessence_cream.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.4,
+      "soldCount": 310,
+      "discountPrice": 26.0,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_089": {
+      "productId": "prod_089",
+      "name": "Hada Labo Super Hyaluronic Acid Hydrating Lotion",
+      "description": "Lightweight lotion with multiple molecular weights of hyaluronic acid for deep hydration.",
+      "price": 22.9,
+      "category": "Toner",
+      "brand": "Hada Labo",
+      "ingredients": "Super Hyaluronic Acid, Glycerin",
+      "skinType": "All Skin Types, Dehydrated Skin",
+      "stock": 170,
+      "imageUrls": [
+        "https://example.com/images/hadalabo_lotion.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.8,
+      "soldCount": 910,
+      "discountPrice": 19.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_090": {
+      "productId": "prod_090",
+      "name": "Hada Labo Super Hyaluronic Acid Hydrating Lotion",
+      "description": "Lightweight lotion with multiple molecular weights of hyaluronic acid for deep hydration.",
+      "price": 23.5,
+      "category": "Toner",
+      "brand": "Hada Labo",
+      "ingredients": "Super Hyaluronic Acid, Glycerin",
+      "skinType": "All Skin Types, Dehydrated Skin",
+      "stock": 155,
+      "imageUrls": [
+        "https://example.com/images/hadalabo_lotion.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.8,
+      "soldCount": 860,
+      "discountPrice": 20.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_091": {
+      "productId": "prod_091",
+      "name": "Bioré UV Aqua Rich Watery Essence SPF50+ PA++++",
+      "description": "Lightweight, hydrating sunscreen that absorbs quickly with no white cast.",
+      "price": 15.9,
+      "category": "Sunscreens",
+      "brand": "Bioré",
+      "ingredients": "SPF50+ PA++++, Hyaluronic Acid, Royal Jelly Extract",
+      "skinType": "All Skin Types",
+      "stock": 190,
+      "imageUrls": [
+        "https://example.com/images/biore_sunscreen.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.9,
+      "soldCount": 1250,
+      "discountPrice": 13.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_092": {
+      "productId": "prod_092",
+      "name": "Bioré UV Aqua Rich Watery Essence SPF50+ PA++++",
+      "description": "Lightweight, hydrating sunscreen that absorbs quickly with no white cast.",
+      "price": 16.5,
+      "category": "Sunscreens",
+      "brand": "Bioré",
+      "ingredients": "SPF50+ PA++++, Hyaluronic Acid, Royal Jelly Extract",
+      "skinType": "All Skin Types",
+      "stock": 175,
+      "imageUrls": [
+        "https://example.com/images/biore_sunscreen.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.9,
+      "soldCount": 1180,
+      "discountPrice": 14.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_093": {
+      "productId": "prod_093",
+      "name": "Cetaphil Gentle Skin Cleanser",
+      "description": "Soap-free, non-irritating cleanser for sensitive skin that won't strip natural oils.",
+      "price": 18.9,
+      "category": "Cleansers",
+      "brand": "Cetaphil",
+      "ingredients": "Niacinamide, Panthenol, Glycerin",
+      "skinType": "Sensitive Skin, All Skin Types",
+      "stock": 200,
+      "imageUrls": [
+        "https://example.com/images/cetaphil_cleanser.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.7,
+      "soldCount": 780,
+      "discountPrice": 16.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_094": {
+      "productId": "prod_094",
+      "name": "Cetaphil Gentle Skin Cleanser",
+      "description": "Soap-free, non-irritating cleanser for sensitive skin that won't strip natural oils.",
+      "price": 19.5,
+      "category": "Cleansers",
+      "brand": "Cetaphil",
+      "ingredients": "Niacinamide, Panthenol, Glycerin",
+      "skinType": "Sensitive Skin, All Skin Types",
+      "stock": 185,
+      "imageUrls": [
+        "https://example.com/images/cetaphil_cleanser.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.7,
+      "soldCount": 740,
+      "discountPrice": 17.5,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_095": {
+      "productId": "prod_095",
+      "name": "Simple Kind to Skin Moisturizing Facial Wash",
+      "description": "Gentle facial wash that cleanses without upsetting skin's natural balance.",
+      "price": 12.9,
+      "category": "Cleansers",
+      "brand": "Simple",
+      "ingredients": "Pro-Vitamin B5, Vitamin E, Allantoin",
+      "skinType": "Sensitive Skin, All Skin Types",
+      "stock": 210,
+      "imageUrls": [
+        "https://example.com/images/simple_wash.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.5,
+      "soldCount": 690,
+      "discountPrice": 10.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_096": {
+      "productId": "prod_096",
+      "name": "Simple Kind to Skin Moisturizing Facial Wash",
+      "description": "Gentle facial wash that cleanses without upsetting skin's natural balance.",
+      "price": 13.5,
+      "category": "Cleansers",
+      "brand": "Simple",
+      "ingredients": "Pro-Vitamin B5, Vitamin E, Allantoin",
+      "skinType": "Sensitive Skin, All Skin Types",
+      "stock": 195,
+      "imageUrls": [
+        "https://example.com/images/simple_wash.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.5,
+      "soldCount": 650,
+      "discountPrice": 11.5,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_097": {
+      "productId": "prod_097",
+      "name": "Innisfree Green Tea Seed Serum",
+      "description": "Hydrating serum with green tea seeds from Jeju Island to boost skin's moisture barrier.",
+      "price": 32.9,
+      "category": "Serums",
+      "brand": "Innisfree",
+      "ingredients": "Green Tea Seed Oil, Green Tea Extract, Hyaluronic Acid",
+      "skinType": "All Skin Types, Dehydrated Skin",
+      "stock": 120,
+      "imageUrls": [
+        "https://example.com/images/innisfree_serum.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.7,
+      "soldCount": 520,
+      "discountPrice": 28.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_098": {
+      "productId": "prod_098",
+      "name": "Innisfree Green Tea Seed Serum",
+      "description": "Hydrating serum with green tea seeds from Jeju Island to boost skin's moisture barrier.",
+      "price": 33.9,
+      "category": "Serums",
+      "brand": "Innisfree",
+      "ingredients": "Green Tea Seed Oil, Green Tea Extract, Hyaluronic Acid",
+      "skinType": "All Skin Types, Dehydrated Skin",
+      "stock": 105,
+      "imageUrls": [
+        "https://example.com/images/innisfree_serum.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.7,
+      "soldCount": 480,
+      "discountPrice": 30.0,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_099": {
+      "productId": "prod_099",
+      "name": "The Body Shop Tea Tree Oil",
+      "description": "Pure tea tree oil to help combat blemishes and purify the skin.",
+      "price": 19.9,
+      "category": "Treatments",
+      "brand": "The Body Shop",
+      "ingredients": "100% Pure Tea Tree Oil",
+      "skinType": "Oily, Acne-Prone Skin",
+      "stock": 140,
+      "imageUrls": [
+        "https://example.com/images/body_shop_oil.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.6,
+      "soldCount": 430,
+      "discountPrice": 16.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Watsons_MY_01",
+      "sellerName": "Watsons Pharmacy",
+      "sellerProfileImageUrl": "https://example.com/sellers/watsons.jpg",
+      "isPreloaded": false
+    },
+    "prod_100": {
+      "productId": "prod_100",
+      "name": "The Body Shop Tea Tree Oil",
+      "description": "Pure tea tree oil to help combat blemishes and purify the skin.",
+      "price": 20.5,
+      "category": "Treatments",
+      "brand": "The Body Shop",
+      "ingredients": "100% Pure Tea Tree Oil",
+      "skinType": "Oily, Acne-Prone Skin",
+      "stock": 125,
+      "imageUrls": [
+        "https://example.com/images/body_shop_oil.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.6,
+      "soldCount": 400,
+      "discountPrice": 17.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    },
+    "prod_101": {
+      "productId": "prod_101",
+      "name": "The Body Shop Tea Tree Oil",
+      "description": "Pure tea tree oil to help combat blemishes and purify the skin.",
+      "price": 20.5,
+      "category": "Treatments",
+      "brand": "The Body Shop",
+      "ingredients": "100% Pure Tea Tree Oil",
+      "skinType": "Oily, Acne-Prone Skin",
+      "stock": 125,
+      "imageUrls": [
+        "https://example.com/images/body_shop_oil.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.6,
+      "soldCount": 400,
+      "discountPrice": 17.9,
+      "isOfficialStore": false,
+      "active": true,
+      "creationTimestamp": 1737417600000,
+      "sellerId": "sel_Guardian_MY_01",
+      "sellerName": "Guardian Malaysia",
+      "sellerProfileImageUrl": "https://example.com/sellers/guardian.jpg",
+      "isPreloaded": false
+    }
+  }
+  }
+}
+

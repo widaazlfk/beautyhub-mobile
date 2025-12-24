@@ -1,0 +1,945 @@
+{
+  "AdminLogs": {
+    "log_001": {
+      "logId": "log_001",
+      "action": "SYSTEM_INITIALIZATION",
+      "performedBy": "admin@beautyhub.com",
+      "details": "System initialized with preloaded products",
+      "timestamp": 1734739200000
+    },
+    "log_002": {
+      "logId": "log_002",
+      "action": "SELLER_REGISTRATION",
+      "performedBy": "admin@beautyhub.com",
+      "details": "Registered 10 official sellers to the platform",
+      "timestamp": 1734825600000
+    }
+  },
+
+  "BuyerRewards": {
+    "br_001": {
+      "buyerRewardId": "br_001",
+      "buyerId": "jcg0vFQheQPJGB7WAn8b63JH1Le2",
+      "rewardId": "rw_001",
+      "earnedDate": 1734998400000,
+      "redeemedDate": 1735084800000
+    },
+    "br_002": {
+      "buyerRewardId": "br_002",
+      "buyerId": "tFqPkaRDMlRkOWOoMp9o9e0g2Tv22",
+      "rewardId": "rw_002",
+      "earnedDate": 1735171200000,
+      "redeemedDate": 0
+    }
+  },
+
+  "CartItems": {
+    "cart_001": {
+      "productId": "prod_001",
+      "productName": "Hydrating Moisturizer",
+      "price": 49.9,
+      "quantity": 1,
+      "imageUrl": "https://example.com/images/moisturizer.jpg",
+      "sellerId": "prrJtKhVRedZTqhyAubBWcTHfHz2",
+      "sellerName": "Demica Beauty",
+      "selected": true,
+      "cartItemId": "cart_001",
+      "variantId": "var_001a",
+      "variantName": "Normal Skin",
+      "isFromJson": true,
+      "hasVariants": true
+    },
+    "cart_002": {
+      "productId": "prod_012",
+      "productName": "Matte Lipstick",
+      "price": 32.9,
+      "quantity": 2,
+      "imageUrl": "https://example.com/images/lipstick.jpg",
+      "sellerId": "lEBxrjmaMEZooDBCSCrKIXvrEj12",
+      "sellerName": "ANAS Cosmetics",
+      "selected": true,
+      "cartItemId": "cart_002",
+      "isFromJson": true,
+      "hasVariants": false
+    }
+  },
+
+  "Categories": {
+    "cat_001": {
+      "categoryId": "cat_001",
+      "categoryName": "Skincare"
+    },
+    "cat_002": {
+      "categoryId": "cat_002",
+      "categoryName": "Makeup"
+    },
+    "cat_003": {
+      "categoryId": "cat_003",
+      "categoryName": "Cleansers"
+    },
+    "cat_004": {
+      "categoryId": "cat_004",
+      "categoryName": "Moisturizers"
+    },
+    "cat_005": {
+      "categoryId": "cat_005",
+      "categoryName": "Sunscreens"
+    },
+    "cat_006": {
+      "categoryId": "cat_006",
+      "categoryName": "Serums"
+    },
+    "cat_007": {
+      "categoryId": "cat_007",
+      "categoryName": "Toners"
+    },
+    "cat_008": {
+      "categoryId": "cat_008",
+      "categoryName": "Face Masks"
+    },
+    "cat_009": {
+      "categoryId": "cat_009",
+      "categoryName": "Lipstick"
+    },
+    "cat_010": {
+      "categoryId": "cat_010",
+      "categoryName": "Eyeliner"
+    },
+    "cat_011": {
+      "categoryId": "cat_011",
+      "categoryName": "Powder"
+    },
+    "cat_012": {
+      "categoryId": "cat_012",
+      "categoryName": "Mascara"
+    },
+    "cat_013": {
+      "categoryId": "cat_013",
+      "categoryName": "Foundation"
+    },
+    "cat_014": {
+      "categoryId": "cat_014",
+      "categoryName": "Concealer"
+    },
+    "cat_015": {
+      "categoryId": "cat_015",
+      "categoryName": "Primer"
+    }
+  },
+
+  "Orders": {
+    "order_001": {
+      "orderId": "order_001",
+      "userId": "jcg0vFQheQPJGB7WAn8b63JH1Le2",
+      "shippingAddress": {
+        "addressId": "addr_001",
+        "addressType": "Home",
+        "city": "Kuala Lumpur",
+        "phoneNumber": "+60123456789",
+        "recipientName": "Amina Binti Ahmad",
+        "state": "Wilayah Persekutuan",
+        "street": "Jalan Bukit Bintang 123",
+        "zipcode": "55100",
+        "isDefault": true,
+        "zone": "West Malaysia"
+      },
+      "totalAmount": 145.7,
+      "status": "delivered",
+      "orderDate": 1734739200000,
+      "paymentMethod": "credit_card",
+      "orderSource": "cart",
+      "subOrders": {
+        "sub_001": {
+          "orderId": "sub_001",
+          "userId": "jcg0vFQheQPJGB7WAn8b63JH1Le2",
+          "totalAmount": 85.8,
+          "status": "delivered",
+          "orderDate": 1734739200000,
+          "paymentMethod": "credit_card",
+          "sellerId": "prrJtKhVRedZTqhyAubBWcTHfHz2",
+          "sellerName": "Demica Beauty",
+          "isOfficialStore": true,
+          "orderItems": [
+            {
+              "productId": "prod_001",
+              "productName": "Hydrating Moisturizer",
+              "quantity": 1,
+              "price": 49.9,
+              "productImageUrl": "https://example.com/images/moisturizer.jpg",
+              "subOrderId": "sub_001",
+              "reviewed": true,
+              "variantId": "var_001a",
+              "variantName": "Normal Skin",
+              "fromJson": true,
+              "hasVariants": true,
+              "officialStore": true,
+              "sellerId": "prrJtKhVRedZTqhyAubBWcTHfHz2",
+              "sellerName": "Demica Beauty"
+            },
+            {
+              "productId": "prod_003",
+              "productName": "Daily Sunscreen SPF 50",
+              "quantity": 1,
+              "price": 35.9,
+              "productImageUrl": "https://example.com/images/sunscreen.jpg",
+              "subOrderId": "sub_001",
+              "reviewed": false,
+              "fromJson": true,
+              "hasVariants": false,
+              "officialStore": true,
+              "sellerId": "prrJtKhVRedZTqhyAubBWcTHfHz2",
+              "sellerName": "Demica Beauty"
+            }
+          ]
+        }
+      }
+    }
+  },
+
+  "Products": {
+    "prod_001": {
+      "productId": "prod_001",
+      "name": "Hydrating Moisturizer",
+      "description": "Lightweight moisturizer for daily hydration. Suitable for all skin types.",
+      "price": 49.9,
+      "category": "Moisturizers",
+      "brand": "Demica",
+      "ingredients": "Hyaluronic Acid, Ceramides, Vitamin E",
+      "skinType": "All Skin Types",
+      "stock": 150,
+      "imageUrls": [
+        "https://example.com/images/moisturizer_1.jpg",
+        "https://example.com/images/moisturizer_2.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_001a",
+          "name": "Normal Skin",
+          "priceModifier": 0,
+          "stock": 50,
+          "sku": "DM001-NS",
+          "isDefault": true
+        },
+        {
+          "id": "var_001b",
+          "name": "Dry Skin",
+          "priceModifier": 5.0,
+          "stock": 50,
+          "sku": "DM001-DS",
+          "isDefault": false
+        },
+        {
+          "id": "var_001c",
+          "name": "Oily Skin",
+          "priceModifier": 0,
+          "stock": 50,
+          "sku": "DM001-OS",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.5,
+      "soldCount": 342,
+      "discountPrice": 44.9,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "prrJtKhVRedZTqhyAubBWcTHfHz2",
+      "sellerName": "Demica Beauty",
+      "sellerProfileImageUrl": "https://example.com/sellers/demica.jpg",
+      "isPreloaded": true
+    },
+    "prod_002": {
+      "productId": "prod_002",
+      "name": "Gentle Foam Cleanser",
+      "description": "pH-balanced foam cleanser that removes impurities without stripping skin.",
+      "price": 28.5,
+      "category": "Cleansers",
+      "brand": "Demica",
+      "ingredients": "Green Tea Extract, Chamomile, Glycerin",
+      "skinType": "Sensitive Skin",
+      "stock": 200,
+      "imageUrls": [
+        "https://example.com/images/cleanser.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.3,
+      "soldCount": 189,
+      "discountPrice": 0,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "prrJtKhVRedZTqhyAubBWcTHfHz2",
+      "sellerName": "Demica Beauty",
+      "sellerProfileImageUrl": "https://example.com/sellers/demica.jpg",
+      "isPreloaded": true
+    },
+    "prod_003": {
+      "productId": "prod_003",
+      "name": "Daily Sunscreen SPF 50",
+      "description": "Non-greasy sunscreen with broad spectrum protection.",
+      "price": 35.9,
+      "category": "Sunscreens",
+      "brand": "Demica",
+      "ingredients": "Zinc Oxide, Titanium Dioxide, Vitamin C",
+      "skinType": "All Skin Types",
+      "stock": 120,
+      "imageUrls": [
+        "https://example.com/images/sunscreen.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.7,
+      "soldCount": 256,
+      "discountPrice": 32.9,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "prrJtKhVRedZTqhyAubBWcTHfHz2",
+      "sellerName": "Demica Beauty",
+      "sellerProfileImageUrl": "https://example.com/sellers/demica.jpg",
+      "isPreloaded": true
+    },
+    "prod_004": {
+      "productId": "prod_004",
+      "name": "Vitamin C Serum",
+      "description": "Brightening serum with 15% Vitamin C for radiant skin.",
+      "price": 65.0,
+      "category": "Serums",
+      "brand": "Demica",
+      "ingredients": "Vitamin C, Ferulic Acid, Vitamin E",
+      "skinType": "Dull Skin",
+      "stock": 80,
+      "imageUrls": [
+        "https://example.com/images/serum.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.6,
+      "soldCount": 134,
+      "discountPrice": 58.5,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "prrJtKhVRedZTqhyAubBWcTHfHz2",
+      "sellerName": "Demica Beauty",
+      "sellerProfileImageUrl": "https://example.com/sellers/demica.jpg",
+      "isPreloaded": true
+    },
+    "prod_005": {
+      "productId": "prod_005",
+      "name": "Hydrating Toner",
+      "description": "Alcohol-free toner that balances skin pH.",
+      "price": 32.0,
+      "category": "Toners",
+      "brand": "Demica",
+      "ingredients": "Rose Water, Hyaluronic Acid, Aloe Vera",
+      "skinType": "All Skin Types",
+      "stock": 95,
+      "imageUrls": [
+        "https://example.com/images/toner.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.2,
+      "soldCount": 87,
+      "discountPrice": 0,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "prrJtKhVRedZTqhyAubBWcTHfHz2",
+      "sellerName": "Demica Beauty",
+      "sellerProfileImageUrl": "https://example.com/sellers/demica.jpg",
+      "isPreloaded": true
+    },
+    "prod_006": {
+      "productId": "prod_006",
+      "name": "Clay Face Mask",
+      "description": "Detoxifying mask for deep pore cleansing.",
+      "price": 25.9,
+      "category": "Face Masks",
+      "brand": "Demica",
+      "ingredients": "Bentonite Clay, Charcoal, Tea Tree Oil",
+      "skinType": "Oily & Acne-Prone",
+      "stock": 110,
+      "imageUrls": [
+        "https://example.com/images/mask.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.4,
+      "soldCount": 92,
+      "discountPrice": 22.9,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "prrJtKhVRedZTqhyAubBWcTHfHz2",
+      "sellerName": "Demica Beauty",
+      "sellerProfileImageUrl": "https://example.com/sellers/demica.jpg",
+      "isPreloaded": true
+    },
+    "prod_007": {
+      "productId": "prod_007",
+      "name": "Matte Lipstick - Ruby Red",
+      "description": "Long-lasting matte lipstick with intense color payoff.",
+      "price": 32.9,
+      "category": "Lipstick",
+      "brand": "ANAS",
+      "ingredients": "Vitamin E, Jojoba Oil, Beeswax",
+      "skinType": "All Skin Types",
+      "stock": 200,
+      "imageUrls": [
+        "https://example.com/images/lipstick_red.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_007a",
+          "name": "Ruby Red",
+          "priceModifier": 0,
+          "stock": 80,
+          "sku": "AN001-RR",
+          "isDefault": true
+        },
+        {
+          "id": "var_007b",
+          "name": "Nude Pink",
+          "priceModifier": 0,
+          "stock": 60,
+          "sku": "AN001-NP",
+          "isDefault": false
+        },
+        {
+          "id": "var_007c",
+          "name": "Berry Wine",
+          "priceModifier": 2.0,
+          "stock": 60,
+          "sku": "AN001-BW",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.5,
+      "soldCount": 178,
+      "discountPrice": 29.9,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "lEBxrjmaMEZooDBCSCrKIXvrEj12",
+      "sellerName": "ANAS Cosmetics",
+      "sellerProfileImageUrl": "https://example.com/sellers/anas.jpg",
+      "isPreloaded": true
+    },
+    "prod_008": {
+      "productId": "prod_008",
+      "name": "Liquid Eyeliner - Black",
+      "description": "Waterproof liquid eyeliner with precise brush tip.",
+      "price": 24.5,
+      "category": "Eyeliner",
+      "brand": "ANAS",
+      "ingredients": "Carbon Black, Acrylate Copolymer",
+      "skinType": "All Skin Types",
+      "stock": 150,
+      "imageUrls": [
+        "https://example.com/images/eyeliner.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.3,
+      "soldCount": 145,
+      "discountPrice": 21.9,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "lEBxrjmaMEZooDBCSCrKIXvrEj12",
+      "sellerName": "ANAS Cosmetics",
+      "sellerProfileImageUrl": "https://example.com/sellers/anas.jpg",
+      "isPreloaded": true
+    },
+    "prod_009": {
+      "productId": "prod_009",
+      "name": "Compact Powder - Light Beige",
+      "description": "Oil-control compact powder for a matte finish.",
+      "price": 38.0,
+      "category": "Powder",
+      "brand": "ANAS",
+      "ingredients": "Silica, Mica, Zinc Stearate",
+      "skinType": "Oily Skin",
+      "stock": 120,
+      "imageUrls": [
+        "https://example.com/images/powder.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_009a",
+          "name": "Light Beige",
+          "priceModifier": 0,
+          "stock": 40,
+          "sku": "AN002-LB",
+          "isDefault": true
+        },
+        {
+          "id": "var_009b",
+          "name": "Natural Beige",
+          "priceModifier": 0,
+          "stock": 40,
+          "sku": "AN002-NB",
+          "isDefault": false
+        },
+        {
+          "id": "var_009c",
+          "name": "Medium Beige",
+          "priceModifier": 0,
+          "stock": 40,
+          "sku": "AN002-MB",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.2,
+      "soldCount": 96,
+      "discountPrice": 34.9,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "lEBxrjmaMEZooDBCSCrKIXvrEj12",
+      "sellerName": "ANAS Cosmetics",
+      "sellerProfileImageUrl": "https://example.com/sellers/anas.jpg",
+      "isPreloaded": true
+    },
+    "prod_010": {
+      "productId": "prod_010",
+      "name": "Volume Mascara - Black",
+      "description": "Smudge-proof mascara for voluminous lashes.",
+      "price": 29.9,
+      "category": "Mascara",
+      "brand": "ANAS",
+      "ingredients": "Beeswax, Carnauba Wax, Panthenol",
+      "skinType": "All Skin Types",
+      "stock": 180,
+      "imageUrls": [
+        "https://example.com/images/mascara.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.4,
+      "soldCount": 112,
+      "discountPrice": 26.9,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "lEBxrjmaMEZooDBCSCrKIXvrEj12",
+      "sellerName": "ANAS Cosmetics",
+      "sellerProfileImageUrl": "https://example.com/sellers/anas.jpg",
+      "isPreloaded": true
+    },
+    "prod_011": {
+      "productId": "prod_011",
+      "name": "Liquid Foundation - Fair",
+      "description": "Buildable coverage foundation with natural finish.",
+      "price": 45.0,
+      "category": "Foundation",
+      "brand": "WAWA",
+      "ingredients": "Hyaluronic Acid, Vitamin E, SPF 15",
+      "skinType": "Normal to Dry",
+      "stock": 90,
+      "imageUrls": [
+        "https://example.com/images/foundation.jpg"
+      ],
+      "variants": [
+        {
+          "id": "var_011a",
+          "name": "Fair",
+          "priceModifier": 0,
+          "stock": 30,
+          "sku": "WA001-FA",
+          "isDefault": true
+        },
+        {
+          "id": "var_011b",
+          "name": "Light",
+          "priceModifier": 0,
+          "stock": 30,
+          "sku": "WA001-LI",
+          "isDefault": false
+        },
+        {
+          "id": "var_011c",
+          "name": "Medium",
+          "priceModifier": 0,
+          "stock": 30,
+          "sku": "WA001-ME",
+          "isDefault": false
+        }
+      ],
+      "averageRating": 4.6,
+      "soldCount": 167,
+      "discountPrice": 40.5,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "LvdOWPH3ydXpds6aoXF5R92HP7x1",
+      "sellerName": "WAWA Cosmetics",
+      "sellerProfileImageUrl": "https://example.com/sellers/wawa.jpg",
+      "isPreloaded": true
+    },
+    "prod_012": {
+      "productId": "prod_012",
+      "name": "Concealer - Light",
+      "description": "Creamy concealer for dark circles and blemishes.",
+      "price": 28.0,
+      "category": "Concealer",
+      "brand": "WAWA",
+      "ingredients": "Caffeine, Vitamin K, Arnica",
+      "skinType": "All Skin Types",
+      "stock": 140,
+      "imageUrls": [
+        "https://example.com/images/concealer.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.3,
+      "soldCount": 98,
+      "discountPrice": 25.0,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "LvdOWPH3ydXpds6aoXF5R92HP7x1",
+      "sellerName": "WAWA Cosmetics",
+      "sellerProfileImageUrl": "https://example.com/sellers/wawa.jpg",
+      "isPreloaded": true
+    },
+    "prod_013": {
+      "productId": "prod_013",
+      "name": "Makeup Primer",
+      "description": "Smoothing primer for flawless makeup application.",
+      "price": 35.9,
+      "category": "Primer",
+      "brand": "WAWA",
+      "ingredients": "Silicone, Vitamin B5, Green Tea",
+      "skinType": "All Skin Types",
+      "stock": 110,
+      "imageUrls": [
+        "https://example.com/images/primer.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.4,
+      "soldCount": 76,
+      "discountPrice": 32.9,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "LvdOWPH3ydXpds6aoXF5R92HP7x1",
+      "sellerName": "WAWA Cosmetics",
+      "sellerProfileImageUrl": "https://example.com/sellers/wawa.jpg",
+      "isPreloaded": true
+    },
+    "prod_014": {
+      "productId": "prod_014",
+      "name": "Eye Cream",
+      "description": "Anti-aging eye cream with retinol and caffeine.",
+      "price": 55.0,
+      "category": "Skincare",
+      "brand": "Syedewa",
+      "ingredients": "Retinol, Caffeine, Peptides",
+      "skinType": "Mature Skin",
+      "stock": 70,
+      "imageUrls": [
+        "https://example.com/images/eyecream.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.7,
+      "soldCount": 89,
+      "discountPrice": 49.5,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "QrHV78fKIWhLK0SijtgFtMMkF3H3",
+      "sellerName": "Syedewa Cosmetics",
+      "sellerProfileImageUrl": "https://example.com/sellers/syedewa.jpg",
+      "isPreloaded": true
+    },
+    "prod_015": {
+      "productId": "prod_015",
+      "name": "Face Oil",
+      "description": "Nourishing face oil with rosehip and jojoba.",
+      "price": 42.9,
+      "category": "Skincare",
+      "brand": "Syedewa",
+      "ingredients": "Rosehip Oil, Jojoba Oil, Vitamin E",
+      "skinType": "Dry Skin",
+      "stock": 85,
+      "imageUrls": [
+        "https://example.com/images/faceoil.jpg"
+      ],
+      "variants": [],
+      "averageRating": 4.5,
+      "soldCount": 67,
+      "discountPrice": 38.9,
+      "isOfficialStore": true,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "sellerId": "QrHV78fKIWhLK0SijtgFtMMkF3H3",
+      "sellerName": "Syedewa Cosmetics",
+      "sellerProfileImageUrl": "https://example.com/sellers/syedewa.jpg",
+      "isPreloaded": true
+    }
+  },
+
+  "ProductListings": {
+    "list_001": {
+      "productId": "prod_001",
+      "sellerId": "prrJtKhVRedZTqhyAubBWcTHfHz2",
+      "price": 49.9,
+      "stock": 150,
+      "condition": "New",
+      "listingDate": "2024-12-20",
+      "active": true
+    },
+    "list_002": {
+      "productId": "prod_007",
+      "sellerId": "lEBxrjmaMEZooDBCSCrKIXvrEj12",
+      "price": 32.9,
+      "stock": 200,
+      "condition": "New",
+      "listingDate": "2024-12-20",
+      "active": true
+    }
+  },
+
+  "Promotions": {
+    "promo_001": {
+      "promotionId": "promo_001",
+      "title": "Welcome to BeautyHub",
+      "description": "15% off your first purchase",
+      "type": "welcome_offer",
+      "discountType": "percentage",
+      "discountValue": 15,
+      "minPurchase": 30,
+      "startDate": 1734652800000,
+      "endDate": 1737331200000,
+      "applicableCategories": ["all"],
+      "applicableBrands": ["all"],
+      "maxDiscountAmount": 20,
+      "usageLimit": 1,
+      "usedCount": 45,
+      "active": true,
+      "imageUrl": "https://example.com/promos/welcome.jpg",
+      "promoCode": "WELCOME15"
+    },
+    "promo_002": {
+      "promotionId": "promo_002",
+      "title": "Skincare Essentials Sale",
+      "description": "20% off all skincare products",
+      "type": "seasonal_sale",
+      "discountType": "percentage",
+      "discountValue": 20,
+      "minPurchase": 50,
+      "startDate": 1734652800000,
+      "endDate": 1735257600000,
+      "applicableCategories": ["Skincare", "Cleansers", "Moisturizers", "Sunscreens", "Serums"],
+      "applicableBrands": ["all"],
+      "maxDiscountAmount": 30,
+      "usageLimit": null,
+      "usedCount": 89,
+      "active": true,
+      "imageUrl": "https://example.com/promos/skincare.jpg"
+    }
+  },
+
+  "Reviews": {
+    "rev_001": {
+      "productId": "prod_001",
+      "userId": "jcg0vFQheQPJGB7WAn8b63JH1Le2",
+      "username": "Amina Ahmad",
+      "rating": 5,
+      "comment": "Excellent moisturizer! My skin feels hydrated all day without being greasy.",
+      "timestamp": 1734998400000,
+      "productName": "Hydrating Moisturizer",
+      "status": "APPROVED"
+    },
+    "rev_002": {
+      "productId": "prod_007",
+      "userId": "tFqPkaRDMlRkOWOoMp9o9e0g2Tv22",
+      "username": "Siti Nurhaliza",
+      "rating": 4,
+      "comment": "Beautiful color and long-lasting. A bit drying though.",
+      "timestamp": 1735084800000,
+      "productName": "Matte Lipstick - Ruby Red",
+      "status": "APPROVED"
+    }
+  },
+
+  "Rewards": {
+    "rw_001": {
+      "rewardId": "rw_001",
+      "title": "RM10 Off Voucher",
+      "description": "Get RM10 off your next purchase",
+      "pointsRequired": 100,
+      "rewardType": "fixed_amount",
+      "discountValue": 10,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "redeemedAt": 1735084800000
+    },
+    "rw_002": {
+      "rewardId": "rw_002",
+      "title": "15% Off Voucher",
+      "description": "15% discount on any product",
+      "pointsRequired": 150,
+      "rewardType": "percentage",
+      "discountValue": 15,
+      "active": true,
+      "creationTimestamp": 1734652800000,
+      "redeemedAt": 0
+    }
+  },
+
+  "Users": {
+    "jcg0vFQheQPJGB7WAn8b63JH1Le2": {
+      "username": "Amina Ahmad",
+      "email": "amina@gmail.com",
+      "userType": "BUYER",
+      "registrationDate": "2024-12-01",
+      "points": 250,
+      "suspended": false,
+      "addresses": {
+        "addr_001": {
+          "addressId": "addr_001",
+          "addressType": "Home",
+          "city": "Kuala Lumpur",
+          "phoneNumber": "+60123456789",
+          "recipientName": "Amina Binti Ahmad",
+          "state": "Wilayah Persekutuan",
+          "street": "Jalan Bukit Bintang 123",
+          "zipcode": "55100",
+          "isDefault": true,
+          "zone": "West Malaysia"
+        }
+      },
+      "uid": "jcg0vFQheQPJGB7WAn8b63JH1Le2",
+      "profileImage": "https://example.com/profiles/amina.jpg"
+    },
+    "tFqPkaRDMlRkOWOoMp9o9e0g2Tv22": {
+      "username": "Siti Nurhaliza",
+      "email": "siti@gmail.com",
+      "userType": "BUYER",
+      "registrationDate": "2024-12-05",
+      "points": 120,
+      "suspended": false,
+      "addresses": {},
+      "uid": "tFqPkaRDMlRkOWOoMp9o9e0g2Tv22",
+      "profileImage": "https://example.com/profiles/siti.jpg"
+    },
+    "iHf887c7XYbPurDLQHKZGjEGprD3": {
+      "username": "BeautyHub Admin",
+      "email": "admin@beautyhub.com",
+      "userType": "ADMIN",
+      "registrationDate": "2024-11-15",
+      "points": 0,
+      "suspended": false,
+      "addresses": {},
+      "uid": "iHf887c7XYbPurDLQHKZGjEGprD3",
+      "profileImage": "https://example.com/profiles/admin.jpg"
+    },
+    "prrJtKhVRedZTqhyAubBWcTHfHz2": {
+      "username": "Demica Beauty",
+      "email": "demica@beauty.com",
+      "userType": "SELLER",
+      "registrationDate": "2024-11-20",
+      "points": 0,
+      "suspended": false,
+      "addresses": {},
+      "uid": "prrJtKhVRedZTqhyAubBWcTHfHz2",
+      "profileImage": "https://example.com/sellers/demica.jpg"
+    },
+    "lEBxrjmaMEZooDBCSCrKIXvrEj12": {
+      "username": "ANAS Cosmetics",
+      "email": "anas@gmail.com",
+      "userType": "SELLER",
+      "registrationDate": "2024-11-21",
+      "points": 0,
+      "suspended": false,
+      "addresses": {},
+      "uid": "lEBxrjmaMEZooDBCSCrKIXvrEj12",
+      "profileImage": "https://example.com/sellers/anas.jpg"
+    },
+    "LvdOWPH3ydXpds6aoXF5R92HP7x1": {
+      "username": "WAWA Cosmetics",
+      "email": "wawacosmetics@gmail.com",
+      "userType": "SELLER",
+      "registrationDate": "2024-11-22",
+      "points": 0,
+      "suspended": false,
+      "addresses": {},
+      "uid": "LvdOWPH3ydXpds6aoXF5R92HP7x1",
+      "profileImage": "https://example.com/sellers/wawa.jpg"
+    },
+    "QrHV78fKIWhLK0SijtgFtMMkF3H3": {
+      "username": "Syedewa Cosmetics",
+      "email": "syedewa@beautyhub.com",
+      "userType": "SELLER",
+      "registrationDate": "2024-11-23",
+      "points": 0,
+      "suspended": false,
+      "addresses": {},
+      "uid": "QrHV78fKIWhLK0SijtgFtMMkF3H3",
+      "profileImage": "https://example.com/sellers/syedewa.jpg"
+    },
+    "VZnyHCo0qVcpQcBS4l9ILaXewpA3": {
+      "username": "Watsons HQ",
+      "email": "watsons@beautyhub.com",
+      "userType": "SELLER",
+      "registrationDate": "2024-11-24",
+      "points": 0,
+      "suspended": false,
+      "addresses": {},
+      "uid": "VZnyHCo0qVcpQcBS4l9ILaXewpA3",
+      "profileImage": "https://example.com/sellers/watsons.jpg"
+    },
+    "ygVnpMvcJ9M8gEik4829XbA5Qvm2": {
+      "username": "Guardian HQ",
+      "email": "guardian@beautyhub.com",
+      "userType": "SELLER",
+      "registrationDate": "2024-11-25",
+      "points": 0,
+      "suspended": false,
+      "addresses": {},
+      "uid": "ygVnpMvcJ9M8gEik4829XbA5Qvm2",
+      "profileImage": "https://example.com/sellers/guardian.jpg"
+    },
+    "uWLedJIJBkThdXOahblzzTMvva92": {
+      "username": "Sephora Malaysia",
+      "email": "sephora@beautyhub.com",
+      "userType": "SELLER",
+      "registrationDate": "2024-11-26",
+      "points": 0,
+      "suspended": false,
+      "addresses": {},
+      "uid": "uWLedJIJBkThdXOahblzzTMvva92",
+      "profileImage": "https://example.com/sellers/sephora.jpg"
+    },
+    "v5Ljlh8nTuXp2u8iDj9gRxxy7nq2": {
+      "username": "Cubre Mi HQ",
+      "email": "cubremi@beautyhub.com",
+      "userType": "SELLER",
+      "registrationDate": "2024-11-27",
+      "points": 0,
+      "suspended": false,
+      "addresses": {},
+      "uid": "v5Ljlh8nTuXp2u8iDj9gRxxy7nq2",
+      "profileImage": "https://example.com/sellers/cubremi.jpg"
+    },
+    "rDandciRvYbqKRFnJdLZ5EoXHRh2": {
+      "username": "Sally Official HQ",
+      "email": "sally@beautyhub.com",
+      "userType": "SELLER",
+      "registrationDate": "2024-11-28",
+      "points": 0,
+      "suspended": false,
+      "addresses": {},
+      "uid": "rDandciRvYbqKRFnJdLZ5EoXHRh2",
+      "profileImage": "https://example.com/sellers/sally.jpg"
+    },
+    "wHbSjNidEoQAS9fbouX5Aip5Vll1": {
+      "username": "Maaez Cosmetics",
+      "email": "maaez@beautyhub.com",
+      "userType": "SELLER",
+      "registrationDate": "2024-11-29",
+      "points": 0,
+      "suspended": false,
+      "addresses": {},
+      "uid": "wHbSjNidEoQAS9fbouX5Aip5Vll1",
+      "profileImage": "https://example.com/sellers/maaez.jpg"
+    }
+  }
+}

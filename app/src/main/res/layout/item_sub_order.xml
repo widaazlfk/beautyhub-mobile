@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginBottom="12dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- 1. Bahagian Header Penjual yang Boleh Diklik -->
+        <LinearLayout
+            android:id="@+id/layout_seller_profile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp">
+
+            <!-- Ikon Kedai untuk visual yang lebih baik -->
+            <ImageView
+                android:id="@+id/icon_store"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_store"
+                app:tint="?android:attr/textColorSecondary"
+                android:contentDescription="Ikon Kedai"/>
+
+            <!-- Gaya teks diubah suai untuk hierarki yang lebih baik -->
+            <TextView
+                android:id="@+id/tv_sub_order_seller_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                android:textStyle="bold"
+                android:textColor="?android:attr/textColorPrimary"
+                tools:text="Order from: Seller Name" />
+
+            <!-- Saiz ikon dikecilkan agar lebih seimbang -->
+            <ImageView
+                android:id="@+id/iv_arrow_right"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_chevron_right"
+                app:tint="?android:attr/textColorSecondary"
+                android:contentDescription="Go to seller profile" />
+        </LinearLayout>
+
+        <!-- 2. Garisan Pemisah -->
+        <com.google.android.material.divider.MaterialDivider
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"/>
+
+        <!-- 3. Senarai Produk -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_sub_order_items"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="16dp"
+            android:nestedScrollingEnabled="false"
+            tools:itemCount="1"
+            tools:listitem="@layout/item_order_detail" />
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

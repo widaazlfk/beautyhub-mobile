@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Warna teks apabila Chip dipilih -->
+    <item android:color="?attr/colorOnPrimaryContainer" android:state_checked="true"/>
+    <!-- Warna teks lalai -->
+    <item android:color="?attr/colorOnSurface"/>
+</selector>

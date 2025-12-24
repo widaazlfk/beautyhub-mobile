@@ -1,0 +1,175 @@
+<resources>
+    <string name="app_name">Beauty Hub</string>
+
+    <!-- Activity Labels -->
+    <string name="about_us">About Us</string>
+    <string name="contact_us">Contact Us</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="title_my_profile">My Profile</string>
+
+    <!-- Common strings -->
+    <string name="email_address">Email Address</string>
+    <string name="password">Password</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="login">LOG IN</string>
+    <string name="dont_have_account">Don\'t have an account?</string>
+    <string name="register_here">Register Here</string>
+    <string name="logout">Logout</string>
+    <string name="action_logout">Logout</string>
+
+    <!-- Login activity strings -->
+    <string name="login_to_beauty_hub">Log In to Beauty Hub</string>
+    <string name="example_email">contoh@gmail.com</string>
+    <string name="enter_password">Enter Password</string>
+
+    <!-- Register activity strings -->
+    <string name="create_account">Create Account</string>
+    <string name="full_name">Full Name</string>
+    <string name="enter_full_name">Enter your full name</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="re_enter_password">Re-enter your password</string>
+    <string name="register">REGISTER</string>
+    <string name="already_have_account">Already have an account?</string>
+    <string name="login_here">Login Here</string>
+    <string name="beauty_hub_logo">Beauty Hub Logo</string>
+
+    <!-- Forgot Password Activity -->
+    <string name="back">Back</string>
+    <string name="reset_password_instructions_sent">Reset instructions sent to your email</string>
+    <string name="enter_valid_email">Please enter a valid email address</string>
+    <string name="forget_password">Forgot Password</string>
+    <string name="forgot_password_subtitle">Enter your email address and we\'ll send you instructions to reset your password</string>
+    <string name="send_reset_instructions">Send Reset Instructions</string>
+    <string name="remember_password">Remember your password?</string>
+    <string name="back_to_login">Back to Login</string>
+    <string name="email_required">Email is required</string>
+    <string name="invalid_email">Please enter a valid email address</string>
+    <string name="reset_email_sent">Reset email sent successfully! Check your inbox.</string>
+    <string name="reset_failed">Failed to send reset email. Please try again.</string>
+
+    <!-- User type selection -->
+    <string name="select_user_type">Select Account Type</string>
+    <string name="user_type_seller">Seller Account</string>
+    <string name="user_type_buyer">Buyer Account</string>
+
+    <string name="sales_analytics">Sales Analytics</string>
+    <string name="week">Week</string>
+    <string name="month">Month</string>
+    <string name="year">Year</string>
+    <string name="currency_2450">$2,450</string>
+    <string name="total_sales">Total Sales</string>
+    <string name="percent_12">+12%</string>
+    <string name="orders_45">45</string>
+    <string name="total_orders">Total Orders</string>
+    <string name="percent_8">+8%</string>
+    <string name="currency_54_44">$54.44</string>
+    <string name="avg_order">Avg Order</string>
+    <string name="percent_5">+5%</string>
+    <string name="sales_trend">Sales Trend</string>
+    <string name="chart_placeholder">Sales Chart Will Appear Here</string>
+    <string name="top_products">Top Products</string>
+    <string name="product_image">Product Image</string>
+    <string name="vitamin_c_serum">Vitamin C Serum</string>
+    <string name="sold_24">24 sold</string>
+    <string name="currency_599">$599</string>
+    <string name="face_moisturizer">Face Moisturizer</string>
+    <string name="sold_18">18 sold</string>
+    <string name="currency_459">$459</string>
+    <string name="sunscreen_spf_50">Sunscreen SPF 50</string>
+    <string name="sold_15">15 sold</string>
+    <string name="currency_399">$399</string>
+    <string name="view_details">View Details</string>
+    <string name="mark_paid">Mark Paid</string>
+    <string name="payment_method">Payment Method</string>
+
+    <string name="profile_picture">Profile picture</string>
+    <string name="change_photo">Change</string>
+    <string name="loyalty_tier">Loyalty tier</string>
+
+    <string name="reward_points">Reward Points</string>
+    <string name="reviews">Reviews</string>
+    <string name="account_settings">Account Settings</string>
+    <string name="personal_info">Personal information</string>
+    <string name="personal_information">Personal Information</string>
+    <string name="shipping_address">Shipping address</string>
+    <string name="shipping_addresses">Shipping Addresses</string>
+    <string name="payment_methods">Payment Methods</string>
+    <string name="order_history">Order History</string>
+    <string name="my_reviews">My Reviews</string>
+    <string name="navigate">Navigate</string>
+    <string name="support">Support</string>
+    <string name="help_center">Help Center</string>
+    <string name="contact_support">Contact Support</string>
+    <string name="empty_payments_description">No payments found in your history</string>
+    <string name="no_payments_found">No Payments</string>
+    <string name="payments_empty_description">Your payment history will appear here</string>
+    <string name="payment_pending">Payment Pending</string>
+
+    <string name="promo_banner_text">GET UP TO 15% OFF YOUR FIRST HAUL WITH CODE FIRST15</string>
+
+    <string name="content_description_notifications">Notifications</string>
+    <string name="content_description_logout">Logout</string>
+    <string name="content_description_search">Search</string>
+    <string name="content_description_cart">Shopping Cart</string>
+    <string name="content_description_new_year_banner">New Year Shop Banner</string>
+    <string name="content_description_menu">Open navigation menu</string>
+
+    <string name="new_year_shop_title">New Year Shop</string>
+    <string name="new_year_shop_description">Step into a world of decadence and delight this holiday season with dazzling beauty treats for everyone on your list.</string>
+    <string name="discover_now_button">Discover Now</string>
+
+    <string name="new_and_exclusive_subtitle">New And Exclusive</string>
+    <string name="new_and_exclusive_title">BeautyHub New Year Stocking</string>
+    <string name="new_and_exclusive_description">From radiant rituals to luxury scents, revel in a spectacle of dazzling beauty treats, neatly tucked into five irresistible stockings.</string>
+    <string name="content_description_total_sales_icon">Total Sales Icon</string>
+    <string name="product_image_description">Image of the products</string>
+    <string name="add_to_cart">Add to Cart</string>
+
+    <string name="section_title_categories">Categories</string>
+    <string name="section_title_newest_products">Newest Products</string>
+    <string name="action_view_all">View All</string>
+    <string name="reward_status_inactive_desc">Inactive Reward Status Icon</string>
+    <string name="category_icon">Category Icon</string>
+    <string name="content_description_profile_picture">User profile picture</string>
+    <string name="cd_back_button">Back to previous screen</string>
+    <string name="no_shipping_addresses_found">No shipping addresses found.\nTap \'+\' to add one.</string>
+    <string name="add_new_address">Add New Address</string>
+    <string name="remove_from_cart">Remove from cart</string>
+    <string name="decrease_quantity">Decrease quantity</string>
+    <string name="increase_quantity">Increase quantity</string>
+    <string name="remove_product">Remove product</string>
+    <string name="edit">Edit Information</string>
+    <string name="locked">Locked</string>
+
+    <string name="buy_now">Buy Now</string>
+    <string name="out_of_stock">Out of Stock</string>
+    <string name="product_not_available">Product not available</string>
+    <string name="edit_product">Edit Product</string>
+    <string name="delete_product">Delete Product</string>
+
+
+
+
+    <!-- New strings for accessibility -->
+    <string name="menu">Menu</string>
+    <string name="search">Search</string>
+    <string name="cart">Cart</string>
+    <string name="refresh">Refresh</string>
+    <string name="wave">Wave</string>
+    <string name="new_arrivals">New Arrivals</string>
+    <string name="best_sellers">Best Sellers</string>
+    <string name="discounts">Discounts</string>
+    <string name="quick_cart">Quick Cart</string>
+
+    <!-- Welcome messages -->
+    <string name="welcome_user">Hello, %s!</string>
+    <string name="welcome_generic">Hello, Beauty Lover!</string>
+    <string name="welcome_to_beautyhub">Welcome to BeautyHub!</string>
+    <string name="sign_in_prompt">Sign in for personalized experience</string>
+
+    <!-- Greetings -->
+    <string name="greeting_morning">Good morning! Ready to explore beauty products?</string>
+    <string name="greeting_afternoon">Good afternoon! Discover amazing deals!</string>
+    <string name="greeting_evening">Good evening! Time for some self-care!</string>
+    <string name="greeting_night">Good night! Dream of beautiful tomorrow!</string>
+</resources>

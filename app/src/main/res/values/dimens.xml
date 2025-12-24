@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Padding and Margin -->
+    <dimen name="padding_xsmall">4dp</dimen>
+    <dimen name="padding_small">8dp</dimen>
+    <dimen name="padding_medium">16dp</dimen>
+    <dimen name="padding_large">24dp</dimen>
+    <dimen name="padding_xlarge">32dp</dimen>
+
+    <dimen name="margin_xsmall">4dp</dimen>
+    <dimen name="margin_small">8dp</dimen>
+    <dimen name="margin_medium">16dp</dimen>
+    <dimen name="margin_large">24dp</dimen>
+    <dimen name="margin_xlarge">32dp</dimen>
+
+    <!-- Card and Button Styles -->
+    <dimen name="card_corner_radius">12dp</dimen>
+    <dimen name="card_elevation">4dp</dimen>
+    <dimen name="button_corner_radius">8dp</dimen>
+    <dimen name="button_elevation">2dp</dimen>
+    <dimen name="category_spacing">12dp</dimen>
+    <dimen name="product_grid_spacing">8dp</dimen>
+
+    <dimen name="text_size_large">20sp</dimen>
+    <dimen name="text_size_medium">16sp</dimen>
+    <dimen name="text_size_small">12sp</dimen>
+
+    <!-- Text Sizes -->
+    <dimen name="text_xsmall">12sp</dimen>
+    <dimen name="text_small">14sp</dimen>
+    <dimen name="text_medium">16sp</dimen>
+    <dimen name="text_large">18sp</dimen>
+    <dimen name="text_xlarge">20sp</dimen>
+    <dimen name="text_xxlarge">24sp</dimen>
+
+    <!-- Icon Sizes -->
+    <dimen name="icon_small">24dp</dimen>
+    <dimen name="icon_medium">32dp</dimen>
+    <dimen name="icon_large">48dp</dimen>
+    <dimen name="icon_xlarge">64dp</dimen>
+
+    <!-- Layout Dimensions -->
+    <dimen name="button_height">48dp</dimen>
+    <dimen name="input_field_height">56dp</dimen>
+    <dimen name="card_height_small">80dp</dimen>
+    <dimen name="card_height_medium">100dp</dimen>
+    <dimen name="card_height_large">120dp</dimen>
+
+    <!-- Logo and Image Sizes -->
+    <dimen name="logo_size_small">80dp</dimen>
+    <dimen name="logo_size_medium">100dp</dimen>
+    <dimen name="logo_size_large">120dp</dimen>
+
+    <dimen name="spacing_small">4dp</dimen>
+    <dimen name="spacing_medium">8dp</dimen>
+    <dimen name="spacing_large">16dp</dimen>
+    <dimen name="spacing_extra_large">32dp</dimen>
+
+    <dimen name="success_icon_size">24dp</dimen>
+    <dimen name="success_padding">12dp</dimen>
+</resources>

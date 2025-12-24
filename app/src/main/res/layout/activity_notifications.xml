@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".buyer.NotificationActivity">
+
+    <!-- 1. Toolbar untuk navigasi kembali -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar_notification"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:navigationIcon="@drawable/ic_arrow_back"
+            app:title="Notifications" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- 2. FrameLayout untuk menguruskan paparan senarai atau mesej kosong -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- RecyclerView untuk memaparkan senarai notifikasi -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/notifications_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/item_notification_row"
+            tools:visibility="visible" />
+
+        <!-- TextView untuk dipaparkan jika tiada notifikasi -->
+        <TextView
+            android:id="@+id/empty_notification_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="You have no notifications yet."
+            android:textSize="18sp"
+            android:visibility="visible"
+            tools:visibility="gone"/>
+
+    </FrameLayout>
+
+</LinearLayout>

@@ -1,0 +1,70 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Gaya Asas Aplikasi -->
+    <style name="Base.Theme.BeautyHub" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Warna Utama -->
+        <item name="colorPrimary">@color/maroon</item>
+        <item name="colorPrimaryVariant">@color/maroon_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
+
+        <!-- Warna Sekunder -->
+        <item name="colorSecondary">@color/pink</item>
+        <item name="colorSecondaryVariant">@color/pink_dark</item>
+        <item name="colorOnSecondary">@color/black</item>
+
+        <!-- Warna Aksen (Penting untuk keserasian) -->
+        <item name="colorAccent">@color/pink</item>
+
+        <!-- Latar Belakang & Permukaan -->
+        <item name="android:colorBackground">@color/light_gray</item>
+        <item name="colorOnBackground">@color/text_primary</item>
+        <item name="colorSurface">@color/card_background</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+
+        <!-- Warna Ralat -->
+        <item name="colorError">@color/error_color</item>
+        <item name="colorOnError">@color/white</item>
+
+        <!-- Warna Status Bar -->
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+
+        <!-- ▼▼▼ PENTING: Beri nilai kepada atribut yang baru dicipta ▼▼▼ -->
+        <item name="colorSecondaryText">@color/text_secondary</item>
+    </style>
+
+    <style name="Theme.BeautyHub" parent="Base.Theme.BeautyHub" />
+
+    <!-- Tema untuk Activity tanpa ActionBar -->
+    <style name="Theme.BeautyHub.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <!-- Tema lain seperti AlertDialogTheme, CarouselImage, dll. boleh kekal di bawah ini -->
+    <!-- ... (kod tema anda yang lain) ... -->
+    <style name="AlertDialogTheme" parent="Theme.Material3.Light.Dialog.Alert">
+        <item name="colorPrimary">@color/maroon</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="android:windowBackground">@color/white</item>
+        <item name="buttonBarPositiveButtonStyle">@style/AlertDialog.Button.Positive</item>
+        <item name="buttonBarNegativeButtonStyle">@style/AlertDialog.Button.Negative</item>
+    </style>
+
+    <style name="AlertDialog.Button.Positive" parent="Widget.Material3.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/maroon</item>
+    </style>
+
+    <style name="AlertDialog.Button.Negative" parent="Widget.Material3.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+
+    <!-- ▼▼▼ TAMBAH GAYA INI JIKA TIADA ▼▼▼ -->
+    <style name="CarouselImage">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
+    </style>
+    <style name="DynamicChipStyle" parent="Widget.MaterialComponents.Chip.Filter">
+        <!-- Anda boleh tambah atribut lain di sini jika perlu -->
+        <!-- Contoh: <item name="android:textColor">@color/your_color</item> -->
+    </style>
+</resources>

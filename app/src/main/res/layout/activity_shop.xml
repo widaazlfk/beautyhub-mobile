@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".buyer.ShopActivity">
+
+    <!-- 1. AppBarLayout -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- DIUBAH: Toolbar kini menggunakan RelativeLayout untuk menampung beberapa item -->
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar_shop"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:contentInsetStartWithNavigation="0dp"
+            app:navigationIcon="@drawable/ic_arrow_back"
+            app:title="">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <!-- Tombol Filter (paling kanan) -->
+                <ImageButton
+                    android:id="@+id/btn_filter_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Filter Products"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_filter" /> <!-- Pastikan ikon ini ada di drawable -->
+
+                <!-- Tombol Keranjang (di sebelah kiri tombol filter) -->
+                <ImageButton
+                    android:id="@+id/btn_cart_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toStartOf="@id/btn_filter_icon"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Shopping Cart"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_shopping" /> <!-- Pastikan ikon ini ada di drawable -->
+
+                <!-- SearchView (mengisi ruang yang tersisa) -->
+                <androidx.appcompat.widget.SearchView
+                    android:id="@+id/search_view_shop"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toStartOf="@id/btn_cart_icon"
+                    app:queryHint="Search products..." />
+
+            </RelativeLayout>
+
+        </com.google.android.material.appbar.MaterialToolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <!-- 2. RecyclerView (Tidak ada perubahan) -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_all_products"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:padding="4dp"
+            tools:listitem="@layout/b_item_product_grid2" />
+
+        <!-- 3. ProgressBar (Tidak ada perubahan) -->
+        <ProgressBar
+            android:id="@+id/progress_bar_shop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <!-- Teks jika tiada produk (Tidak ada perubahan) -->
+        <TextView
+            android:id="@+id/tv_no_products_shop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="No products available"
+            android:visibility="gone" />
+
+    </FrameLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
