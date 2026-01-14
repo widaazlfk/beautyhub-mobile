@@ -300,50 +300,6 @@
 
                 </LinearLayout>
 
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- ▼▼▼ BAHAGIAN VARIAN YANG DITAMBAH ▼▼▼ -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Product Variants"
-                android:textColor="@android:color/black"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <!-- Container untuk senarai varian yang akan ditambah secara dinamik -->
-                    <LinearLayout
-                        android:id="@+id/variants_container"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical" />
-
-                    <!-- Butang untuk membuka dialog tambah varian -->
-                    <Button
-                        android:id="@+id/btn_add_variant"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="end"
-                        android:layout_marginTop="8dp"
-                        android:text="+ Add Variant"
-                        android:textColor="@color/maroon" />
-
-                </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
             <!-- ▲▲▲ TAMAT BAHAGIAN VARIAN ▲▲▲ -->

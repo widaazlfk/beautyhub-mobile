@@ -73,6 +73,11 @@ dependencies {
     implementation ("com.stripe:stripe-android:20.39.0")
     implementation ("androidx.gridlayout:gridlayout:1.1.0")
     implementation ("com.google.code.gson:gson:2.10.1")
+    implementation(libs.firebase.crashlytics.buildtools)
+    implementation(libs.androidx.room.common.jvm)
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation("com.github.chrisbanes:PhotoView:2.3.0")
+    implementation("com.google.firebase:firebase-messaging:23.4.1")
 
 
     // Testing libraries

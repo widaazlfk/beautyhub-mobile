@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.beautyhub.R;
 import com.example.beautyhub.adapters.CategoryAdapter;
 import com.example.beautyhub.models.Category;
+import com.google.android.material.appbar.MaterialToolbar; // Import ini
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -36,6 +37,9 @@ public class ManageCategoriesActivity extends AppCompatActivity implements Categ
         super.onCreate(savedInstanceState);
         setContentView(R.layout.a_activity_manage_categories);
 
+        // 1. Setup Toolbar dan Back Button
+        setupToolbar();
+
         // Rujukan terus ke Firebase
         categoriesRef = FirebaseDatabase.getInstance().getReference("Categories");
 
@@ -52,6 +56,20 @@ public class ManageCategoriesActivity extends AppCompatActivity implements Categ
 
         // Terus muatkan kategori
         fetchCategories();
+    }
+
+    private void setupToolbar() {
+        // Gantikan R.id.toolbar_manage_categories dengan ID Toolbar dalam XML anda
+        MaterialToolbar toolbar = findViewById(R.id.toolbar_manage_categories);
+
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+
+            // Memberikan fungsi butang kembali (Navigation Icon)
+            toolbar.setNavigationOnClickListener(v -> {
+                onBackPressed(); // Menutup aktiviti ini dan kembali ke Admin Dashboard
+            });
+        }
     }
 
     private void fetchCategories() {
@@ -76,10 +94,8 @@ public class ManageCategoriesActivity extends AppCompatActivity implements Categ
         });
     }
 
-    // Dipanggil dari adapter apabila ikon padam diklik
     @Override
     public void onDeleteClick(Category category) {
-        // Terus padam tanpa pengesahan (tidak disyorkan)
         if (category.getCategoryId() != null) {
             categoriesRef.child(category.getCategoryId()).removeValue()
                     .addOnSuccessListener(aVoid -> Toast.makeText(ManageCategoriesActivity.this, "Category deleted.", Toast.LENGTH_SHORT).show())
@@ -87,7 +103,6 @@ public class ManageCategoriesActivity extends AppCompatActivity implements Categ
         }
     }
 
-    // Dialog untuk menambah kategori
     private void showAddCategoryDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View view = LayoutInflater.from(this).inflate(R.layout.a_dialog_add_edit_category, null);

@@ -28,12 +28,14 @@ public class CartParentAdapter extends RecyclerView.Adapter<CartParentAdapter.Se
     private final ParentCartListener listener;
     private Map<String, Product> productCache;
 
+    // ▼▼▼ PEMBETULAN 1: Tambah pemboleh ubah untuk mod suntingan ▼▼▼
+    private boolean isInEditMode = false;
+
     public interface ParentCartListener {
         void onSellerHeaderClicked(String sellerId);
-        void onQuantityChanged(String cartItemId, int newQuantity);
-        void onItemDeleted(String cartItemId);
+        void onQuantityChanged(String sellerId, String cartItemId, int newQuantity);
+        void onItemDeleted(String sellerId, String cartItemId);
         void onItemSelectedChanged();
-        void onVariantChanged(String cartItemId, String newVariantId);
     }
 
     public CartParentAdapter(Context context, List<CartSeller> sellerList, ParentCartListener listener) {
@@ -42,19 +44,22 @@ public class CartParentAdapter extends RecyclerView.Adapter<CartParentAdapter.Se
         this.listener = listener;
     }
 
-    public void updateSellerList(List<CartSeller> newList) {
-        this.sellerList = newList;
-        notifyDataSetChanged();
-    }
-
     public void setProductCache(Map<String, Product> productCache) {
         this.productCache = productCache;
     }
 
+    // ▼▼▼ PEMBETULAN 2: Tambah kaedah setEditMode ▼▼▼
+    public void setEditMode(boolean isInEditMode) {
+        this.isInEditMode = isInEditMode;
+        notifyDataSetChanged(); // Beritahu RecyclerView untuk melukis semula semua item
+    }
+
+
     @NonNull
     @Override
     public SellerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_cart_seller, parent, false);
+        // Ralat asal adalah di sini, pastikan nama layout adalah betul
+        View view = LayoutInflater.from(context).inflate(R.layout.list_item_cart_seller, parent, false);
         return new SellerViewHolder(view);
     }
 
@@ -71,105 +76,86 @@ public class CartParentAdapter extends RecyclerView.Adapter<CartParentAdapter.Se
 
     public class SellerViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView tvSellerName;
-        private ImageView ivSellerProfile;
-        private CheckBox checkboxSellerSelectAll;
-        private RecyclerView rvCartItems;
-        private View sellerHeader;
-
-        private CartAdapter childAdapter;
+        private final TextView tvSellerName;
+        private final ImageView ivSellerProfile;
+        private final CheckBox checkboxSellerSelectAll;
+        private final RecyclerView rvCartItems;
+        private final View sellerHeader;
+        private CartChildAdapter childAdapter; // Nama ditukar dari CartAdapter
 
         public SellerViewHolder(@NonNull View itemView) {
             super(itemView);
-
-            tvSellerName = itemView.findViewById(R.id.tv_seller_name);
-            ivSellerProfile = itemView.findViewById(R.id.iv_seller_profile);
-            checkboxSellerSelectAll = itemView.findViewById(R.id.checkbox_seller_select_all);
-            rvCartItems = itemView.findViewById(R.id.rv_cart_items);
-            sellerHeader = itemView.findViewById(R.id.seller_header);
-
-            // Setup child recyclerview
-            childAdapter = new CartAdapter(context, new java.util.ArrayList<>(), new CartAdapter.ChildCartListener() {
-                @Override
-                public void onQuantityChanged(String cartItemId, int newQuantity) {
-                    if (listener != null) {
-                        listener.onQuantityChanged(cartItemId, newQuantity);
-                    }
-                }
-
-                @Override
-                public void onItemDeleted(String cartItemId) {
-                    if (listener != null) {
-                        listener.onItemDeleted(cartItemId);
-                    }
-                }
-
-                @Override
-                public void onItemSelectedChanged(String cartItemId, boolean isSelected) {
-                    updateSellerSelectAllCheckbox();
-                    if (listener != null) {
-                        listener.onItemSelectedChanged();
-                    }
-                }
-
-                @Override
-                public void onVariantChanged(String cartItemId, String newVariantId) {
-                    if (listener != null) {
-                        listener.onVariantChanged(cartItemId, newVariantId);
-                    }
-                }
-            });
+            // Pastikan ID adalah betul
+            tvSellerName = itemView.findViewById(R.id.tv_seller_name_header);
+            ivSellerProfile = itemView.findViewById(R.id.iv_seller_profile_header);
+            checkboxSellerSelectAll = itemView.findViewById(R.id.checkbox_select_seller);
+            rvCartItems = itemView.findViewById(R.id.rv_child_cart_items);
+            sellerHeader = itemView.findViewById(R.id.layout_seller_header);
 
             rvCartItems.setLayoutManager(new LinearLayoutManager(context));
-            rvCartItems.setAdapter(childAdapter);
             rvCartItems.setItemAnimator(null);
         }
 
-        void bind(CartSeller seller) {
-            // Set seller info
+        void bind(final CartSeller seller) {
             tvSellerName.setText(seller.getSellerName());
 
             if (seller.getSellerProfileImageUrl() != null && !seller.getSellerProfileImageUrl().isEmpty()) {
                 Glide.with(context)
                         .load(seller.getSellerProfileImageUrl())
                         .placeholder(R.drawable.ic_profile)
+                        .circleCrop()
                         .into(ivSellerProfile);
             } else {
                 ivSellerProfile.setImageResource(R.drawable.ic_profile);
             }
 
-            // Show official badge for "system" seller
-            if ("system".equals(seller.getSellerId())) {
-                tvSellerName.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_verified, 0);
-            } else {
-                tvSellerName.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-            }
+            // Guna CartChildAdapter
+            childAdapter = new CartChildAdapter(context, seller.getCartItems(), new CartChildAdapter.ChildCartListener() {
+                @Override
+                public void onQuantityChanged(String cartItemId, int newQuantity) {
+                    if (listener != null) {
+                        listener.onQuantityChanged(seller.getSellerId(), cartItemId, newQuantity);
+                    }
+                }
 
-            // Set items
-            childAdapter.updateItemList(seller.getCartItems());
-            childAdapter.setProductCache(productCache); // Pass product cache ke child adapter
+                @Override
+                public void onItemDeleted(String cartItemId) {
+                    if (listener != null) {
+                        listener.onItemDeleted(seller.getSellerId(), cartItemId);
+                    }
+                }
 
-            // Setup seller header click
-            sellerHeader.setOnClickListener(v -> {
-                if (listener != null && !"system".equals(seller.getSellerId())) {
-                    listener.onSellerHeaderClicked(seller.getSellerId());
-                } else if ("system".equals(seller.getSellerId())) {
-                    // Show toast for official store
-                    android.widget.Toast.makeText(context,
-                            "BeautyHub Official Store",
-                            android.widget.Toast.LENGTH_SHORT).show();
+                @Override
+                public void onItemSelectedChanged(String cartItemId, boolean isSelected) {
+                    updateSellerSelectAllCheckbox(seller.getCartItems());
+                    if (listener != null) {
+                        listener.onItemSelectedChanged();
+                    }
                 }
             });
 
-            // Setup seller select all checkbox
+            rvCartItems.setAdapter(childAdapter);
+            childAdapter.setProductCache(productCache);
+            // ▼▼▼ PEMBETULAN 3: Hantar status mod suntingan kepada child adapter ▼▼▼
+            childAdapter.setEditMode(isInEditMode);
+
+
+            sellerHeader.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onSellerHeaderClicked(seller.getSellerId());
+                }
+            });
+
             checkboxSellerSelectAll.setOnCheckedChangeListener(null);
-            boolean allSelected = areAllItemsSelected(seller.getCartItems());
-            checkboxSellerSelectAll.setChecked(allSelected);
+            updateSellerSelectAllCheckbox(seller.getCartItems());
 
             checkboxSellerSelectAll.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 if (buttonView.isPressed()) {
                     for (CartItem item : seller.getCartItems()) {
-                        item.setSelected(isChecked);
+                        // Hanya pilih item yang tersedia jika tidak dalam mod suntingan
+                        if (item.isAvailable() || isInEditMode) {
+                            item.setSelected(isChecked);
+                        }
                     }
                     childAdapter.notifyDataSetChanged();
                     if (listener != null) {
@@ -179,33 +165,36 @@ public class CartParentAdapter extends RecyclerView.Adapter<CartParentAdapter.Se
             });
         }
 
-        private boolean areAllItemsSelected(List<CartItem> items) {
-            if (items.isEmpty()) return false;
+        private void updateSellerSelectAllCheckbox(List<CartItem> items) {
+            if (items == null || items.isEmpty()) {
+                checkboxSellerSelectAll.setChecked(false);
+                return;
+            }
+
+            // Kira jumlah item yang relevan untuk pemilihan dalam mod semasa
+            int relevantItemCount = 0;
+            // Kira jumlah item yang telah dipilih
+            int selectedItemCount = 0;
+
             for (CartItem item : items) {
-                if (!item.isSelected()) {
-                    return false;
+                // Satu item dianggap 'relevan' jika:
+                // 1. Kita berada dalam mod suntingan (semua item relevan).
+                // 2. Kita dalam mod biasa DAN item itu tersedia.
+                boolean isItemRelevant = isInEditMode || item.isAvailable();
+
+                if (isItemRelevant) {
+                    relevantItemCount++;
+                    if (item.isSelected()) {
+                        selectedItemCount++;
+                    }
                 }
             }
-            return true;
+
+            // Kotak semak penjual akan ditanda jika:
+            // 1. Terdapat sekurang-kurangnya satu item yang relevan.
+            // 2. Jumlah item yang relevan adalah sama dengan jumlah item yang dipilih.
+            checkboxSellerSelectAll.setChecked(relevantItemCount > 0 && relevantItemCount == selectedItemCount);
         }
 
-        private void updateSellerSelectAllCheckbox() {
-            List<CartItem> items = childAdapter.getItemList();
-            boolean allSelected = areAllItemsSelected(items);
-
-            checkboxSellerSelectAll.setOnCheckedChangeListener(null);
-            checkboxSellerSelectAll.setChecked(allSelected);
-            checkboxSellerSelectAll.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (buttonView.isPressed()) {
-                    for (CartItem item : items) {
-                        item.setSelected(isChecked);
-                    }
-                    childAdapter.notifyDataSetChanged();
-                    if (listener != null) {
-                        listener.onItemSelectedChanged();
-                    }
-                }
-            });
-        }
     }
 }

@@ -4,51 +4,77 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FAFAFA"
     android:orientation="vertical"
     tools:context=".buyer.AddReviewActivity">
 
+    <!-- 1. Toolbar Moden -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar_add_review"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
+        android:background="@color/white"
+        android:elevation="4dp"
         app:navigationIcon="@drawable/ic_arrow_back"
-        app:title="Write a Review" />
+        app:title="Write a Review"
+        app:titleCentered="true" />
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="20dp">
 
-            <!-- Paparan Produk yang Diulas -->
-            <ImageView
-                android:id="@+id/product_image_review"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:layout_gravity="center_horizontal"
-                android:scaleType="centerCrop"
-                tools:src="@tools:sample/avatars" />
+            <!-- 2. Kad Maklumat Produk (Lebih Kemas) -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#E0E0E0"
+                app:strokeWidth="1dp">
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/product_image_review"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:scaleType="centerCrop"
+                        app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium"
+                        tools:src="@tools:sample/avatars" />
+
+                    <TextView
+                        android:id="@+id/product_name_review"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                        android:textStyle="bold"
+                        tools:text="Premium Hair Serum" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 3. Bahagian Rating -->
             <TextView
-                android:id="@+id/product_name_review"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="8dp"
-                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                tools:text="Product Name" />
-
-            <!-- Rating Bintang -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="Your Rating"
-                android:textAppearance="@style/TextAppearance.Material3.LabelLarge" />
+                android:layout_marginTop="32dp"
+                android:text="How would you rate this product?"
+                android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+                android:textColor="#757575" />
 
             <RatingBar
                 android:id="@+id/rating_bar"
@@ -57,15 +83,49 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="8dp"
                 android:numStars="5"
+                android:progressTint="#FFB300"
                 android:stepSize="1.0" />
 
-            <!-- Ruangan Komen -->
+            <!-- 4. Upload Gambar (Optional) -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:text="Add a photo"
+                android:textAppearance="@style/TextAppearance.Material3.LabelLarge" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_add_photo"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_marginTop="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="#F0F0F0"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="0dp">
+
+                <ImageView
+                    android:id="@+id/ivProductImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="30dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_camera"
+                    app:tint="#9E9E9E" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 5. Ruangan Komen -->
             <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:hint="Your Review (Optional)">
+                android:layout_marginTop="24dp"
+                android:hint="Share your experience (Optional)"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusTopStart="12dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/et_review_comment"
@@ -73,16 +133,19 @@
                     android:layout_height="wrap_content"
                     android:gravity="top"
                     android:minLines="4" />
-
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Butang Hantar -->
-            <Button
+            <!-- 6. Butang Hantar -->
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_submit_review"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="Submit Review" />
+                android:layout_height="56dp"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="24dp"
+                android:text="Submit Review"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                app:cornerRadius="12dp" />
 
         </LinearLayout>
     </ScrollView>

@@ -4,8 +4,6 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.speech.RecognizerIntent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -25,7 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.beautyhub.R;
 import com.example.beautyhub.adapters.BuyerProductAdapter;
 import com.example.beautyhub.models.Product;
-import com.example.beautyhub.models.Variant; // Import the Variant model
+import com.example.beautyhub.seller.SellerProfileActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -35,11 +33,11 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
-// Implement the listener interface
 public class SearchActivity extends AppCompatActivity implements BuyerProductAdapter.OnProductInteractionListener {
 
     // UI Components
@@ -81,7 +79,6 @@ public class SearchActivity extends AppCompatActivity implements BuyerProductAda
 
     private void setupRecyclerView() {
         productList = new ArrayList<>();
-        // Pass 'this' as the third argument for the listener
         productAdapter = new BuyerProductAdapter(this, productList, this);
         searchResultsRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         searchResultsRecyclerView.setAdapter(productAdapter);
@@ -112,58 +109,70 @@ public class SearchActivity extends AppCompatActivity implements BuyerProductAda
         }
     }
 
+    // Gantikan kaedah performComprehensiveSearch yang lama dengan ini
+    // Gantikan kaedah performComprehensiveSearch yang lama dengan versi yang telah dikemas kini ini
+    // Gantikan kaedah performComprehensiveSearch yang lama dengan versi yang lebih pintar ini
     private void performComprehensiveSearch(String searchText) {
-        String lowercasedQuery = searchText.toLowerCase();
+        String lowercasedQuery = searchText.toLowerCase().trim();
         updateUiForLoading();
 
-        HashSet<Product> uniqueProducts = new HashSet<>();
-        // Corrected the search count to match the number of search fields
-        final int[] searchCounter = {3};
-        Runnable onSearchComplete = () -> {
-            productList.clear();
-            productList.addAll(uniqueProducts);
-            productAdapter.notifyDataSetChanged(); // Use notifyDataSetChanged for updates
-            updateUiWithResults();
-        };
-
-        // Search across different fields
-        searchByField("name_lowercase", lowercasedQuery, uniqueProducts, searchCounter, onSearchComplete);
-        searchByField("category_lowercase", lowercasedQuery, uniqueProducts, searchCounter, onSearchComplete);
-        searchByField("brand_lowercase", lowercasedQuery, uniqueProducts, searchCounter, onSearchComplete);
-    }
-
-    private void searchByField(String field, String query, HashSet<Product> uniqueProducts, int[] counter, Runnable onComplete) {
-        Query searchQuery = productsRef.orderByChild(field)
-                .startAt(query)
-                .endAt(query + "\uf8ff");
-
-        searchQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+        productsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                ArrayList<Product> foundProducts = new ArrayList<>();
+
+                // Definisikan sub-kategori di sini
+                List<String> skincareSubCategories = Arrays.asList("cleansers", "serums", "moisturizers", "sunscreens", "toners", "face masks");
+                List<String> makeupSubCategories = Arrays.asList("foundations", "lipstick", "mascara", "eyeliner", "eyeshadow", "concealer", "powder", "primer", "blusher");
+
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Product product = snapshot.getValue(Product.class);
-                    // Ensure the product is valid before adding
-                    if (product != null && product.isActive() && product.getStock() > 0) {
+
+                    if (product != null && product.isActive() && product.hasStock()) {
                         product.setProductId(snapshot.getKey());
-                        uniqueProducts.add(product);
+
+                        boolean nameMatches = product.getName() != null && product.getName().toLowerCase().contains(lowercasedQuery);
+                        boolean brandMatches = product.getBrand() != null && product.getBrand().toLowerCase().contains(lowercasedQuery);
+                        boolean sellerMatches = product.getSellerName() != null && product.getSellerName().toLowerCase().contains(lowercasedQuery);
+
+                        // --- LOGIK BARU UNTUK KATEGORI ---
+                        boolean categoryMatches = false;
+                        String productCategory = product.getCategory() != null ? product.getCategory().toLowerCase() : "";
+
+                        if (!productCategory.isEmpty()) {
+                            // 1. Semak padanan terus (cth: cari "serum" jumpa produk kategori "serums")
+                            if (productCategory.contains(lowercasedQuery)) {
+                                categoryMatches = true;
+                            }
+                            // 2. Semak jika pengguna mencari kategori utama "skincare"
+                            else if (lowercasedQuery.equals("skincare") && skincareSubCategories.contains(productCategory)) {
+                                categoryMatches = true;
+                            }
+                            // 3. Semak jika pengguna mencari kategori utama "makeup"
+                            else if (lowercasedQuery.equals("makeup") && makeupSubCategories.contains(productCategory)) {
+                                categoryMatches = true;
+                            }
+                        }
+                        // --- AKHIR LOGIK BARU ---
+
+                        if (nameMatches || brandMatches || sellerMatches || categoryMatches) {
+                            foundProducts.add(product);
+                        }
                     }
                 }
-                counter[0]--;
-                if (counter[0] == 0) {
-                    onComplete.run();
-                }
+                productAdapter.updateProductList(foundProducts);
+                updateUiWithResults();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                counter[0]--;
-                if (counter[0] == 0) {
-                    onComplete.run();
-                }
-                Toast.makeText(SearchActivity.this, "Search on " + field + " failed", Toast.LENGTH_SHORT).show();
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(SearchActivity.this, "Failed to load products: " + databaseError.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }
+
+
 
     private void startVoiceSearch() {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -198,38 +207,46 @@ public class SearchActivity extends AppCompatActivity implements BuyerProductAda
 
     @Override
     public void onProductClick(Product product) {
-        // Example: Navigate to ProductDetailActivity
-        // Intent intent = new Intent(this, ProductDetailActivity.class);
-        // intent.putExtra("PRODUCT_ID", product.getProductId());
-        // startActivity(intent);
-        Toast.makeText(this, "Clicked on: " + product.getName(), Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(this, ProductDetailActivity.class);
+        intent.putExtra("PRODUCT_ID", product.getProductId());
+        startActivity(intent);
     }
 
+    // --- PERUBAHAN 2: Kemas kini tandatangan kaedah ---
     @Override
-    public void onBuyNowClick(Product product, Variant variant) {
-        // Handle buy now logic
-        String variantInfo = variant != null ? " with variant " + variant.getName() : "";
-        Toast.makeText(this, "Buy now: " + product.getName() + variantInfo, Toast.LENGTH_SHORT).show();
+    public void onBuyNowClick(Product product) {
+        // Implementasi logik 'Beli Sekarang' di sini
+        // Contoh:
+        Toast.makeText(this, "Buy now: " + product.getName(), Toast.LENGTH_SHORT).show();
+        // Anda boleh salin logik dari BuyerActivity jika perlu
     }
 
+    // --- PERUBAHAN 3: Kemas kini tandatangan kaedah ---
     @Override
-    public void onAddToCartClick(Product product, Variant variant) {
-        // Handle add to cart logic
-        String variantInfo = variant != null ? " with variant " + variant.getName() : "";
-        Toast.makeText(this, "Added to cart: " + product.getName() + variantInfo, Toast.LENGTH_SHORT).show();
+    public void onAddToCartClick(Product product) {
+        // Implementasi logik 'Tambah ke Troli' di sini
+        // Contoh:
+        Toast.makeText(this, "Added to cart: " + product.getName(), Toast.LENGTH_SHORT).show();
+        // Anda boleh salin logik dari BuyerActivity jika perlu
     }
 
     @Override
     public void onFavouriteClick(Product product, boolean isFavourite) {
-        // Handle favourite toggle logic
+        // Implementasi logik kegemaran di sini
         String message = isFavourite ? "Added to favourites: " : "Removed from favourites: ";
         Toast.makeText(this, message + product.getName(), Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onSellerClick(String sellerId) {
-        // Handle seller profile click
-        Toast.makeText(this, "Clicked on seller ID: " + sellerId, Toast.LENGTH_SHORT).show();
+        // Implementasi klik pada profil penjual di sini
+        if (sellerId == null || sellerId.isEmpty() || sellerId.startsWith("json_")) {
+            Toast.makeText(this, "This is an official store.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Intent intent = new Intent(this, SellerProfileActivity.class);
+        intent.putExtra("SELLER_ID", sellerId);
+        startActivity(intent);
     }
 
 
@@ -237,14 +254,18 @@ public class SearchActivity extends AppCompatActivity implements BuyerProductAda
     private void showKeyboardAndFocus() {
         searchInput.requestFocus();
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.showSoftInput(searchInput, InputMethodManager.SHOW_IMPLICIT);
+        if (imm != null) {
+            imm.showSoftInput(searchInput, InputMethodManager.SHOW_IMPLICIT);
+        }
     }
 
     private void hideKeyboard() {
         View view = this.getCurrentFocus();
         if (view != null) {
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            }
         }
     }
 
@@ -254,9 +275,12 @@ public class SearchActivity extends AppCompatActivity implements BuyerProductAda
         emptySearchText.setVisibility(View.GONE);
     }
 
+    // Ubah sedikit kaedah updateUiWithResults
     private void updateUiWithResults() {
         progressBar.setVisibility(View.GONE);
-        if (productList.isEmpty()) {
+        // Gunakan getItemCount() dari adapter sebagai sumber kebenaran
+        if (productAdapter.getItemCount() == 0) {
+            emptySearchText.setText("No results found"); // Beri mesej yang jelas
             emptySearchText.setVisibility(View.VISIBLE);
             searchResultsRecyclerView.setVisibility(View.GONE);
         } else {
@@ -265,11 +289,12 @@ public class SearchActivity extends AppCompatActivity implements BuyerProductAda
         }
     }
 
+
     private void clearResults() {
         productList.clear();
-        productAdapter.notifyDataSetChanged();
+        productAdapter.updateProductList(new ArrayList<>());
         emptySearchText.setVisibility(View.VISIBLE);
-        emptySearchText.setText("Start typing to search for products");
+        emptySearchText.setText(R.string.start_typing_to_search); // Guna rujukan string
         searchResultsRecyclerView.setVisibility(View.GONE);
         progressBar.setVisibility(View.GONE);
     }

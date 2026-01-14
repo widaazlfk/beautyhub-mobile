@@ -2,44 +2,63 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_item_product"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingVertical="12dp">
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="12dp"
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
 
-    <!-- 1. Gunakan ShapeableImageView untuk sudut bulat -->
+    <!-- 1. Imej Produk -->
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/iv_order_detail_item_image"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:scaleType="centerCrop"
         app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium"
         tools:src="@tools:sample/backgrounds/scenic" />
 
-    <!-- 2. Maklumat Produk -->
+    <!-- 2. Butang Review (Diletakkan di luar supaya layout_toStartOf berfungsi) -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_add_review"
+        style="@style/Widget.Material3.Button.TonalButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:minHeight="32dp"
+        android:paddingHorizontal="12dp"
+        android:text="Review"
+        android:textSize="12sp"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    <!-- 3. Maklumat Produk -->
     <LinearLayout
         android:id="@+id/item_info_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="12dp"
         android:layout_marginEnd="8dp"
-        android:layout_toStartOf="@+id/btn_add_review"
+        android:layout_toStartOf="@id/btn_add_review"
         android:layout_toEndOf="@id/iv_order_detail_item_image"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/tv_order_detail_item_name"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:maxLines="2"
-            android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
             android:textStyle="bold"
-            tools:text="Nama Produk yang Sangat Panjang dan Memerlukan Dua Baris" />
+            tools:text="Nama Produk Cantik" />
 
-        <!-- 3. Susun kuantiti dan harga dalam satu baris -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -51,39 +70,20 @@
                 android:id="@+id/tv_order_detail_item_quantity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                android:textAppearance="@style/TextAppearance.Material3.BodySmall"
                 android:textColor="?android:attr/textColorSecondary"
-                tools:text="Quantity: 2" />
-
-            <View
-                android:layout_width="1dp"
-                android:layout_height="12dp"
-                android:layout_marginHorizontal="8dp"
-                android:background="?android:attr/listDivider" />
+                tools:text="x2" />
 
             <TextView
                 android:id="@+id/tv_order_detail_item_price"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                android:textColor="?android:attr/textColorPrimary"
+                android:layout_marginStart="12dp"
+                android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                android:textColor="?attr/colorPrimary"
                 android:textStyle="bold"
                 tools:text="RM 25.90" />
-
         </LinearLayout>
     </LinearLayout>
-
-    <!-- 4. Butang "Add Review" dengan gaya yang lebih halus -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_add_review"
-        style="@style/Widget.Material3.Button.TextButton.Icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        android:text="Review"
-        app:icon="@drawable/ic_star"
-        android:visibility="gone"
-        tools:visibility="visible" />
 
 </RelativeLayout>

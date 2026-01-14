@@ -31,6 +31,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service
+            android:name=".services.MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
 
         <!-- ================== AUTHENTICATION ACTIVITIES ================== -->
         <activity
@@ -43,6 +50,14 @@
             android:exported="false"
             android:theme="@style/Theme.BeautyHub.NoActionBar"
             android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".auth.ForgotPasswordActivity"
+            android:exported="false"
+            android:label="Forgot Password"
+            android:parentActivityName=".auth.LoginActivity"
+            android:theme="@style/Theme.BeautyHub.NoActionBar" />
+        <!-- TAMBAH SEHINGGA SINI -->
 
         <!-- ================== BUYER ACTIVITIES ================== -->
         <activity
@@ -60,6 +75,16 @@
             android:label="Product Details"
             android:parentActivityName=".buyer.ShopActivity"
             android:theme="@style/Theme.BeautyHub.NoActionBar" />
+        <activity
+            android:name=".buyer.ComparisonActivity"
+            android:exported="false"
+            android:label="Beauty Match"
+            android:parentActivityName=".buyer.BuyerActivity" />
+
+        <activity
+            android:name=".buyer.FullScreenImageActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
+
         <activity
             android:name=".buyer.CartActivity"
             android:exported="false"
@@ -89,6 +114,18 @@
             android:exported="false"
             android:label="Order Details"
             android:parentActivityName=".buyer.MyOrdersActivity" />
+
+        <activity
+            android:name=".buyer.ShopViewActivity"
+            android:exported="false"
+            android:label="Seller Profile"
+            android:parentActivityName=".buyer.OrderDetailsActivity" />
+
+        <activity
+            android:name=".buyer.WriteReviewActivity"
+            android:exported="false"
+            android:label="Write a Review"
+            android:parentActivityName=".buyer.OrderDetailsActivity" />
         <activity
             android:name=".buyer.UserProfileActivity"
             android:exported="false"
@@ -169,6 +206,7 @@
             android:exported="false"
             android:label="Manage Products"
             android:parentActivityName=".seller.SellerActivity" />
+
         <activity
             android:name="com.canhub.cropper.CropImageActivity"
             android:theme="@style/Theme.AppCompat.Light"
@@ -183,11 +221,7 @@
             android:exported="false"
             android:label="Add New Listing"
             android:parentActivityName=".seller.ManageProductsActivity" />
-        <activity
-            android:name=".seller.EditProductActivity"
-            android:exported="false"
-            android:label="Edit Product"
-            android:parentActivityName=".seller.ManageProductsActivity" />
+
         <activity
             android:name=".seller.SellerOrderDetailActivity"
             android:exported="false"
@@ -209,6 +243,31 @@
             android:name=".admin.AdminDashboardActivity"
             android:exported="false"
             android:label="Admin Dashboard" />
+
+        <activity
+            android:name=".admin.UsersStatisticsActivity"
+            android:exported="false"
+            android:label="User Statistics"
+            android:parentActivityName=".admin.AdminDashboardActivity" />
+
+        <activity
+            android:name=".admin.SellersStatisticsActivity"
+            android:exported="false"
+            android:label="User Statistics"
+            android:parentActivityName=".admin.AdminDashboardActivity" />\
+
+        <activity
+            android:name=".admin.ProductsStatisticsActivity"
+            android:exported="false"
+            android:label="Popular Product Statistics"
+            android:parentActivityName=".admin.AdminDashboardActivity" />
+
+        <activity
+            android:name=".admin.RevenueStatisticsActivity"
+            android:exported="false"
+            android:label="Statistics of Revenue Obtained"
+            android:parentActivityName=".admin.AdminDashboardActivity" />
+
         <activity
             android:name=".admin.ManageUsersActivity"
             android:exported="false"
@@ -244,6 +303,11 @@
             android:exported="false"
             android:label="Admin Profile"
             android:parentActivityName=".admin.AdminDashboardActivity" />
+
+        <activity
+            android:name=".admin.AdminManageReportsActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustPan" />
 
         <!-- ================== INFO ACTIVITIES ================== -->
         <activity

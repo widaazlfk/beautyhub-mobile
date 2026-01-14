@@ -12,6 +12,9 @@ dependencyResolutionManagement {
     repositories {
         google()  // ← THIS IS CRITICAL for Firebase dependencies
         mavenCentral()
+        // This is correctly added for MPAndroidChart
+        maven { url = uri("https://jitpack.io") }
+
     }
 }
 

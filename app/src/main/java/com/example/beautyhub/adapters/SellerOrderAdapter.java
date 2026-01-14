@@ -5,12 +5,13 @@ import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
 import com.example.beautyhub.R;
-// ▼▼▼ PERUBAHAN 1: Tukar import dari CartItem kepada OrderItem ▼▼▼
 import com.example.beautyhub.models.OrderItem;
 import com.example.beautyhub.models.Order;
 
@@ -56,12 +57,12 @@ public class SellerOrderAdapter extends RecyclerView.Adapter<SellerOrderAdapter.
     }
 
     class OrderViewHolder extends RecyclerView.ViewHolder {
-        // Pastikan ID ini sepadan dengan s_item_order.xml
+        private final ImageView ivOrderImage;
         private final TextView tvOrderId, tvOrderStatus, tvOrderDate, tvOrderItemsPreview, tvOrderTotal;
 
         OrderViewHolder(@NonNull View itemView) {
             super(itemView);
-            // Inisialisasi TextViews di dalam constructor, amalan terbaik
+            ivOrderImage = itemView.findViewById(R.id.iv_order_image);
             tvOrderId = itemView.findViewById(R.id.tv_order_id);
             tvOrderStatus = itemView.findViewById(R.id.tv_order_status);
             tvOrderDate = itemView.findViewById(R.id.tv_order_date);
@@ -70,25 +71,40 @@ public class SellerOrderAdapter extends RecyclerView.Adapter<SellerOrderAdapter.
         }
 
         void bind(final Order order, final OnOrderItemClickListener listener) {
-            // Set ID Pesanan
-            tvOrderId.setText(String.format("Order #%s", getShortOrderId(order.getOrderId())));
+            // 1. Set Order ID
+            tvOrderId.setText(String.format("Order #%s", order.getOrderId() != null ? order.getOrderId() : "N/A"));
 
-            // Set Tarikh Pesanan
+            // 2. Set Date
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault());
-            tvOrderDate.setText(dateFormat.format(new Date(order.getTimestamp())));
+            tvOrderDate.setText(dateFormat.format(new Date(order.getOrderDate())));
 
-            // Set Jumlah Harga (menggunakan format mata wang Malaysia)
-            tvOrderTotal.setText(String.format(Locale.US, "RM %.2f", order.getTotalPayment()));
+            // 3. Set Total Amount
+            tvOrderTotal.setText(String.format(Locale.US, "RM %.2f", order.getTotalAmount()));
 
-            // Set Pratonton Item
-            tvOrderItemsPreview.setText(generateItemsPreview(order.getItems()));
+            // 4. Set Items Preview Text
+            tvOrderItemsPreview.setText(generateItemsPreview(order.getOrderItems()));
 
-            // Set Status Pesanan
+            // 5. Load Image (DIBAIKI: Isytihar firstItem terlebih dahulu)
+            if (order.getOrderItems() != null && !order.getOrderItems().isEmpty()) {
+                OrderItem firstItem = order.getOrderItems().get(0); // Isytihar di sini
+                String imageUrl = firstItem.getImageUrls();
+
+                Glide.with(context)
+                        .load(imageUrl)
+                        .centerCrop()
+                        .placeholder(R.drawable.product_placeholder)
+                        .error(R.drawable.product_placeholder)
+                        .into(ivOrderImage);
+            } else {
+                ivOrderImage.setImageResource(R.drawable.product_placeholder);
+            }
+
+            // 6. Set Status and Background Color
             String status = order.getStatus();
-            tvOrderStatus.setText(status);
+            tvOrderStatus.setText(status != null ? status : "Pending");
             updateStatusBackground(status);
 
-            // Set listener untuk keseluruhan item view
+            // 7. Click Listener
             itemView.setOnClickListener(v -> {
                 if (listener != null) {
                     listener.onOrderItemClick(order);
@@ -96,52 +112,50 @@ public class SellerOrderAdapter extends RecyclerView.Adapter<SellerOrderAdapter.
             });
         }
 
-        // ▼▼▼ PERUBAHAN 2: Kemas kini kaedah untuk menggunakan OrderItem ▼▼▼
         private String generateItemsPreview(List<OrderItem> items) {
             if (items == null || items.isEmpty()) {
                 return "No items in this order.";
             }
 
             StringBuilder preview = new StringBuilder();
-            int count = 0;
-            for (OrderItem item : items) {
-                if (count < 2) { // Tunjuk 2 item pertama
+            int limit = 2;
+            for (int i = 0; i < Math.min(items.size(), limit); i++) {
+                OrderItem item = items.get(i);
+                if (item != null) {
                     preview.append(String.format(Locale.US, "%dx %s\n", item.getQuantity(), item.getProductName()));
                 }
-                count++;
             }
-            if (items.size() > 2) {
-                preview.append(String.format(Locale.US, "...and %d more", items.size() - 2));
+
+            if (items.size() > limit) {
+                preview.append(String.format(Locale.US, "...and %d more", items.size() - limit));
             }
-            // Buang newline terakhir jika ada
             return preview.toString().trim();
         }
 
-        private String getShortOrderId(String orderId) {
-            if (orderId != null && orderId.length() > 7) {
-                return orderId.substring(orderId.length() - 7).toUpperCase();
-            }
-            return orderId != null ? orderId.toUpperCase() : "";
-        }
-
-        // ▼▼▼ PERUBAHAN 3: Kaedah kemas kini latar belakang yang lebih mantap ▼▼▼
         private void updateStatusBackground(String status) {
             if (status == null) status = "pending";
 
             int colorResId;
             switch (status.toLowerCase()) {
-                case "shipped": colorResId = R.color.status_shipped; break;
-                case "completed": case "delivered": colorResId = R.color.status_completed; break;
-                case "cancelled": colorResId = R.color.status_cancelled; break;
-                case "pending": default: colorResId = R.color.status_pending; break;
+                case "shipped":
+                    colorResId = R.color.status_shipped;
+                    break;
+                case "completed":
+                case "delivered":
+                    colorResId = R.color.status_completed;
+                    break;
+                case "cancelled":
+                    colorResId = R.color.status_cancelled;
+                    break;
+                default:
+                    colorResId = R.color.status_pending;
+                    break;
             }
 
-            // Cara yang lebih selamat untuk menukar warna drawable tanpa bergantung pada jenis fail
             if (tvOrderStatus.getBackground() instanceof GradientDrawable) {
                 GradientDrawable background = (GradientDrawable) tvOrderStatus.getBackground().mutate();
                 background.setColor(ContextCompat.getColor(context, colorResId));
             } else {
-                // Sebagai fallback, tetapkan warna latar belakang sahaja
                 tvOrderStatus.setBackgroundColor(ContextCompat.getColor(context, colorResId));
             }
         }

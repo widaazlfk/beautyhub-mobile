@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Header: Buyer Information -->
+        <LinearLayout
+            android:id="@+id/layout_buyer_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp">
+
+            <!-- Person Icon -->
+            <ImageView
+                android:id="@+id/icon_buyer"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_user_add"
+                app:tint="?android:attr/textColorSecondary"
+                android:contentDescription="Buyer Icon"/>
+
+            <TextView
+                android:id="@+id/tv_detail_buyer_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                android:textStyle="bold"
+                android:textColor="?android:attr/textColorPrimary"
+                tools:text="Customer: John Doe" />
+
+            <!-- Removed the chevron/arrow since seller doesn't need to visit buyer profile usually -->
+        </LinearLayout>
+
+        <!-- Divider -->
+        <com.google.android.material.divider.MaterialDivider
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"/>
+
+        <!-- List of Products Purchased -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_order_detail_items"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="16dp"
+            android:nestedScrollingEnabled="false"
+            tools:itemCount="2"
+            tools:listitem="@layout/s_item_order_detail" />
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

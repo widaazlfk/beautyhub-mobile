@@ -11,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.beautyhub.adapters.RewardAdapter;
-// No change needed here, this import is correct.
 import com.example.beautyhub.databinding.BActivityMyRewardsBinding;
 import com.example.beautyhub.models.Reward;
 import com.google.firebase.auth.FirebaseAuth;
@@ -28,7 +27,6 @@ import java.util.Locale;
 
 public class MyRewardsActivity extends AppCompatActivity {
 
-    // This is correct
     private BActivityMyRewardsBinding binding;
     private DatabaseReference userRef, rewardsRef;
     private FirebaseUser currentUser;
@@ -39,7 +37,6 @@ public class MyRewardsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // This is correct
         binding = BActivityMyRewardsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -50,28 +47,23 @@ public class MyRewardsActivity extends AppCompatActivity {
             return;
         }
 
+        // Initialize Firebase
         userRef = FirebaseDatabase.getInstance().getReference("Users").child(currentUser.getUid());
         rewardsRef = FirebaseDatabase.getInstance().getReference("Rewards");
 
         setupToolbar();
         setupRecyclerView();
-        loadAvailableRewards();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        loadUserPoints();
+        loadUserPoints(); // Ambil baki mata
+        loadAvailableRewards(); // Ambil senarai ganjaran
     }
 
     private void setupToolbar() {
-        // CORRECTED: Access toolbar via the binding object
         binding.toolbarMyRewards.setNavigationOnClickListener(v -> finish());
     }
 
     private void setupRecyclerView() {
+        // Setup adapter dengan callback untuk klik redeem
         adapter = new RewardAdapter(rewardList, this::showRedeemConfirmationDialog);
-        // CORRECTED: Access RecyclerView via the binding object
         binding.rvAvailableRewards.setLayoutManager(new LinearLayoutManager(this));
         binding.rvAvailableRewards.setAdapter(adapter);
     }
@@ -81,11 +73,12 @@ public class MyRewardsActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 currentUserPoints = snapshot.exists() ? snapshot.getValue(Long.class) : 0L;
-                // CORRECTED: Access TextView via the binding object
-                binding.tvRewardPoints.setText(String.format(Locale.US, "%d", currentUserPoints));
+                // Update UI baki mata
+                binding.tvRewardPoints.setText(String.valueOf(currentUserPoints));
 
                 if (adapter != null) {
                     adapter.setCurrentUserPoints(currentUserPoints);
+                    adapter.notifyDataSetChanged();
                 }
             }
 
@@ -97,12 +90,11 @@ public class MyRewardsActivity extends AppCompatActivity {
     }
 
     private void loadAvailableRewards() {
-        // CORRECTED: Access ProgressBar via the binding object
         binding.progressBarRewards.setVisibility(View.VISIBLE);
-        rewardsRef.orderByChild("pointsRequired").addListenerForSingleValueEvent(new ValueEventListener() {
+
+        rewardsRef.orderByChild("pointsRequired").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                // CORRECTED: Access ProgressBar via the binding object
                 binding.progressBarRewards.setVisibility(View.GONE);
                 rewardList.clear();
 
@@ -119,33 +111,27 @@ public class MyRewardsActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                // CORRECTED: Access ProgressBar via the binding object
                 binding.progressBarRewards.setVisibility(View.GONE);
-                Log.e("MyRewardsActivity", "Failed to load rewards: " + error.getMessage());
+                Log.e("MyRewardsActivity", "Error: " + error.getMessage());
             }
         });
     }
 
     private void updateRewardsUI() {
         if (rewardList.isEmpty()) {
-            // CORRECTED: Access views via the binding object
-            binding.tvNoRewards.setVisibility(View.VISIBLE);
+            binding.tvNoRewardsContainer.setVisibility(View.VISIBLE);
             binding.rvAvailableRewards.setVisibility(View.GONE);
         } else {
-            // CORRECTED: Access views via the binding object
-            binding.tvNoRewards.setVisibility(View.GONE);
+            binding.tvNoRewardsContainer.setVisibility(View.GONE);
             binding.rvAvailableRewards.setVisibility(View.VISIBLE);
         }
-        adapter.setCurrentUserPoints(currentUserPoints);
         adapter.notifyDataSetChanged();
     }
 
-    // ... sisa kod anda tidak perlu diubah ...
-    // ... rest of your code does not need to be changed ...
     private void showRedeemConfirmationDialog(Reward reward) {
         new AlertDialog.Builder(this)
                 .setTitle("Redeem Reward")
-                .setMessage(String.format("Are you sure you want to spend %d points to redeem '%s'?", reward.getPointsRequired(), reward.getTitle()))
+                .setMessage("Confirm spend " + reward.getPointsRequired() + " points for " + reward.getTitle() + "?")
                 .setPositiveButton("Redeem", (dialog, which) -> redeemReward(reward))
                 .setNegativeButton("Cancel", null)
                 .show();
@@ -153,42 +139,40 @@ public class MyRewardsActivity extends AppCompatActivity {
 
     private void redeemReward(final Reward rewardToRedeem) {
         if (currentUserPoints < rewardToRedeem.getPointsRequired()) {
-            Toast.makeText(this, "Not enough points to redeem this reward.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Insufficient points!", Toast.LENGTH_SHORT).show();
             return;
         }
 
         binding.progressBarRewards.setVisibility(View.VISIBLE);
         long newPoints = currentUserPoints - rewardToRedeem.getPointsRequired();
 
-        Reward redeemedReward = new Reward(
-                rewardToRedeem.getRewardId(),
-                rewardToRedeem.getTitle(),
-                rewardToRedeem.getDescription(),
-                rewardToRedeem.getPointsRequired(),
-                rewardToRedeem.getRewardType(),
-                rewardToRedeem.getDiscountValue(),
-                rewardToRedeem.isActive()
-        );
-        redeemedReward.setRedeemedAt(System.currentTimeMillis());
+        // 1. Tolak mata pengguna dahulu
+        userRef.child("points").setValue(newPoints).addOnSuccessListener(aVoid -> {
 
-        userRef.child("points").setValue(newPoints)
-                .addOnSuccessListener(aVoid -> {
-                    userRef.child("redeemedRewards").push().setValue(redeemedReward)
-                            .addOnCompleteListener(task -> {
-                                binding.progressBarRewards.setVisibility(View.GONE);
-                                if (task.isSuccessful()) {
-                                    Toast.makeText(MyRewardsActivity.this, "Reward redeemed successfully!", Toast.LENGTH_LONG).show();
-                                } else {
-                                    userRef.child("points").setValue(currentUserPoints);
-                                    Toast.makeText(MyRewardsActivity.this, "Failed to save redemption. Points have been restored.", Toast.LENGTH_SHORT).show();
-                                    Log.e("MyRewardsActivity", "Failed to save redeemed reward.", task.getException());
-                                }
-                            });
-                })
-                .addOnFailureListener(e -> {
-                    binding.progressBarRewards.setVisibility(View.GONE);
-                    Toast.makeText(MyRewardsActivity.this, "Failed to update points. Please try again.", Toast.LENGTH_SHORT).show();
-                    Log.e("MyRewardsActivity", "Failed to deduct points.", e);
-                });
+            // 2. Dapatkan rujukan (reference) baru untuk simpan ganjaran yang ditebus
+            DatabaseReference redeemedRef = userRef.child("redeemedRewards").push();
+            String pushId = redeemedRef.getKey(); // Ini adalah ID unik untuk baucar ini
+
+            // 3. Kemaskini maklumat ganjaran sebelum simpan
+            rewardToRedeem.setRewardId(pushId); // Simpan ID unik ke dalam objek Reward
+            rewardToRedeem.setRedeemedAt(System.currentTimeMillis());
+
+            // 4. Simpan ke Firebase
+            redeemedRef.setValue(rewardToRedeem)
+                    .addOnCompleteListener(task -> {
+                        binding.progressBarRewards.setVisibility(View.GONE);
+                        if (task.isSuccessful()) {
+                            Toast.makeText(this, "Successfully redeemed! You can use this at checkout.", Toast.LENGTH_LONG).show();
+                        } else {
+                            // Jika gagal simpan ganjaran, pulangkan balik mata pengguna
+                            userRef.child("points").setValue(currentUserPoints);
+                            Toast.makeText(this, "Failed to save reward. Points restored.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+        }).addOnFailureListener(e -> {
+            binding.progressBarRewards.setVisibility(View.GONE);
+            Toast.makeText(this, "Transaction failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        });
     }
 }

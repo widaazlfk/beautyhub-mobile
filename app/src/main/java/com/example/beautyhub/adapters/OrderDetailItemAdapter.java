@@ -1,10 +1,8 @@
-// Buka dan gantikan keseluruhan kandungan fail:
-// C:/Users/widaa/beautyhub/app/src/main/java/com/example/beautyhub/adapters/OrderDetailItemAdapter.java
-
 package com.example.beautyhub.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log; // Tambah log untuk debug
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,8 +15,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.beautyhub.R;
 import com.example.beautyhub.buyer.AddReviewActivity;
-// ▼▼▼ PERUBAHAN 1: Guna OrderItem, buang CartItem ▼▼▼
+import com.example.beautyhub.buyer.ProductDetailActivity;
 import com.example.beautyhub.models.OrderItem;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -26,13 +29,11 @@ import java.util.Locale;
 public class OrderDetailItemAdapter extends RecyclerView.Adapter<OrderDetailItemAdapter.ItemViewHolder> {
 
     private final Context context;
-    // ▼▼▼ PERUBAHAN 2: Tukar jenis senarai kepada OrderItem ▼▼▼
     private final ArrayList<OrderItem> itemList;
     private final String mainOrderId;
     private final String orderStatus;
     private final ActivityResultLauncher<Intent> addReviewLauncher;
 
-    // ▼▼▼ PERUBAHAN 3: Kemas kini constructor untuk menerima ArrayList<OrderItem> ▼▼▼
     public OrderDetailItemAdapter(Context context, ArrayList<OrderItem> itemList, String mainOrderId, String orderStatus, ActivityResultLauncher<Intent> addReviewLauncher) {
         this.context = context;
         this.itemList = itemList;
@@ -50,14 +51,50 @@ public class OrderDetailItemAdapter extends RecyclerView.Adapter<OrderDetailItem
 
     @Override
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
-        // ▼▼▼ PERUBAHAN 4: Guna OrderItem di sini ▼▼▼
         OrderItem item = itemList.get(position);
         holder.bind(item);
+
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, ProductDetailActivity.class);
+            intent.putExtra("PRODUCT_ID", item.getProductId());
+            context.startActivity(intent);
+        });
+    }
+
+    private void checkIfItemReviewed(String productId, Button btnReview) {
+        DatabaseReference reviewsRef = FirebaseDatabase.getInstance().getReference("Reviews");
+        reviewsRef.orderByChild("orderId").equalTo(mainOrderId)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        boolean isReviewed = false;
+                        for (DataSnapshot ds : snapshot.getChildren()) {
+                            String pId = ds.child("productId").getValue(String.class);
+                            if (productId != null && productId.equals(pId)) {
+                                isReviewed = true;
+                                break;
+                            }
+                        }
+
+                        if (isReviewed) {
+                            btnReview.setText("Reviewed");
+                            btnReview.setEnabled(false);
+                            btnReview.setAlpha(0.5f);
+                        } else {
+                            btnReview.setText("Add Review");
+                            btnReview.setEnabled(true);
+                            btnReview.setAlpha(1.0f);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {}
+                });
     }
 
     @Override
     public int getItemCount() {
-        return itemList.size();
+        return itemList != null ? itemList.size() : 0;
     }
 
     class ItemViewHolder extends RecyclerView.ViewHolder {
@@ -67,7 +104,6 @@ public class OrderDetailItemAdapter extends RecyclerView.Adapter<OrderDetailItem
 
         ItemViewHolder(@NonNull View itemView) {
             super(itemView);
-            // ID ini mesti sepadan dengan item_order_detail.xml
             ivProductImage = itemView.findViewById(R.id.iv_order_detail_item_image);
             tvProductName = itemView.findViewById(R.id.tv_order_detail_item_name);
             tvProductPrice = itemView.findViewById(R.id.tv_order_detail_item_price);
@@ -75,17 +111,23 @@ public class OrderDetailItemAdapter extends RecyclerView.Adapter<OrderDetailItem
             btnAddReview = itemView.findViewById(R.id.btn_add_review);
         }
 
-        // ▼▼▼ PERUBAHAN 5: Kemas kini kaedah bind untuk menerima OrderItem ▼▼▼
         void bind(OrderItem item) {
             tvProductName.setText(item.getProductName());
             tvProductPrice.setText(String.format(Locale.US, "RM %.2f", item.getPrice()));
             tvProductQuantity.setText("x" + item.getQuantity());
 
-            if (item.getProductImageUrl() != null && !item.getProductImageUrl().isEmpty()) {
+            // Ambil URL imej
+            String imageUrl = item.getImageUrls();
+
+            // Log untuk debug (Semak Logcat dengan filter "IMAGE_DEBUG")
+            Log.d("IMAGE_DEBUG", "Product: " + item.getProductName() + " | URL: " + imageUrl);
+
+            if (imageUrl != null && !imageUrl.isEmpty()) {
                 Glide.with(context)
-                        .load(item.getProductImageUrl())
-                        .placeholder(R.drawable.product_placeholder) // Pastikan drawable ini wujud
+                        .load(imageUrl)
+                        .placeholder(R.drawable.product_placeholder)
                         .error(R.drawable.product_placeholder)
+                        .centerCrop()
                         .into(ivProductImage);
             } else {
                 ivProductImage.setImageResource(R.drawable.product_placeholder);
@@ -94,21 +136,21 @@ public class OrderDetailItemAdapter extends RecyclerView.Adapter<OrderDetailItem
             // Logik butang review
             if ("Completed".equalsIgnoreCase(orderStatus)) {
                 btnAddReview.setVisibility(View.VISIBLE);
-                btnAddReview.setText("Add Review");
-                btnAddReview.setEnabled(true);
+                checkIfItemReviewed(item.getProductId(), btnAddReview);
             } else {
                 btnAddReview.setVisibility(View.GONE);
             }
 
+            // Set listener di dalam bind supaya 'item' boleh dicapai
             btnAddReview.setOnClickListener(v -> {
                 Intent intent = new Intent(context, AddReviewActivity.class);
                 intent.putExtra("PRODUCT_ID", item.getProductId());
                 intent.putExtra("ORDER_ID", mainOrderId);
                 intent.putExtra("PRODUCT_NAME", item.getProductName());
-                intent.putExtra("PRODUCT_IMAGE_URL", item.getProductImageUrl());
-
+                intent.putExtra("PRODUCT_IMAGE_URL", item.getImageUrls());
                 addReviewLauncher.launch(intent);
             });
         }
+        }
     }
-}
+

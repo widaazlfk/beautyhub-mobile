@@ -10,10 +10,11 @@
         android:icon="@drawable/ic_shop"
         android:title="Shop" />
 
+
     <item
-        android:id="@+id/nav_rewards"
-        android:icon="@drawable/ic_reward"
-        android:title="Rewards" />
+        android:id="@+id/nav_comparison"
+        android:icon="@drawable/ic_compare"
+        android:title="Match" />
 
     <item
         android:id="@+id/nav_favourite"

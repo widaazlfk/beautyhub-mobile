@@ -2,6 +2,7 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".buyer.ProductDetailActivity">
@@ -45,9 +46,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="80dp">  <!-- Increased padding to avoid overlap with bottom bar -->
+            android:paddingBottom="80dp">
 
-            <!-- Product Name, Favourite Icon, Variants, and Description -->
+            <!-- Product Name, Favourite Icon, and Description -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -82,41 +83,6 @@
                         android:contentDescription="Add to Favourites" />
                 </RelativeLayout>
 
-                <!-- Variant Selection Layout -->
-                <LinearLayout
-                    android:id="@+id/layout_variant_selection"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingVertical="8dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:visibility="gone"
-                    tools:visibility="visible">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Variant:"
-                        android:textStyle="bold"/>
-
-                    <TextView
-                        android:id="@+id/tv_variant_selector"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="8dp"
-                        android:textColor="?attr/colorPrimary"
-                        tools:text="Red, XL"/>
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/ic_arrow_forward"
-                        app:tint="?attr/colorControlNormal"/>
-                </LinearLayout>
-
-
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
@@ -140,100 +106,217 @@
                     tools:text="Ini adalah deskripsi produk yang sangat terperinci dan menarik untuk dibaca oleh para pembeli yang budiman."/>
             </LinearLayout>
 
-            <!-- Product Details Section -->
+            <!-- Product Specifications Section (REKA BENTUK BAHARU) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@color/gray_light"
                 android:orientation="vertical"
-                android:padding="16dp"
-                android:background="@color/gray_light">
+                android:paddingTop="8dp"
+                android:paddingBottom="16dp">
 
-                <!-- Product Info Grid -->
-                <androidx.gridlayout.widget.GridLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:columnCount="2"
-                    app:rowCount="3">
-
-                    <!-- Brand -->
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Brand:"
-                        android:textStyle="bold"
-                        app:layout_column="0"
-                        app:layout_row="0"
-                        android:layout_marginEnd="8dp"/>
-
-                    <TextView
-                        android:id="@+id/tv_product_brand"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        app:layout_column="1"
-                        app:layout_row="0"
-                        app:layout_columnWeight="1"
-                        tools:text="BeautyHub"/>
-
-                    <!-- Category -->
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Category:"
-                        android:textStyle="bold"
-                        app:layout_column="0"
-                        app:layout_row="1"
-                        android:layout_marginEnd="8dp"/>
-
-                    <TextView
-                        android:id="@+id/tv_product_category"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        app:layout_column="1"
-                        app:layout_row="1"
-                        app:layout_columnWeight="1"
-                        tools:text="Skincare"/>
-
-                    <!-- Skin Type -->
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Skin Type:"
-                        android:textStyle="bold"
-                        app:layout_column="0"
-                        app:layout_row="2"
-                        android:layout_marginEnd="8dp"/>
-
-                    <TextView
-                        android:id="@+id/tv_product_skin_type"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        app:layout_column="1"
-                        app:layout_row="2"
-                        app:layout_columnWeight="1"
-                        tools:text="All Skin Types"/>
-
-                </androidx.gridlayout.widget.GridLayout>
-
-                <!-- Ingredients -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Ingredients:"
-                    android:textStyle="bold"
-                    android:layout_marginTop="16dp"/>
+                    android:layout_marginStart="16dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="Product Specifications"
+                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                    android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/tv_product_ingredients"
+                <!-- Card for Brand, Category, and Skin Type -->
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    tools:text="Vitamin C, Hyaluronic Acid, Niacinamide"/>
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp">
+
+                        <!-- Item for Brand -->
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingHorizontal="16dp"
+                            android:paddingVertical="12dp">
+
+                            <ImageView
+                                android:id="@+id/icon_brand"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_alignParentStart="true"
+                                android:layout_centerVertical="true"
+                                android:src="@drawable/ic_brand"
+                                app:tint="?attr/colorPrimary" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:layout_marginStart="16dp"
+                                android:layout_toEndOf="@id/icon_brand"
+                                android:text="Brand"
+                                android:textAppearance="?attr/textAppearanceBody2"
+                                android:textColor="?android:attr/textColorSecondary" />
+
+                            <TextView
+                                android:id="@+id/tv_product_brand"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:textStyle="bold"
+                                tools:text="BeautyHub" />
+                        </RelativeLayout>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginHorizontal="16dp"
+                            android:background="@color/gray_light" />
+
+                        <!-- Item for Category -->
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingHorizontal="16dp"
+                            android:paddingVertical="12dp">
+
+                            <ImageView
+                                android:id="@+id/icon_category"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_alignParentStart="true"
+                                android:layout_centerVertical="true"
+                                android:src="@drawable/ic_categories"
+                                app:tint="?attr/colorPrimary" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:layout_marginStart="16dp"
+                                android:layout_toEndOf="@id/icon_category"
+                                android:text="Category"
+                                android:textAppearance="?attr/textAppearanceBody2"
+                                android:textColor="?android:attr/textColorSecondary" />
+
+                            <TextView
+                                android:id="@+id/tv_product_category"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:textStyle="bold"
+                                tools:text="Skincare" />
+                        </RelativeLayout>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginHorizontal="16dp"
+                            android:background="@color/gray_light" />
+
+                        <!-- Item for Skin Type -->
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingHorizontal="16dp"
+                            android:paddingVertical="12dp">
+
+                            <ImageView
+                                android:id="@+id/icon_skin_type"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_alignParentStart="true"
+                                android:layout_centerVertical="true"
+                                android:src="@drawable/ic_skintype"
+                                app:tint="?attr/colorPrimary" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:layout_marginStart="16dp"
+                                android:layout_toEndOf="@id/icon_skin_type"
+                                android:text="Skin Type"
+                                android:textAppearance="?attr/textAppearanceBody2"
+                                android:textColor="?android:attr/textColorSecondary" />
+
+                            <TextView
+                                android:id="@+id/tv_product_skin_type"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:textStyle="bold"
+                                tools:text="All Skin Types" />
+                        </RelativeLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Card for Ingredients -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginEnd="16dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/ic_ingredient"
+                                app:tint="?attr/colorPrimary"
+                                android:contentDescription="Ingredients Icon"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="16dp"
+                                android:text="Ingredients"
+                                android:textAppearance="?attr/textAppearanceBody1"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/tv_product_ingredients"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:lineSpacingExtra="4dp"
+                            android:textColor="?android:attr/textColorSecondary"
+                            tools:text="Aqua, Glycerin, Niacinamide, Vitamin C, Hyaluronic Acid, Cetearyl Alcohol, dan pelbagai lagi bahan berkualiti tinggi." />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
                 <!-- Stock & Rating -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
+                    android:paddingHorizontal="16dp"
                     android:layout_marginTop="16dp">
 
                     <TextView
@@ -259,7 +342,6 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         tools:text="1,234 sold"/>
-
                 </LinearLayout>
             </LinearLayout>
 
@@ -269,7 +351,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="16dp"
-                android:background="@color/white">
+                android:background="@android:color/white">
 
                 <!-- Price with Discount -->
                 <LinearLayout
@@ -305,7 +387,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@drawable/badge_discount"
-                        android:textColor="@color/white"
+                        android:textColor="@android:color/white"
                         android:textSize="12sp"
                         android:paddingHorizontal="8dp"
                         android:paddingVertical="2dp"
@@ -322,16 +404,128 @@
                     android:layout_height="wrap_content"
                     android:text="OFFICIAL"
                     android:background="@drawable/badge_official"
-                    android:textColor="@color/white"
+                    android:textColor="@android:color/white"
                     android:textSize="10sp"
                     android:textStyle="bold"
                     android:paddingHorizontal="8dp"
                     android:paddingVertical="4dp"
+                    android:layout_marginTop="8dp"
                     android:visibility="gone"
                     tools:visibility="visible"/>
             </LinearLayout>
 
-            <!-- ▼▼▼ BLOK KOD YANG HILANG ▼▼▼ -->
+            <!-- Seller Info Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/seller_info_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/gray_light"
+                app:strokeWidth="1dp"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="12dp">
+
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        android:id="@+id/iv_seller_profile"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        tools:src="@drawable/ic_profile_placeholder" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="12dp"
+                        android:layout_toStartOf="@+id/btn_view_shop"
+                        android:layout_toEndOf="@id/iv_seller_profile"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tv_seller_name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:textAppearance="?attr/textAppearanceSubtitle1"
+                            android:textStyle="bold"
+                            tools:text="Nama Kedai Penjual" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="View Shop"
+                            android:textAppearance="?attr/textAppearanceCaption"
+                            android:textColor="?attr/colorPrimary" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/btn_view_shop"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:src="@drawable/ic_arrow_forward"
+                        app:tint="?attr/colorControlNormal"
+                        android:contentDescription="View Shop"/>
+
+                </RelativeLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Divider -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="8dp"
+                android:background="@color/gray_light" />
+
+            <!-- Product Reviews Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/label_reviews"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Product Reviews"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                    android:textStyle="bold" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_product_reviews"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:nestedScrollingEnabled="false"
+                    tools:itemCount="3"
+                    tools:listitem="@layout/item_review" />
+
+                <TextView
+                    android:id="@+id/tv_no_reviews"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="16dp"
+                    android:text="No reviews yet for this product."
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+            </LinearLayout>
+
             <!-- Other Sellers / Price Comparison -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -358,10 +552,48 @@
                     android:layout_marginTop="8dp"
                     android:nestedScrollingEnabled="false"
                     tools:itemCount="2"
-                    tools:listitem="@layout/item_price_comparison" />
-
+                    tools:listitem="@layout/item_similar_beauty" />
             </LinearLayout>
-            <!-- ▲▲▲ BLOK KOD YANG HILANG ▲▲▲ -->
+
+            <!-- You Might Also Like Section -->
+            <LinearLayout
+                android:id="@+id/similar_products_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="16dp"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="8dp"
+                    android:background="@color/gray_light" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="You Might Also Like"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                    android:textStyle="bold"
+                    android:paddingTop="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_similar_products"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:clipToPadding="false"
+                    android:nestedScrollingEnabled="false"
+                    android:orientation="horizontal"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:itemCount="5"
+                    tools:listitem="@layout/item_product_similar" />
+            </LinearLayout>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
@@ -377,14 +609,27 @@
         android:orientation="horizontal"
         android:padding="8dp">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_add_to_cart_detail"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+        <FrameLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginEnd="4dp"
-            android:text="Add to Cart" />
+            android:layout_marginEnd="4dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_add_to_cart_detail"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Add to Cart" />
+
+            <ProgressBar
+                android:id="@+id/add_to_cart_progress_bar"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+        </FrameLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_buy_now_detail"
@@ -394,7 +639,16 @@
             android:layout_weight="1"
             android:layout_marginStart="4dp"
             android:text="Buy Now" />
-
     </LinearLayout>
 
+    <!-- Main Loading Progress Bar -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
+

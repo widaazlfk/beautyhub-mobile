@@ -16,6 +16,9 @@ firebaseBom = "32.8.1"
 googleGmsGoogleServices = "4.4.2"
 firebaseCommon = "22.0.1"
 glide = "4.16.0"
+firebaseCrashlyticsBuildtools = "3.0.6"
+roomCommonJvm = "2.8.4"
+firebaseMessaging = "25.0.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,6 +44,9 @@ firebase-auth = { group = "com.google.firebase", name = "firebase-auth"}
 firebase-database = { group = "com.google.firebase", name = "firebase-database"}
 firebase-common = { group = "com.google.firebase", name = "firebase-common", version.ref = "firebaseCommon" }
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide"}
+firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebaseCrashlyticsBuildtools" }
+androidx-room-common-jvm = { group = "androidx.room", name = "room-common-jvm", version.ref = "roomCommonJvm" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

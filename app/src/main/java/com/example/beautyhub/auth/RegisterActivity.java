@@ -24,6 +24,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -138,44 +139,37 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void saveAdditionalUserInfo(FirebaseUser firebaseUser, String username, String email, String userType) {
-        // 1. Dapatkan UID sebenar dari Firebase Authentication
         String uid = firebaseUser.getUid();
-
-        // 2. Rujuk kepada nod pengguna dengan UID tersebut
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Users").child(uid);
 
-        // 3. Sediakan tarikh pendaftaran
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         String registrationDate = sdf.format(new Date());
 
-        // 4. Cipta objek User baru
-        User newUser = new User(username, email, userType, registrationDate);
+        // Menggunakan HashMap untuk memastikan kunci (keys) tepat seperti dalam Rules
+        HashMap<String, Object> userMap = new HashMap<>();
+        userMap.put("uid", uid);                  // Wajib ada (Line 17 Rules)
+        userMap.put("username", username);        // Wajib ada (Line 13 Rules)
+        userMap.put("email", email);              // Wajib ada (Line 14 Rules)
+        userMap.put("userType", userType);        // Wajib ada (Line 15 Rules) - "Buyer" atau "Seller"
+        userMap.put("registrationDate", registrationDate); // Wajib ada (Line 16 Rules)
 
-        // Set the UID in the User object
-        newUser.setUid(uid);
-
-        // 5. Simpan keseluruhan objek User ke Firebase
-        databaseReference.setValue(newUser).addOnCompleteListener(task -> {
+        databaseReference.setValue(userMap).addOnCompleteListener(task -> {
             progressDialog.dismiss();
             if (task.isSuccessful()) {
                 Toast.makeText(RegisterActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
 
-                /// ▼▼▼ THIS IS THE FIX ▼▼▼
-// 1. Create a detailed log message string.
+                // Log Action
                 String logMessage = "New " + userType + " registered with email: " + email;
-
-// 2. Call logAction with the required two arguments: the user's ID and the message.
                 LogHelper.logAction(uid, logMessage);
-// ▲▲▲ END OF FIX ▲▲▲
 
-                // Redirect user based on their type
                 redirectToDashboard(userType);
             } else {
-                Toast.makeText(RegisterActivity.this, "Failed to save user data: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_LONG).show();
+                // Jika masih error, paparkan error yang spesifik dari Firebase
+                String error = task.getException() != null ? task.getException().getMessage() : "Unknown error";
+                Toast.makeText(RegisterActivity.this, "Database Error: " + error, Toast.LENGTH_LONG).show();
             }
         });
     }
-
     private void redirectToDashboard(String userType) {
         if (userType == null) {
             // ... fallback ...

@@ -41,7 +41,7 @@ public class CheckoutSummaryAdapter extends RecyclerView.Adapter<CheckoutSummary
         CartItem item = itemList.get(position);
 
         // Set data ke dalam view menggunakan ID dari layout Anda
-        holder.itemName.setText(item.getProductName());
+        holder.itemName.setText(item.getName());
         holder.itemQuantity.setText("x " + item.getQuantity()); // Sesuai format di layout Anda "x 2"
 
         // Format harga sesuai mata uang Malaysia (Ringgit)
@@ -50,7 +50,7 @@ public class CheckoutSummaryAdapter extends RecyclerView.Adapter<CheckoutSummary
 
         // Gunakan Glide untuk memuat gambar produk
         Glide.with(context)
-                .load(item.getImageUrl()) // Menggunakan getter dari model CartItem
+                .load(item.getSellerProfileImageUrl()) // Menggunakan getter dari model CartItem
                 .placeholder(R.drawable.product_placeholder) // Menggunakan placeholder dari layout Anda
                 .error(R.drawable.product_placeholder) // Tampilkan placeholder jika ada error
                 .into(holder.itemImage);

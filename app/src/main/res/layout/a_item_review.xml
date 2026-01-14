@@ -5,10 +5,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:cardCornerRadius="8dp"
+    app:cardCornerRadius="12dp"
     app:cardElevation="2dp"
     android:layout_marginHorizontal="16dp"
-    android:layout_marginVertical="6dp">
+    android:layout_marginVertical="8dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,18 +16,22 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- Bahagian Produk & Tarikh -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <ImageView
-                android:id="@+id/iv_review_user_avatar"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:src="@drawable/ic_profile"
-                app:tint="?attr/colorPrimary" />
+            <!-- Imej Produk yang diulas -->
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/iv_review_product_image"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:scaleType="centerCrop"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Small"
+                android:src="@drawable/product_placeholder"
+                tools:src="@tools:sample/avatars" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -37,44 +41,56 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/tv_review_username"
+                    android:id="@+id/tv_review_product_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="widaad"
-                    android:textAppearance="?attr/textAppearanceTitleSmall"
-                    android:textStyle="bold"/>
+                    tools:text="Premium Hair Serum"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorOnSurface"/>
 
                 <TextView
                     android:id="@+id/tv_review_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="29 Nov 2025, 10:30 PM"
+                    tools:text="29 Nov 2025"
                     android:textAppearance="?attr/textAppearanceBodySmall"
                     android:textColor="?android:attr/textColorSecondary"/>
             </LinearLayout>
 
+            <!-- Butang Padam (Hanya muncul jika isActionMode true) -->
             <ImageView
                 android:id="@+id/iv_delete_review"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="4dp"
                 android:src="@drawable/ic_delete"
                 app:tint="#D32F2F"
-                android:layout_gravity="center_vertical"
+                android:layout_gravity="top"
                 android:clickable="true"
                 android:focusable="true"
-                android:background="?attr/selectableItemBackgroundBorderless"/>
+                android:visibility="gone"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                tools:visibility="visible"/>
 
         </LinearLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#EEEEEE"
+            android:layout_marginVertical="12dp"/>
+
+        <!-- Bahagian Rating & Komen -->
         <RatingBar
             android:id="@+id/review_rating_bar"
             style="?android:attr/ratingBarStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:numStars="5"
-            android:stepSize="0.5"
-            tools:rating="4.5"
+            android:stepSize="1.0"
+            tools:rating="4"
+            android:progressTint="#FFB300"
             android:isIndicator="true"/>
 
         <TextView
@@ -82,8 +98,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            tools:text="This is a great product! I really love the texture and the smell. Would definitely recommend it to anyone looking for a good quality skincare item. The packaging was also very nice."
-            android:textAppearance="?attr/textAppearanceBodyMedium" />
+            tools:text="The product is amazing! Fast delivery and well-packed."
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:lineSpacingExtra="2dp"/>
 
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

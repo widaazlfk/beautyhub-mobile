@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingVertical="12dp">
+
+    <!-- 1. Image View (Matches ivProductImage) -->
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/iv_order_detail_item_image"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:scaleType="centerCrop"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium"
+        tools:src="@tools:sample/backgrounds/scenic" />
+
+    <!-- 2. Hidden Button (Matches btnAddReview)
+         Must exist in XML because SellerOrderItemAdapter.java calls findViewById(R.id.btn_add_review) -->
+    <View
+        android:id="@+id/btn_add_review"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:visibility="gone" />
+
+    <!-- 3. Product Info -->
+    <LinearLayout
+        android:id="@+id/item_info_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_toStartOf="@id/btn_add_review"
+        android:layout_toEndOf="@id/iv_order_detail_item_image"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_order_detail_item_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+            android:textStyle="bold"
+            tools:text="Product Name" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <!-- Matches tvProductQuantity -->
+            <TextView
+                android:id="@+id/tv_order_detail_item_quantity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                android:textColor="?android:attr/textColorSecondary"
+                tools:text="x2" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="12dp"
+                android:layout_marginHorizontal="8dp"
+                android:background="?android:attr/listDivider" />
+
+            <!-- Matches tvProductPrice -->
+            <TextView
+                android:id="@+id/tv_order_detail_item_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textStyle="bold"
+                tools:text="RM 25.90" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>

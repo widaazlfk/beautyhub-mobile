@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="8dp"
     android:layout_marginVertical="6dp"
-    app:cardCornerRadius="8dp"
+    app:cardCornerRadius="12dp"
     app:cardElevation="3dp"
     app:strokeWidth="0dp">
 
@@ -16,7 +16,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Baris Atas: ID Pesanan dan Status -->
+        <!-- Atas: ID dan Status -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -26,11 +26,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:layout_toStartOf="@id/tv_order_status"
-                android:layout_marginEnd="8dp"
-                android:ellipsize="end"
-                android:maxLines="1"
                 android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                 android:textStyle="bold"
                 tools:text="Order #A1B2C3D" />
@@ -40,7 +35,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
                 android:background="@drawable/bg_order_status_pending"
                 android:paddingHorizontal="10dp"
                 android:paddingVertical="4dp"
@@ -48,10 +42,8 @@
                 android:textSize="12sp"
                 android:textStyle="bold"
                 tools:text="Pending" />
-
         </RelativeLayout>
 
-        <!-- Tanggal Pesanan -->
         <TextView
             android:id="@+id/tv_order_date"
             android:layout_width="wrap_content"
@@ -59,34 +51,64 @@
             android:layout_marginTop="4dp"
             android:textAppearance="@style/TextAppearance.Material3.BodySmall"
             android:textColor="?android:attr/textColorSecondary"
-            tools:text="29 November 2025, 10:30 PM" />
+            tools:text="29 Nov 2025, 10:30 PM" />
 
         <com.google.android.material.divider.MaterialDivider
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp" />
 
-        <!-- Pratinjau Item Pesanan -->
-        <TextView
-            android:id="@+id/tv_order_items_preview"
+        <!-- Tengah: Gambar + Preview Item -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:lineSpacingExtra="4dp"
-            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-            tools:text="1x - Brightening Serum\n...and 2 more item(s)" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-        <!-- Baris Bawah: Total Harga -->
-        <TextView
-            android:id="@+id/tv_order_total"
-            android:layout_width="wrap_content"
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/iv_order_image"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_marginEnd="12dp"
+                android:scaleType="centerCrop"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Small"
+                tools:src="@tools:sample/avatars" />
+
+            <TextView
+                android:id="@+id/tv_order_items_preview"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="3"
+                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                tools:text="1x Brightening Serum\n2x Face Wash" />
+        </LinearLayout>
+
+        <!-- Bawah: Total Harga -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="end"
             android:layout_marginTop="12dp"
-            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-            android:textColor="?attr/colorPrimary"
-            android:textStyle="bold"
-            tools:text="RM 175.50" />
+            android:gravity="end"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Total: "
+                android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
+
+            <TextView
+                android:id="@+id/tv_order_total"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                tools:text="RM 175.50" />
+        </LinearLayout>
 
     </LinearLayout>
 

@@ -1,4 +1,3 @@
-// CartItem.java
 package com.example.beautyhub.models;
 
 import android.os.Parcel;
@@ -6,65 +5,81 @@ import android.os.Parcelable;
 
 public class CartItem implements Parcelable {
 
+    private String userId;
     private String productId;
-    private String productName;
+    private String name;
     private double price;
+    private double discountPrice;
     private int quantity;
-    private String imageUrl;
+    private String sellerProfileImageUrl;
     private String sellerId;
     private String sellerName;
     private boolean selected = true;
     private String cartItemId; // Firebase key
 
-    // NEW: Fields untuk variants
-    private String variantId;
-    private String variantName;
-    private String variantSku;
-
-    // NEW: Untuk tracking product source
+    // Tracking product source & state
     private boolean isFromJson = false;
-    private boolean hasVariants = false;
+    private String imageUrls;
+    private boolean isAvailable = true;
 
-    // Constructor kosong untuk Firebase
+    // 1. Empty Constructor required for Firebase
     public CartItem() {}
 
-    // Existing constructor (compatible)
-    public CartItem(String productId, String productName, double price, int quantity, String imageUrl) {
+    // 2. Full Constructor (8 parameters) - Resolves the "Cannot resolve constructor" error
+    public CartItem(String productId, String name, double price, int quantity,
+                    String imageUrls, String sellerId, String sellerName,
+                    String sellerProfileImageUrl) {
         this.productId = productId;
-        this.productName = productName;
+        this.name = name;
         this.price = price;
         this.quantity = quantity;
-        this.imageUrl = imageUrl;
+        this.imageUrls = imageUrls;
+        this.sellerId = sellerId;
+        this.sellerName = sellerName;
+        this.sellerProfileImageUrl = sellerProfileImageUrl;
+
+        // Initialize defaults
+        this.selected = true;
+        this.isAvailable = true;
     }
 
-    // NEW: Constructor dengan variant support
-    public CartItem(String productId, String productName, double price, int quantity,
-                    String imageUrl, String variantId, String variantName) {
+    // 3. Basic Constructor (6 parameters) - For backward compatibility if used elsewhere
+    public CartItem(String productId, String name, double price, int quantity, String imageUrls, String sellerProfileImageUrl) {
         this.productId = productId;
-        this.productName = productName;
+        this.name = name;
         this.price = price;
         this.quantity = quantity;
-        this.imageUrl = imageUrl;
-        this.variantId = variantId;
-        this.variantName = variantName;
-        this.hasVariants = (variantId != null && !variantId.isEmpty());
+        this.imageUrls = imageUrls;
+        this.sellerProfileImageUrl = sellerProfileImageUrl;
+        this.selected = true;
+        this.isAvailable = true;
     }
 
     // --- Getters & Setters ---
+
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
+
     public String getProductId() { return productId; }
     public void setProductId(String productId) { this.productId = productId; }
 
-    public String getProductName() { return productName; }
-    public void setProductName(String productName) { this.productName = productName; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
     public double getPrice() { return price; }
     public void setPrice(double price) { this.price = price; }
 
+    public double getDiscountPrice() { return discountPrice; }
+    public void setDiscountPrice(double discountPrice) { this.discountPrice = discountPrice; }
+
     public int getQuantity() { return quantity; }
     public void setQuantity(int quantity) { this.quantity = quantity; }
 
-    public String getImageUrl() { return imageUrl; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public String getSellerProfileImageUrl() { return sellerProfileImageUrl; }
+    public void setSellerProfileImageUrl(String sellerProfileImageUrl) { this.sellerProfileImageUrl = sellerProfileImageUrl; }
+
+    public String getImageUrls() { return imageUrls; }
+    public void setImageUrls(String imageUrls) { this.imageUrls = imageUrls; }
 
     public String getSellerId() { return sellerId; }
     public void setSellerId(String sellerId) { this.sellerId = sellerId; }
@@ -78,68 +93,51 @@ public class CartItem implements Parcelable {
     public String getCartItemId() { return cartItemId; }
     public void setCartItemId(String cartItemId) { this.cartItemId = cartItemId; }
 
-    // NEW: Variant getters & setters
-    public String getVariantId() { return variantId; }
-    public void setVariantId(String variantId) {
-        this.variantId = variantId;
-        this.hasVariants = (variantId != null && !variantId.isEmpty());
-    }
-
-    public String getVariantName() { return variantName; }
-    public void setVariantName(String variantName) { this.variantName = variantName; }
-
-    public String getVariantSku() { return variantSku; }
-    public void setVariantSku(String variantSku) { this.variantSku = variantSku; }
-
     public boolean isFromJson() { return isFromJson; }
     public void setFromJson(boolean fromJson) { isFromJson = fromJson; }
 
-    public boolean hasVariants() { return hasVariants; }
-    public void setHasVariants(boolean hasVariants) { this.hasVariants = hasVariants; }
+    public boolean isAvailable() { return isAvailable; }
+    public void setAvailable(boolean available) { isAvailable = available; }
 
-    // NEW: Helper method untuk display
-    public String getDisplayName() {
-        if (variantName != null && !variantName.isEmpty()) {
-            return productName + " (" + variantName + ")";
-        }
-        return productName;
-    }
+    // --- Helper Methods ---
+    public String getDisplayName() { return name; }
 
-    public String getFullDescription() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(productName);
-
-        if (variantName != null && !variantName.isEmpty()) {
-            sb.append(" - ").append(variantName);
-        }
-
-        if (variantSku != null && !variantSku.isEmpty()) {
-            sb.append(" [").append(variantSku).append("]");
-        }
-
-        return sb.toString();
-    }
-
-    public double getTotalPrice() {
-        return price * quantity;
-    }
+    public double getTotalPrice() { return price * quantity; }
 
     // --- Parcelable Implementation ---
     protected CartItem(Parcel in) {
+        userId = in.readString();
         productId = in.readString();
-        productName = in.readString();
+        name = in.readString();
         price = in.readDouble();
+        discountPrice = in.readDouble();
         quantity = in.readInt();
-        imageUrl = in.readString();
+        sellerProfileImageUrl = in.readString();
         sellerId = in.readString();
         sellerName = in.readString();
         selected = in.readByte() != 0;
         cartItemId = in.readString();
-        variantId = in.readString();
-        variantName = in.readString();
-        variantSku = in.readString();
         isFromJson = in.readByte() != 0;
-        hasVariants = in.readByte() != 0;
+        imageUrls = in.readString();
+        isAvailable = in.readByte() != 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(userId);
+        dest.writeString(productId);
+        dest.writeString(name);
+        dest.writeDouble(price);
+        dest.writeDouble(discountPrice);
+        dest.writeInt(quantity);
+        dest.writeString(sellerProfileImageUrl);
+        dest.writeString(sellerId);
+        dest.writeString(sellerName);
+        dest.writeByte((byte) (selected ? 1 : 0));
+        dest.writeString(cartItemId);
+        dest.writeByte((byte) (isFromJson ? 1 : 0));
+        dest.writeString(imageUrls);
+        dest.writeByte((byte) (isAvailable ? 1 : 0));
     }
 
     public static final Creator<CartItem> CREATOR = new Creator<CartItem>() {
@@ -155,25 +153,5 @@ public class CartItem implements Parcelable {
     };
 
     @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(productId);
-        dest.writeString(productName);
-        dest.writeDouble(price);
-        dest.writeInt(quantity);
-        dest.writeString(imageUrl);
-        dest.writeString(sellerId);
-        dest.writeString(sellerName);
-        dest.writeByte((byte) (selected ? 1 : 0));
-        dest.writeString(cartItemId);
-        dest.writeString(variantId);
-        dest.writeString(variantName);
-        dest.writeString(variantSku);
-        dest.writeByte((byte) (isFromJson ? 1 : 0));
-        dest.writeByte((byte) (hasVariants ? 1 : 0));
-    }
+    public int describeContents() { return 0; }
 }

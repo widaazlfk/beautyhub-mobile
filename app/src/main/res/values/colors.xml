@@ -163,6 +163,13 @@
 
     <!-- You can also add the grey color used in the drawable -->
     <color name="grey_border_color">#BDBDBD</color>
+    <color name="error_light">#FFCDD2</color>
+    <color name="md_theme_primary">#6750A4</color>
+    <color name="star_color">#FFC107</color>
+    <!-- Dalam res/values/colors.xml -->
+    <color name="maroon_red">#8A2128</color>
+    <color name="seed">#6750A4</color>
+
     <!-- Anda boleh pilih kod warna jingga atau kuning yang sesuai -->
 
 

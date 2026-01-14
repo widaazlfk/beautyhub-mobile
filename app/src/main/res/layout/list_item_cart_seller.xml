@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Header Penjual -->
+        <!-- Bahagian Header untuk Penjual -->
         <LinearLayout
             android:id="@+id/layout_seller_header"
             android:layout_width="match_parent"
@@ -27,12 +27,21 @@
             android:paddingHorizontal="12dp"
             android:paddingVertical="10dp">
 
+            <!-- Checkbox untuk memilih semua item penjual ini -->
+            <CheckBox
+                android:id="@+id/checkbox_select_seller"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp" />
+
+            <!-- Gambar Profil Penjual -->
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/iv_seller_profile_header"
                 android:layout_width="28dp"
                 android:layout_height="28dp"
                 android:src="@drawable/ic_profile" />
 
+            <!-- Nama Penjual -->
             <TextView
                 android:id="@+id/tv_seller_name_header"
                 android:layout_width="0dp"
@@ -44,14 +53,13 @@
                 android:textColor="?android:attr/textColorPrimary"
                 tools:text="Nama Penjual Rasmi" />
 
-            <!-- ▼▼▼ PERUBAHAN UTAMA DI SINI ▼▼▼ -->
+            <!-- Ikon 'arrow' untuk ke profil penjual -->
             <ImageView
                 android:layout_width="18dp"
                 android:layout_height="18dp"
                 android:layout_marginStart="4dp"
                 android:src="@drawable/ic_chevron_right"
                 app:tint="@color/gray_500" />
-            <!-- ▲▲▲ AKHIR PERUBAHAN ▲▲▲ -->
 
         </LinearLayout>
 
@@ -60,7 +68,7 @@
             android:layout_height="1dp"
             android:background="?android:attr/listDivider" />
 
-        <!-- RecyclerView Dalam untuk Produk-produk Penjual Ini -->
+        <!-- RecyclerView untuk memaparkan senarai produk dari penjual ini -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_child_cart_items"
             android:layout_width="match_parent"
@@ -71,4 +79,3 @@
 
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
-

@@ -8,7 +8,10 @@
     android:layout_marginBottom="12dp"
     app:cardCornerRadius="8dp"
     app:strokeWidth="1dp"
-    app:strokeColor="#E0E0E0">
+    app:strokeColor="#E0E0E0"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,6 +19,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- HEADER: ID & STATUS -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -38,39 +42,65 @@
                 android:paddingHorizontal="8dp"
                 android:paddingVertical="4dp"
                 android:textColor="@color/white"
-                android:textSize="12sp"
+                android:textSize="10sp"
                 android:textStyle="bold"
                 tools:text="Pending" />
-
         </RelativeLayout>
 
         <TextView
             android:id="@+id/tv_order_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="2dp"
             android:textAppearance="@style/TextAppearance.Material3.BodySmall"
             tools:text="15 May 2024" />
+
+        <!-- ▼▼▼ TAMBAHAN: INFO KEDAI (STORE INFO) ▼▼▼ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_store"
+                app:tint="?attr/colorPrimary" />
+
+            <TextView
+                android:id="@+id/tv_seller_name_order"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+                android:textStyle="bold"
+                tools:text="Beauty Glow Official Store" />
+        </LinearLayout>
 
         <com.google.android.material.divider.MaterialDivider
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginVertical="12dp" />
 
+        <!-- PRATONTON ITEM -->
         <TextView
             android:id="@+id/tv_order_items_preview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:lineSpacingMultiplier="1.3"
+            android:lineSpacingMultiplier="1.2"
             android:maxLines="3"
             android:ellipsize="end"
-            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-            tools:text="1x - Skincare Serum\n2x - Lipstick Red\n...and 1 more item" />
+            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+            android:textColor="#555555"
+            tools:text="1x - Skincare Serum\n2x - Lipstick Red" />
 
+        <!-- FOOTER: TOTAL -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp">
+            android:layout_marginTop="16dp">
 
             <TextView
                 android:id="@+id/tv_order_total"
@@ -88,11 +118,9 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
-                android:text="Total"
-                android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
-
+                android:text="Order Total"
+                android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
         </RelativeLayout>
 
     </LinearLayout>
-
 </com.google.android.material.card.MaterialCardView>

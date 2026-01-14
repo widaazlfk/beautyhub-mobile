@@ -2,8 +2,9 @@ package com.example.beautyhub.buyer;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
-import android.widget.Button; // Import untuk Button
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -30,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-// ▼▼▼ PERUBAHAN 1: Implement interface dari OrderAdapter ▼▼▼
 public class MyOrdersActivity extends AppCompatActivity implements OrderAdapter.OnOrderItemClickListener {
 
     private RecyclerView rvOrders;
@@ -56,22 +56,33 @@ public class MyOrdersActivity extends AppCompatActivity implements OrderAdapter.
         setupToolbar();
         initViews();
         setupRecyclerView();
-    }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        // Memuatkan data apabila activity bermula atau kembali ke skrin
+        // Muat data segera
         if (currentUser != null) {
             loadOrders(currentUser.getUid());
         } else {
             Toast.makeText(this, "You must be logged in to view orders.", Toast.LENGTH_LONG).show();
             showEmptyState();
+            finish();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Refresh data apabila kembali
+        if (currentUser != null) {
+            loadOrders(currentUser.getUid());
         }
     }
 
     private void setupToolbar() {
         MaterialToolbar toolbar = findViewById(R.id.toolbar_my_orders);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("My Orders");
+        }
         toolbar.setNavigationOnClickListener(v -> finish());
     }
 
@@ -79,48 +90,80 @@ public class MyOrdersActivity extends AppCompatActivity implements OrderAdapter.
         rvOrders = findViewById(R.id.rv_orders);
         progressBar = findViewById(R.id.progress_bar_orders);
         layoutNoOrders = findViewById(R.id.layout_no_orders);
-        chipGroupStatus = findViewById(R.id.chip_group_status);
 
+        // Aktifkan ChipGroup
+        com.google.android.material.chip.ChipGroup chipGroup = findViewById(R.id.chip_group_status);
+        if (chipGroup != null) {
+            chipGroup.setVisibility(View.VISIBLE); // Pastikan Visible
+            chipGroup.setOnCheckedChangeListener((group, checkedId) -> {
+                if (currentUser != null) {
+                    loadOrders(currentUser.getUid()); // Muat semula data dengan penapis
+                }
+            });
+        }
 
-        // Tambah listener untuk butang "Start Shopping" pada skrin kosong
+        // Listener butang Start Shopping tetap sama...
         Button btnStartShopping = findViewById(R.id.btn_start_shopping_from_orders);
-        btnStartShopping.setOnClickListener(v -> {
-            Intent intent = new Intent(MyOrdersActivity.this, BuyerActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-        });
+        if (btnStartShopping != null) {
+            btnStartShopping.setOnClickListener(v -> {
+                Intent intent = new Intent(MyOrdersActivity.this, BuyerActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish();
+            });
+        }
     }
+
 
     private void setupRecyclerView() {
         orderList = new ArrayList<>();
-        // ▼▼▼ PERUBAHAN 2: Serahkan 'this' sebagai listener ▼▼▼
         orderAdapter = new OrderAdapter(this, orderList, this);
         rvOrders.setLayoutManager(new LinearLayoutManager(this));
         rvOrders.setAdapter(orderAdapter);
+        rvOrders.setItemAnimator(null);
     }
 
     private void loadOrders(String userId) {
         showLoadingState();
 
+        // Dapatkan status penapis daripada ChipGroup
+        com.google.android.material.chip.ChipGroup chipGroup = findViewById(R.id.chip_group_status);
+        int checkedId = (chipGroup != null) ? chipGroup.getCheckedChipId() : R.id.chip_all;
+
         Query userOrdersQuery = databaseReference.orderByChild("userId").equalTo(userId);
 
-        // ▼▼▼ PERUBAHAN 3: Menggunakan addListenerForSingleValueEvent untuk kecekapan ▼▼▼
         userOrdersQuery.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 orderList.clear();
+
                 if (snapshot.exists()) {
                     for (DataSnapshot orderSnapshot : snapshot.getChildren()) {
                         Order order = orderSnapshot.getValue(Order.class);
                         if (order != null) {
-                            // Penting: Simpan ID pesanan dari Firebase key
                             order.setOrderId(orderSnapshot.getKey());
-                            orderList.add(order);
+
+                            // LOGIK PENAPIS (FILTER)
+                            String status = order.getStatus();
+                            if (checkedId == R.id.chip_all) {
+                                orderList.add(order);
+                            } else if (checkedId == R.id.chip_pending && "Pending".equalsIgnoreCase(status)) {
+                                orderList.add(order);
+                            } else if (checkedId == R.id.chip_shipped && "Shipped".equalsIgnoreCase(status)) {
+                                orderList.add(order);
+                            } else if (checkedId == R.id.chip_completed && "Completed".equalsIgnoreCase(status)) {
+                                orderList.add(order);
+                            }
                         }
                     }
-                    // Isih pesanan dari yang terbaru ke terlama
-                    Collections.sort(orderList, (o1, o2) -> Long.compare(o2.getTimestamp(), o1.getTimestamp()));
-                    showDataState();
+
+                    if (!orderList.isEmpty()) {
+                        // Susun mengikut tarikh terbaru
+                        Collections.sort(orderList, (o1, o2) -> Long.compare(o2.getOrderDate(), o1.getOrderDate()));
+                        showDataState();
+                    } else {
+                        showEmptyState();
+                    }
                 } else {
                     showEmptyState();
                 }
@@ -130,17 +173,20 @@ public class MyOrdersActivity extends AppCompatActivity implements OrderAdapter.
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 showEmptyState();
-                Toast.makeText(MyOrdersActivity.this, "Failed to load orders: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(MyOrdersActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    // ▼▼▼ PERUBAHAN 4: Kaedah implementasi dari OnOrderItemClickListener ▼▼▼
     @Override
     public void onOrderItemClick(Order order) {
-        Intent intent = new Intent(this, OrderDetailsActivity.class);
-        intent.putExtra("ORDER_ID", order.getOrderId()); // Hantar ID Pesanan ke activity seterusnya
-        startActivity(intent);
+        if (order != null && order.getOrderId() != null) {
+            Intent intent = new Intent(this, OrderDetailsActivity.class);
+            intent.putExtra("ORDER_ID", order.getOrderId());
+            startActivity(intent);
+        } else {
+            Toast.makeText(this, "Order details not available", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void showLoadingState() {
@@ -160,6 +206,4 @@ public class MyOrdersActivity extends AppCompatActivity implements OrderAdapter.
         rvOrders.setVisibility(View.GONE);
         layoutNoOrders.setVisibility(View.VISIBLE);
     }
-
-    // Kaedah onStop() tidak lagi diperlukan kerana kita menggunakan addListenerForSingleValueEvent
 }

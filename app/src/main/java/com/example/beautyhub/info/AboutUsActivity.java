@@ -9,6 +9,7 @@ import android.util.Log;
 import android.widget.TextView;
 
 import com.example.beautyhub.R;
+import com.google.android.material.appbar.MaterialToolbar; // Tambah import ini
 
 public class AboutUsActivity extends AppCompatActivity {
 
@@ -17,9 +18,8 @@ public class AboutUsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about_us);
 
-        // Tetapkan tajuk untuk AppBar aktiviti ini
-        // Anda boleh membuang baris ini jika anda menggunakan Toolbar khas
-        setTitle("About Us");
+        // 1. Inisialisasi Toolbar dan fungsi Back Button
+        setupToolbar();
 
         // Dapatkan TextView untuk versi aplikasi
         TextView tvAppVersion = findViewById(R.id.tv_app_version);
@@ -29,21 +29,31 @@ public class AboutUsActivity extends AppCompatActivity {
     }
 
     /**
+     * Method untuk menguruskan Toolbar dan butang kembali.
+     */
+    private void setupToolbar() {
+        MaterialToolbar toolbar = findViewById(R.id.toolbar_about);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+
+            // Logik apabila butang back diklik
+            toolbar.setNavigationOnClickListener(v -> {
+                onBackPressed(); // Menutup aktiviti semasa dan kembali ke halaman sebelumnya
+            });
+        }
+    }
+
+    /**
      * Method ini mendapatkan versi aplikasi dari Gradle dan memaparkannya.
      * @param textView TextView untuk memaparkan versi.
      */
     private void setAppVersion(TextView textView) {
         try {
-            // Dapatkan maklumat pakej untuk aplikasi semasa
             PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-            // Dapatkan nama versi (cth: "1.0.0")
             String version = pInfo.versionName;
-            // Tetapkan teks pada TextView
             textView.setText("Version " + version);
         } catch (PackageManager.NameNotFoundException e) {
-            // Tangani ralat jika maklumat pakej tidak ditemui
             Log.e("AboutUsActivity", "Could not get package version", e);
-            // Tetapkan teks lalai jika berlaku ralat
             textView.setText("Version 1.0.0");
         }
     }

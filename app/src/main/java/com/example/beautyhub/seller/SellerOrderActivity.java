@@ -2,14 +2,15 @@ package com.example.beautyhub.seller;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
-import android.widget.Button; // Import untuk butang
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher; // Import baru
-import androidx.activity.result.contract.ActivityResultContracts; // Import baru
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -31,6 +32,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 public class SellerOrderActivity extends AppCompatActivity {
 
@@ -41,19 +43,9 @@ public class SellerOrderActivity extends AppCompatActivity {
     private TextView tvNoOrders;
     private DatabaseReference ordersRef;
     private FirebaseUser currentUser;
+    private Query sellerQuery; // Gunakan Query untuk filter
     private ValueEventListener ordersListener;
-    private Query sellerOrdersQuery;
-
-    // ▼▼▼ PENAMBAHBAIKAN 1: Gunakan ActivityResultLauncher untuk penyegaran data ▼▼▼
-    private final ActivityResultLauncher<Intent> orderDetailLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                // Walaupun kita guna ValueEventListener, ini adalah amalan baik
-                // untuk trigger penyegaran data secara manual jika perlu pada masa hadapan.
-                // Buat masa ini, biarkan kosong kerana listener masa nyata sudah menguruskannya.
-                // Jika anda tukar ke addListenerForSingleValueEvent, anda akan panggil fetchOrders() di sini.
-            }
-    );
+    private TextView tvTotalAmount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,12 +54,11 @@ public class SellerOrderActivity extends AppCompatActivity {
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null) {
-            Toast.makeText(this, "Authentication error. Please log in again.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please log in again.", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        // Susun atur logik yang lebih kemas
         setupToolbar();
         initViews();
         setupRecyclerView();
@@ -76,22 +67,23 @@ public class SellerOrderActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        // Mula mendengar perubahan data apabila activity kelihatan
         fetchOrders();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        // Penting: Hentikan listener untuk elak kebocoran memori apabila activity tidak kelihatan
-        if (sellerOrdersQuery != null && ordersListener != null) {
-            sellerOrdersQuery.removeEventListener(ordersListener);
+        if (sellerQuery != null && ordersListener != null) {
+            sellerQuery.removeEventListener(ordersListener);
         }
     }
 
     private void setupToolbar() {
         MaterialToolbar toolbar = findViewById(R.id.toolbar_seller_orders);
-        toolbar.setTitle("Manage Orders");
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("Manage Orders");
+        }
         toolbar.setNavigationOnClickListener(v -> finish());
     }
 
@@ -99,12 +91,11 @@ public class SellerOrderActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.rv_seller_orders);
         progressBar = findViewById(R.id.progress_bar_seller_orders);
         tvNoOrders = findViewById(R.id.tv_no_orders);
+        tvTotalAmount = findViewById(R.id.tv_detail_total_amount);
 
-        // ▼▼▼ PENAMBAHBAIKAN 2: Tambah listener pada butang di skrin kosong ▼▼▼
-        // Pastikan butang ini wujud dalam R.layout.activity_seller_orders
         Button btnGoToDashboard = findViewById(R.id.btn_go_to_dashboard);
         if (btnGoToDashboard != null) {
-            btnGoToDashboard.setOnClickListener(v -> finish()); // Kembali ke skrin sebelumnya (papan pemuka)
+            btnGoToDashboard.setOnClickListener(v -> finish());
         }
     }
 
@@ -112,54 +103,57 @@ public class SellerOrderActivity extends AppCompatActivity {
         orderList = new ArrayList<>();
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new SellerOrderAdapter(this, orderList, order -> {
-            // Logik untuk membuka halaman detail pesanan
             Intent intent = new Intent(SellerOrderActivity.this, SellerOrderDetailActivity.class);
             intent.putExtra("ORDER_ID", order.getOrderId());
-            // Gunakan launcher untuk memulakan activity
-            orderDetailLauncher.launch(intent);
+            startActivity(intent);
         });
         recyclerView.setAdapter(adapter);
     }
 
     private void fetchOrders() {
         showLoadingState(true);
+        ordersRef = FirebaseDatabase.getInstance().getReference("Orders");
 
-        if (ordersRef == null) {
-            ordersRef = FirebaseDatabase.getInstance().getReference("Orders");
-        }
+        // --- PEMBETULAN DI SINI ---
+        // Kita cari semua order yang field 'sellerId' nya sama dengan UID seller sekarang
+        sellerQuery = ordersRef.orderByChild("sellerId").equalTo(currentUser.getUid());
 
-        // Pertanyaan yang efisien untuk menapis pesanan di sisi pelayan
-        sellerOrdersQuery = ordersRef.orderByChild("sellerId").equalTo(currentUser.getUid());
+        ordersListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                orderList.clear();
+                double grandTotal = 0.0;
 
-        if (ordersListener == null) {
-            ordersListener = new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    orderList.clear();
-                    if (dataSnapshot.exists()) {
-                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                            Order order = snapshot.getValue(Order.class);
-                            if (order != null) {
-                                order.setOrderId(snapshot.getKey());
-                                orderList.add(order);
-                            }
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        Order order = snapshot.getValue(Order.class);
+                        if (order != null) {
+                            // Masukkan ID dari key Firebase jika field orderId kosong
+                            if (order.getOrderId() == null) order.setOrderId(snapshot.getKey());
+
+                            orderList.add(order);
+                            grandTotal += order.getTotalAmount();
                         }
-                        // Isih mengikut timestamp secara menurun (terbaru dahulu)
-                        Collections.sort(orderList, (o1, o2) -> Long.compare(o2.getTimestamp(), o1.getTimestamp()));
                     }
-                    updateUI();
-                    showLoadingState(false);
+                    // Susun ikut tarikh terbaru
+                    Collections.sort(orderList, (o1, o2) -> Long.compare(o2.getOrderDate(), o1.getOrderDate()));
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-                    showLoadingState(false);
-                    Toast.makeText(SellerOrderActivity.this, "Failed to load orders: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                if (tvTotalAmount != null) {
+                    tvTotalAmount.setText(String.format(Locale.US, "RM %.2f", grandTotal));
                 }
-            };
-        }
-        // Listener akan sentiasa dikemas kini dengan data terbaru secara automatik
-        sellerOrdersQuery.addValueEventListener(ordersListener);
+
+                updateUI();
+                showLoadingState(false);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                showLoadingState(false);
+                Log.e("DATABASE_ERROR", databaseError.getMessage());
+            }
+        };
+        sellerQuery.addValueEventListener(ordersListener);
     }
 
     private void updateUI() {
@@ -174,10 +168,11 @@ public class SellerOrderActivity extends AppCompatActivity {
     }
 
     private void showLoadingState(boolean isLoading) {
-        progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
-        if (isLoading) {
-            recyclerView.setVisibility(View.GONE);
-            tvNoOrders.setVisibility(View.GONE);
+        if (progressBar != null) {
+            progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        }
+        if (!isLoading) {
+            updateUI();
         }
     }
 }

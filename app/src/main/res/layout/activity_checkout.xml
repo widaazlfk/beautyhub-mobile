@@ -24,7 +24,7 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Bottom Bar untuk butang "Place Order" -->
+    <!-- Bottom Bar for "Place Order" button -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/bottom_bar"
         android:layout_width="match_parent"
@@ -74,127 +74,116 @@
         </RelativeLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Kandungan utama yang boleh skrol -->
+    <!-- Scrollable main content -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/nested_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:clipToPadding="false"
-        android:paddingBottom="80dp">
+        android:fillViewport="true"
+        android:paddingBottom="100dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Shipping Address Section -->
-            <com.google.android.material.card.MaterialCardView
+            <!-- Address Section -->
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                app:cardCornerRadius="12dp"
-                app:strokeWidth="0dp">
+                android:layout_marginEnd="16dp">
 
-                <RelativeLayout
-                    android:id="@+id/layout_change_address"
+                <!-- Address Available -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/layout_address_details"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:padding="16dp">
+                    app:cardCornerRadius="12dp"
+                    app:strokeWidth="0dp"
+                    android:foreground="?attr/selectableItemBackground">
 
-                    <ImageView
-                        android:id="@+id/icon_shipping"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_alignParentStart="true"
-                        android:layout_centerVertical="true"
-                        android:src="@drawable/ic_shipping"
-                        app:tint="?attr/colorPrimary" />
-
-                    <LinearLayout
+                    <RelativeLayout
+                        android:id="@+id/layout_change_address"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginEnd="16dp"
-                        android:layout_toStartOf="@+id/icon_arrow_address"
-                        android:layout_toEndOf="@id/icon_shipping"
-                        android:orientation="vertical">
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:padding="16dp">
 
-                        <TextView
-                            android:id="@+id/tv_recipient_name_and_phone"
-                            android:layout_width="wrap_content"
+                        <ImageView
+                            android:id="@+id/icon_shipping"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:src="@drawable/ic_shipping"
+                            app:tint="?attr/colorPrimary" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-                            android:textStyle="bold"
-                            tools:text="Widad Adnan | 012-3456789" />
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_toStartOf="@+id/icon_arrow_address"
+                            android:layout_toEndOf="@id/icon_shipping"
+                            android:orientation="vertical">
 
-                        <TextView
-                            android:id="@+id/tv_address_line"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:ellipsize="end"
-                            android:maxLines="2"
-                            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                            tools:text="123, Jalan Teknologi, Taman Sains, 43200, Kuala Lumpur, Malaysia" />
-                    </LinearLayout>
+                            <TextView
+                                android:id="@+id/tv_recipient_name_and_phone"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+                                android:textStyle="bold"
+                                tools:text="Widad Adnan | 012-3456789" />
 
-                    <ImageView
-                        android:id="@+id/icon_arrow_address"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:src="@drawable/ic_chevron_right"
-                        app:tint="?android:attr/textColorSecondary" />
-                </RelativeLayout>
-            </com.google.android.material.card.MaterialCardView>
+                            <TextView
+                                android:id="@+id/tv_address_line"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:ellipsize="end"
+                                android:maxLines="2"
+                                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                                tools:text="123, Jalan Teknologi, Taman Sains, 43200, Kuala Lumpur, Malaysia" />
+                        </LinearLayout>
 
-            <!-- Stock Warning Section -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/layout_stock_warning"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                android:visibility="gone"
-                app:cardBackgroundColor="@color/stock_warning_bg"
-                app:cardCornerRadius="12dp"
-                app:strokeWidth="0dp"
-                tools:visibility="visible">
+                        <ImageView
+                            android:id="@+id/icon_arrow_address"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:src="@drawable/ic_chevron_right"
+                            app:tint="?android:attr/textColorSecondary" />
+                    </RelativeLayout>
+                </com.google.android.material.card.MaterialCardView>
 
-                <LinearLayout
+                <!-- No Address -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/layout_no_address"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="16dp">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_warning"
-                        app:tint="@color/stock_warning" />
+                    android:visibility="gone"
+                    app:cardCornerRadius="12dp"
+                    app:strokeWidth="0dp"
+                    android:clickable="true"
+                    android:focusable="true">
 
                     <TextView
-                        android:id="@+id/tv_stock_warning"
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginStart="16dp"
-                        android:layout_weight="1"
-                        android:lineSpacingExtra="4dp"
-                        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                        android:textColor="@color/stock_warning"
-                        tools:text="Some items are unavailable:\n• Product A (Out of stock)\n• Product B (Only 5 left)" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                        android:gravity="center"
+                        android:padding="24dp"
+                        android:text="No shipping address found.\nPlease add or select an address."
+                        android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
+                </com.google.android.material.card.MaterialCardView>
+            </FrameLayout>
 
             <!-- Items Section -->
             <TextView
@@ -225,7 +214,7 @@
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
-                android:padding="8dp"
+                android:padding="12dp"
                 android:text="+ Add more items from your cart"
                 android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
                 android:textColor="?attr/colorPrimary"
@@ -235,6 +224,7 @@
 
             <!-- Rewards/Discount Section -->
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/layout_discount_options"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
@@ -264,43 +254,75 @@
                         android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
                         tools:text="You have 1,250 points" />
 
-                    <FrameLayout
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:scrollbars="none">
+
+                        <com.google.android.material.chip.ChipGroup
+                            android:id="@+id/chip_group_discounts"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:singleLine="true"
+                            app:singleSelection="true">
+
+                            <com.google.android.material.chip.Chip
+                                android:id="@+id/chip_no_discount"
+                                style="@style/Widget.MaterialComponents.Chip.Choice"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:checked="true"
+                                android:text="No Discount" />
+                        </com.google.android.material.chip.ChipGroup>
+                    </HorizontalScrollView>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Payment Method Section -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                app:cardCornerRadius="12dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Payment Method"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+                        android:textStyle="bold" />
+
+                    <RadioGroup
+                        android:id="@+id/rg_payment_method"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp">
 
-                        <HorizontalScrollView
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/rb_online_banking"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:scrollbars="none">
+                            android:checked="true"
+                            android:text="Online Banking"
+                            app:buttonTint="?attr/colorPrimary" />
 
-                            <com.google.android.material.chip.ChipGroup
-                                android:id="@+id/chip_group_discounts"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                app:singleLine="true"
-                                app:singleSelection="true">
-
-                                <com.google.android.material.chip.Chip
-                                    android:id="@+id/chip_no_discount"
-                                    style="@style/Widget.MaterialComponents.Chip.Choice"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="No Discount"
-                                    app:chipIconVisible="false" />
-                                <!-- Reward chips will be added here dynamically -->
-                            </com.google.android.material.chip.ChipGroup>
-                        </HorizontalScrollView>
-
-                        <ProgressBar
-                            android:id="@+id/rewardsProgressBar"
-                            style="?android:attr/progressBarStyle"
-                            android:layout_width="wrap_content"
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/rb_cash_on_delivery"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:visibility="gone"
-                            tools:visibility="visible" />
-                    </FrameLayout>
+                            android:text="Cash on Delivery (COD)"
+                            app:buttonTint="?attr/colorPrimary" />
+                    </RadioGroup>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -328,7 +350,6 @@
                         android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
                         android:textStyle="bold" />
 
-                    <!-- Subtotal -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -338,18 +359,15 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Subtotal"
-                            android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
+                            android:text="Subtotal" />
 
                         <TextView
                             android:id="@+id/tv_subtotal"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
                             tools:text="RM 120.00" />
                     </LinearLayout>
 
-                    <!-- Shipping -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -359,18 +377,15 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Shipping Fee"
-                            android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
+                            android:text="Shipping Fee" />
 
                         <TextView
                             android:id="@+id/tv_shipping_fee"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
                             tools:text="RM 5.00" />
                     </LinearLayout>
 
-                    <!-- Discount -->
                     <LinearLayout
                         android:id="@+id/layout_discount"
                         android:layout_width="match_parent"
@@ -384,19 +399,16 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Discount"
-                            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                            android:textColor="@color/status_completed" />
+                            android:textColor="@android:color/holo_green_dark" />
 
                         <TextView
                             android:id="@+id/tv_discount_amount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                            android:textColor="@color/status_completed"
+                            android:textColor="@android:color/holo_green_dark"
                             tools:text="- RM 10.00" />
                     </LinearLayout>
 
-                    <!-- Total Payment (for display in summary) -->
                     <com.google.android.material.divider.MaterialDivider
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
@@ -411,14 +423,12 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Total"
-                            android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
                             android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/tv_total_payment"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                             android:textColor="?attr/colorPrimary"
                             android:textStyle="bold"
                             tools:text="RM 115.00" />

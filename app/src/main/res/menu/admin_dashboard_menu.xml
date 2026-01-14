@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- Item utama yang akan menunjukkan ikon profil dan bertindak sebagai bekas (container) -->
+    <item
+        android:id="@+id/menu_profile_container"
+        android:title="Profile"
+        android:icon="@drawable/ic_user_add"
+        app:showAsAction="ifRoom"
+        android:iconTint="@android:color/white" >
+
+        <!-- Sub-menu yang akan muncul apabila ikon di atas diklik -->
+        <menu>
+            <item
+                android:id="@+id/submenu_my_profile"
+                android:title="My Profile"
+                app:showAsAction="never" />
+            <item
+                android:id="@+id/submenu_logout"
+                android:title="Logout"
+                app:showAsAction="never" />
+        </menu>
+    </item>
+
+</menu>

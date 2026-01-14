@@ -5,28 +5,31 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="#F5F5F5"
     tools:context=".buyer.NotificationActivity">
 
-    <!-- 1. Toolbar untuk navigasi kembali -->
+    <!-- 1. Toolbar -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar_notification"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:navigationIcon="@drawable/ic_arrow_back"
-            app:title="Notifications" />
+            app:navigationIconTint="@color/white"
+            app:title="Notifications"
+            app:titleTextColor="@color/white" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- 2. FrameLayout untuk menguruskan paparan senarai atau mesej kosong -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- RecyclerView untuk memaparkan senarai notifikasi -->
+        <!-- Senarai Notifikasi -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/notifications_recycler_view"
             android:layout_width="match_parent"
@@ -36,16 +39,50 @@
             tools:listitem="@layout/item_notification_row"
             tools:visibility="visible" />
 
-        <!-- TextView untuk dipaparkan jika tiada notifikasi -->
-        <TextView
-            android:id="@+id/empty_notification_text"
+        <!-- Paparan jika TIADA notifikasi (Visual dari Pilihan 1) -->
+        <LinearLayout
+            android:id="@+id/empty_notification_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="You have no notifications yet."
-            android:textSize="18sp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="32dp"
             android:visibility="visible"
-            tools:visibility="gone"/>
+            tools:visibility="gone">
+
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@drawable/notification_icon_buyer"
+                app:tint="#CCCCCC" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="No Notifications Yet"
+                android:textColor="#888888"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="You'll see updates about your orders and offers here."
+                android:textColor="#AAAAAA"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <!-- ProgressBar untuk loading -->
+        <ProgressBar
+            android:id="@+id/progress_bar_notifications"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone" />
 
     </FrameLayout>
 

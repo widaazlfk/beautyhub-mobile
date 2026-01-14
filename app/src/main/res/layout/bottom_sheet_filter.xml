@@ -15,7 +15,7 @@
         android:text="Filter Products"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6" />
 
-    <!-- Konten yang dapat di-scroll -->
+    <!-- Scrollable Content -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -28,7 +28,7 @@
             android:paddingHorizontal="16dp"
             android:paddingBottom="16dp">
 
-            <!-- 1. Filter Kategori -->
+            <!-- 1. Category Filter -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -65,12 +65,131 @@
                     android:text="Makeup" />
             </com.google.android.material.chip.ChipGroup>
 
+            <!-- 1a. Skincare Sub-Category Filter (Initially Hidden) -->
+            <TextView
+                android:id="@+id/tv_subcategory_skincare_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Skincare Type"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2"
+                android:layout_marginTop="8dp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                tools:visibility="visible"/>
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chip_group_subcategory_skincare"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:singleSelection="true"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <com.google.android.material.chip.Chip
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cleansers" />
+                <com.google.android.material.chip.Chip
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Moisturizers" />
+                <com.google.android.material.chip.Chip
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sunscreens" />
+                <com.google.android.material.chip.Chip
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Serums" />
+                <com.google.android.material.chip.Chip
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Toners" />
+                <com.google.android.material.chip.Chip
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Face Masks" />
+            </com.google.android.material.chip.ChipGroup>
+
+            <!-- 1b. Makeup Sub-Category Filter (Initially Hidden) -->
+            <TextView
+                android:id="@+id/tv_subcategory_makeup_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Makeup Type"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2"
+                android:layout_marginTop="8dp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                tools:visibility="gone"/>
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chip_group_subcategory_makeup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:singleSelection="true"
+                android:visibility="gone"
+                tools:visibility="gone">
+
+                <com.google.android.material.chip.Chip
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Lipstick" />
+                <com.google.android.material.chip.Chip
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Eyeliner" />
+                <com.google.android.material.chip.Chip
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Powder" />
+                <com.google.android.material.chip.Chip
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Mascara" />
+                <com.google.android.material.chip.Chip
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Foundations" />
+                <com.google.android.material.chip.Chip
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Concealer" />
+                <com.google.android.material.chip.Chip
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Primer" />
+                <com.google.android.material.chip.Chip
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Blusher" />
+                <com.google.android.material.chip.Chip
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Eyeshadow" />
+            </com.google.android.material.chip.ChipGroup>
+
             <com.google.android.material.divider.MaterialDivider
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="16dp" />
 
-            <!-- 2. Filter Merek -->
+            <!-- 2. Brand Filter -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -97,7 +216,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="16dp" />
 
-            <!-- 3. Filter Rentang Harga -->
+            <!-- 3. Price Range Filter -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -113,6 +232,7 @@
                 android:valueFrom="10.0"
                 android:valueTo="300.0"
                 android:stepSize="10.0"
+                app:labelBehavior="withinBounds"
                 app:values="@array/initial_slider_values" />
 
             <com.google.android.material.divider.MaterialDivider
@@ -120,7 +240,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="16dp" />
 
-            <!-- 4. Filter Jenis Kulit -->
+            <!-- 4. Skin Type Filter -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -140,25 +260,21 @@
                     android:layout_height="wrap_content"
                     android:checked="true"
                     android:text="All" />
-
                 <com.google.android.material.chip.Chip
                     style="@style/Widget.MaterialComponents.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Oily" />
-
                 <com.google.android.material.chip.Chip
                     style="@style/Widget.MaterialComponents.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Dry" />
-
                 <com.google.android.material.chip.Chip
                     style="@style/Widget.MaterialComponents.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Combination" />
-
                 <com.google.android.material.chip.Chip
                     style="@style/Widget.MaterialComponents.Chip.Filter"
                     android:layout_width="wrap_content"
@@ -171,7 +287,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="16dp" />
 
-            <!-- 5. Filter Bahan -->
+            <!-- 5. Ingredient Filter -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -195,7 +311,7 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Tombol Aksi (Footer) -->
+    <!-- Action Buttons (Footer) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

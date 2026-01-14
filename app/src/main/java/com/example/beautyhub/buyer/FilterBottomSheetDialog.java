@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -18,7 +19,7 @@ import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.slider.RangeSlider;
 import com.google.android.material.textfield.TextInputEditText;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 public class FilterBottomSheetDialog extends BottomSheetDialogFragment {
@@ -27,6 +28,7 @@ public class FilterBottomSheetDialog extends BottomSheetDialogFragment {
 
     // Keys for passing data
     private static final String ARG_CATEGORY = "category";
+    private static final String ARG_SUBCATEGORIES = "subcategories"; // <-- KEY UPDATED
     private static final String ARG_BRAND = "brand";
     private static final String ARG_MIN_PRICE = "min_price";
     private static final String ARG_MAX_PRICE = "max_price";
@@ -35,32 +37,36 @@ public class FilterBottomSheetDialog extends BottomSheetDialogFragment {
 
     private FilterListener listener;
 
-    // View untuk semua filter
-    private ChipGroup chipGroupCategory, chipGroupSkinType;
+    // Views
+    private ChipGroup chipGroupCategory, chipGroupSkinType, chipGroupSubCategorySkincare, chipGroupSubCategoryMakeup;
+    private TextView tvSubCategorySkincareTitle, tvSubCategoryMakeupTitle;
     private TextInputEditText etBrand, etIngredient;
     private RangeSlider priceSlider;
     private Button btnApply, btnReset;
 
     // Current filter values
     private String currentCategory;
+    private ArrayList<String> currentSubCategories; // <-- VALUE TYPE UPDATED
     private String currentBrand;
     private float currentMinPrice;
     private float currentMaxPrice;
     private String currentSkinType;
     private String currentIngredient;
 
-    // Interface untuk berkomunikasi dengan Activity/Fragment pemanggil
+    // Interface to communicate with the calling Activity/Fragment
     public interface FilterListener {
-        void onFilterApplied(String category, String brand, float minPrice, float maxPrice, String skinType, String ingredient);
+        // This signature now matches ShopActivity's implementation
+        void onFilterApplied(String category, List<String> subCategories, String brand, float minPrice, float maxPrice, String skinType, String ingredient);
     }
 
-    // Factory method untuk membuat instance baru dengan arguments
-    public static FilterBottomSheetDialog newInstance(String category, String brand,
+    // --- 1. CORRECTED newInstance FACTORY METHOD ---
+    public static FilterBottomSheetDialog newInstance(String category, ArrayList<String> subcategories, String brand,
                                                       float minPrice, float maxPrice,
                                                       String skinType, String ingredient) {
         FilterBottomSheetDialog fragment = new FilterBottomSheetDialog();
         Bundle args = new Bundle();
         args.putString(ARG_CATEGORY, category);
+        args.putStringArrayList(ARG_SUBCATEGORIES, subcategories); // <-- Pass ArrayList
         args.putString(ARG_BRAND, brand);
         args.putFloat(ARG_MIN_PRICE, minPrice);
         args.putFloat(ARG_MAX_PRICE, maxPrice);
@@ -77,6 +83,10 @@ public class FilterBottomSheetDialog extends BottomSheetDialogFragment {
         // Read arguments
         if (getArguments() != null) {
             currentCategory = getArguments().getString(ARG_CATEGORY, "All");
+            currentSubCategories = getArguments().getStringArrayList(ARG_SUBCATEGORIES); // <-- Read ArrayList
+            if (currentSubCategories == null) {
+                currentSubCategories = new ArrayList<>(); // Initialize if null
+            }
             currentBrand = getArguments().getString(ARG_BRAND, "");
             currentMinPrice = getArguments().getFloat(ARG_MIN_PRICE, 10.0f);
             currentMaxPrice = getArguments().getFloat(ARG_MAX_PRICE, 200.0f);
@@ -88,11 +98,9 @@ public class FilterBottomSheetDialog extends BottomSheetDialogFragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        // Cuba dapatkan listener dari Activity (ShopActivity)
+        // Ensure the host activity implements the listener
         if (context instanceof FilterListener) {
             listener = (FilterListener) context;
-        } else if (getParentFragment() instanceof FilterListener) {
-            listener = (FilterListener) getParentFragment();
         } else {
             throw new ClassCastException(context.toString() + " must implement FilterListener");
         }
@@ -102,22 +110,19 @@ public class FilterBottomSheetDialog extends BottomSheetDialogFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.bottom_sheet_filter, container, false);
-
-        // Inisialisasi semua view dari layout
         initViews(view);
-
-        // Set nilai semasa pada view
         setupCurrentFilterValues();
-
-        // Tetapkan listener untuk butang-butang
         setupListeners();
-
         return view;
     }
 
     private void initViews(View view) {
         chipGroupCategory = view.findViewById(R.id.chip_group_category);
         chipGroupSkinType = view.findViewById(R.id.chip_group_skin_type);
+        tvSubCategorySkincareTitle = view.findViewById(R.id.tv_subcategory_skincare_title);
+        chipGroupSubCategorySkincare = view.findViewById(R.id.chip_group_subcategory_skincare);
+        tvSubCategoryMakeupTitle = view.findViewById(R.id.tv_subcategory_makeup_title);
+        chipGroupSubCategoryMakeup = view.findViewById(R.id.chip_group_subcategory_makeup);
         etBrand = view.findViewById(R.id.et_filter_brand);
         etIngredient = view.findViewById(R.id.et_filter_ingredient);
         priceSlider = view.findViewById(R.id.slider_price_range);
@@ -125,56 +130,43 @@ public class FilterBottomSheetDialog extends BottomSheetDialogFragment {
         btnReset = view.findViewById(R.id.btn_reset_filter);
     }
 
+    // --- 2. CORRECTED setupCurrentFilterValues TO HANDLE LIST ---
     private void setupCurrentFilterValues() {
-        // Set brand dan ingredient
-        if (etBrand != null) {
-            etBrand.setText(currentBrand);
-        }
+        etBrand.setText(currentBrand);
+        etIngredient.setText(currentIngredient);
+        priceSlider.setValues(currentMinPrice, currentMaxPrice);
+        priceSlider.setLabelFormatter(value -> String.format("RM %.0f", value));
 
-        if (etIngredient != null) {
-            etIngredient.setText(currentIngredient);
-        }
-
-        // Set price slider values
-        if (priceSlider != null) {
-            priceSlider.setValues(currentMinPrice, currentMaxPrice);
-
-            // Set label formatter untuk display harga
-            priceSlider.setLabelFormatter(value -> String.format("RM %.0f", value));
-        }
-
-        // Set selected chips berdasarkan current values
         setSelectedChip(chipGroupCategory, currentCategory);
         setSelectedChip(chipGroupSkinType, currentSkinType);
-    }
 
-    private void setSelectedChip(ChipGroup chipGroup, String value) {
-        if (chipGroup == null || value == null) return;
+        // Set initial visibility of sub-category sections
+        updateSubCategoryVisibility(false);
 
-        // Jika value adalah "All" atau kosong, tidak pilih apa-apa
-        if (value.equals("All") || value.isEmpty()) {
-            chipGroup.clearCheck();
-            return;
-        }
-
-        // Cari chip yang sesuai dengan value
-        for (int i = 0; i < chipGroup.getChildCount(); i++) {
-            View child = chipGroup.getChildAt(i);
-            if (child instanceof Chip) {
-                Chip chip = (Chip) child;
-                if (chip.getText().toString().equals(value)) {
-                    chip.setChecked(true);
-                    break;
-                }
-            }
-        }
+        // Set selected chips for sub-categories
+        setSelectedChips(chipGroupSubCategorySkincare, currentSubCategories);
+        setSelectedChips(chipGroupSubCategoryMakeup, currentSubCategories);
     }
 
     private void setupListeners() {
-        // Listener untuk tombol "Apply"
+        chipGroupCategory.setOnCheckedChangeListener((group, checkedId) -> {
+            updateSubCategoryVisibility(true);
+        });
+
+        // --- 3. CORRECTED btnApply OnClickListener ---
         btnApply.setOnClickListener(v -> {
-            // Ambil semua nilai dari input pengguna
             String selectedCategory = getSelectedChipText(chipGroupCategory);
+            List<String> selectedSubCategories = new ArrayList<>();
+
+            // Get sub-categories only if a main category is selected
+            if ("Skincare".equals(selectedCategory)) {
+                selectedSubCategories.addAll(getSelectedChipTexts(chipGroupSubCategorySkincare));
+            } else if ("Makeup".equals(selectedCategory)) {
+                selectedSubCategories.addAll(getSelectedChipTexts(chipGroupSubCategoryMakeup));
+            }
+
+            // If sub-categories are selected, the main category filter in ShopActivity will be ignored.
+            // If no sub-categories are selected, the main category will be used.
             String brand = etBrand.getText() != null ? etBrand.getText().toString().trim() : "";
             String ingredient = etIngredient.getText() != null ? etIngredient.getText().toString().trim() : "";
             String selectedSkinType = getSelectedChipText(chipGroupSkinType);
@@ -183,75 +175,109 @@ public class FilterBottomSheetDialog extends BottomSheetDialogFragment {
             float minPrice = prices.get(0);
             float maxPrice = prices.get(1);
 
-            // Validasi: min price tidak boleh lebih besar dari max price
             if (minPrice > maxPrice) {
                 Toast.makeText(getContext(), "Minimum price cannot be higher than maximum price", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // Hantar semua nilai kembali ke listener
             if (listener != null) {
-                listener.onFilterApplied(selectedCategory, brand, minPrice, maxPrice, selectedSkinType, ingredient);
+                // Pass the list of subcategories
+                listener.onFilterApplied(selectedCategory, selectedSubCategories, brand, minPrice, maxPrice, selectedSkinType, ingredient);
             }
-            dismiss(); // Tutup bottom sheet selepas filter digunakan
+            dismiss();
         });
 
-        // Listener untuk tombol "Reset"
+        // --- 4. CORRECTED btnReset OnClickListener ---
         btnReset.setOnClickListener(v -> {
-            // Reset semua nilai ke default
             resetAllFilters();
-
-            // Hantar nilai reset kembali ke listener
             if (listener != null) {
-                listener.onFilterApplied("All", "", 10.0f, 200.0f, "All", "");
+                // Pass reset values, including an EMPTY list for sub-categories
+                listener.onFilterApplied("All", new ArrayList<>(), "", 10.0f, 200.0f, "All", "");
             }
-
-            // Boleh pilih untuk dismiss atau biarkan user apply reset
-            dismiss(); // Tutup bottom sheet selepas filter direset
+            dismiss();
         });
     }
 
     private void resetAllFilters() {
-        // Reset chip groups
-        if (chipGroupCategory != null) {
-            chipGroupCategory.clearCheck();
-        }
+        chipGroupCategory.clearCheck();
+        chipGroupSkinType.clearCheck();
+        chipGroupSubCategorySkincare.clearCheck();
+        chipGroupSubCategoryMakeup.clearCheck();
+        updateSubCategoryVisibility(false);
+        etBrand.setText("");
+        etIngredient.setText("");
+        priceSlider.setValues(10.0f, 200.0f);
+    }
 
-        if (chipGroupSkinType != null) {
-            chipGroupSkinType.clearCheck();
-        }
+    private void updateSubCategoryVisibility(boolean clearSubCategorySelection) {
+        String selectedCategory = getSelectedChipText(chipGroupCategory);
+        boolean isSkincare = "Skincare".equals(selectedCategory);
+        boolean isMakeup = "Makeup".equals(selectedCategory);
 
-        // Reset text fields
-        if (etBrand != null) {
-            etBrand.setText("");
-        }
+        tvSubCategorySkincareTitle.setVisibility(isSkincare ? View.VISIBLE : View.GONE);
+        chipGroupSubCategorySkincare.setVisibility(isSkincare ? View.VISIBLE : View.GONE);
+        tvSubCategoryMakeupTitle.setVisibility(isMakeup ? View.VISIBLE : View.GONE);
+        chipGroupSubCategoryMakeup.setVisibility(isMakeup ? View.VISIBLE : View.GONE);
 
-        if (etIngredient != null) {
-            etIngredient.setText("");
-        }
-
-        // Reset price slider
-        if (priceSlider != null) {
-            priceSlider.setValues(10.0f, 200.0f);
+        if (clearSubCategorySelection) {
+            chipGroupSubCategorySkincare.clearCheck();
+            chipGroupSubCategoryMakeup.clearCheck();
         }
     }
 
-    /**
-     * Fungsi bantuan untuk mendapatkan teks dari Chip yang dipilih di dalam ChipGroup.
-     * @param chipGroup ChipGroup yang ingin diperiksa.
-     * @return Teks dari chip yang dipilih, atau "All" jika tiada yang dipilih.
-     */
+    // --- HELPER METHODS for Single and Multiple Chip Selection ---
+
+    // For single-choice groups (e.g., Main Category)
+    private void setSelectedChip(ChipGroup chipGroup, String value) {
+        if (chipGroup == null || value == null || value.isEmpty() || "All".equalsIgnoreCase(value)) {
+            if (chipGroup != null) chipGroup.clearCheck();
+            return;
+        }
+        for (int i = 0; i < chipGroup.getChildCount(); i++) {
+            Chip chip = (Chip) chipGroup.getChildAt(i);
+            if (chip.getText().toString().equalsIgnoreCase(value)) {
+                chip.setChecked(true);
+                return;
+            }
+        }
+    }
+
+    // For multi-choice groups (e.g., Sub-Categories)
+    private void setSelectedChips(ChipGroup chipGroup, List<String> values) {
+        if (chipGroup == null || values == null || values.isEmpty()) {
+            return;
+        }
+        for (int i = 0; i < chipGroup.getChildCount(); i++) {
+            Chip chip = (Chip) chipGroup.getChildAt(i);
+            if (values.contains(chip.getText().toString())) {
+                chip.setChecked(true);
+            }
+        }
+    }
+
+    // Gets text from a single-choice group
     private String getSelectedChipText(ChipGroup chipGroup) {
         if (chipGroup == null) return "All";
-
         int selectedId = chipGroup.getCheckedChipId();
         if (selectedId != View.NO_ID) {
             Chip selectedChip = chipGroup.findViewById(selectedId);
-            if (selectedChip != null) {
-                return selectedChip.getText().toString();
-            }
+            return selectedChip.getText().toString();
         }
         return "All";
+    }
+
+    // Gets all texts from a multi-choice group
+    private List<String> getSelectedChipTexts(ChipGroup chipGroup) {
+        List<String> selectedTexts = new ArrayList<>();
+        if (chipGroup == null) return selectedTexts;
+
+        for (int id : chipGroup.getCheckedChipIds()) {
+            Chip chip = chipGroup.findViewById(id);
+            if (chip != null) {
+                selectedTexts.add(chip.getText().toString());
+            }
+        }
+        return selectedTexts;
     }
 
     @Override

@@ -12,7 +12,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- DIUBAH: Toolbar kini menggunakan RelativeLayout untuk menampung beberapa item -->
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar_shop"
             android:layout_width="match_parent"
@@ -23,7 +22,8 @@
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="match_parent"
+                android:gravity="center_vertical">
 
                 <!-- Tombol Filter (paling kanan) -->
                 <ImageButton
@@ -35,19 +35,44 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="Filter Products"
                     android:padding="8dp"
-                    android:src="@drawable/ic_filter" /> <!-- Pastikan ikon ini ada di drawable -->
+                    android:src="@drawable/ic_filter" />
 
-                <!-- Tombol Keranjang (di sebelah kiri tombol filter) -->
-                <ImageButton
+                <!-- ================= PERUBAHAN UTAMA DI SINI ================= -->
+                <!-- 1. Bungkus Ikon Troli dan Badge dalam satu FrameLayout -->
+                <FrameLayout
                     android:id="@+id/btn_cart_icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_toStartOf="@id/btn_filter_icon"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Shopping Cart"
-                    android:padding="8dp"
-                    android:src="@drawable/ic_shopping" /> <!-- Pastikan ikon ini ada di drawable -->
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="8dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:contentDescription="Shopping Cart"
+                        android:src="@drawable/cart_icon" />
+
+                    <!-- 2. Letak Badge di dalam FrameLayout dan tukar ID -->
+                    <TextView
+                        android:id="@+id/cart_badge_shop"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="top|end"
+                        android:background="@drawable/badge_background"
+                        android:gravity="center"
+                        android:textColor="@color/white"
+                        android:textSize="10sp"
+                        android:visibility="gone"
+                        tools:text="3"
+                        tools:visibility="visible" />
+
+                </FrameLayout>
+                <!-- ================= AKHIR PERUBAHAN ================= -->
+
 
                 <!-- SearchView (mengisi ruang yang tersisa) -->
                 <androidx.appcompat.widget.SearchView
@@ -56,7 +81,9 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_toStartOf="@id/btn_cart_icon"
-                    app:queryHint="Search products..." />
+                    app:iconifiedByDefault="false"
+                    app:queryHint="Search products..."
+                    app:searchIcon="@null" />
 
             </RelativeLayout>
 
@@ -69,7 +96,6 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- 2. RecyclerView (Tidak ada perubahan) -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_all_products"
             android:layout_width="match_parent"
@@ -78,7 +104,6 @@
             android:padding="4dp"
             tools:listitem="@layout/b_item_product_grid2" />
 
-        <!-- 3. ProgressBar (Tidak ada perubahan) -->
         <ProgressBar
             android:id="@+id/progress_bar_shop"
             android:layout_width="wrap_content"
@@ -87,7 +112,6 @@
             android:visibility="gone"
             tools:visibility="visible" />
 
-        <!-- Teks jika tiada produk (Tidak ada perubahan) -->
         <TextView
             android:id="@+id/tv_no_products_shop"
             android:layout_width="wrap_content"

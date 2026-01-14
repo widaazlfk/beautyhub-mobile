@@ -10,15 +10,18 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.beautyhub.R;
 import com.example.beautyhub.adapters.BuyerProductAdapter;
+import com.example.beautyhub.auth.LoginActivity;
 import com.example.beautyhub.models.CartItem;
 import com.example.beautyhub.models.Product;
-import com.example.beautyhub.models.Variant;
+// --- PERUBAHAN 1: Padam import Variant ---
+// import com.example.beautyhub.models.Variant;
 import com.example.beautyhub.seller.SellerProfileActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -27,6 +30,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -53,8 +57,6 @@ public class FavouriteActivity extends AppCompatActivity implements BuyerProduct
     private FirebaseUser currentUser;
     private DatabaseReference favouritesRef;
     private ValueEventListener favouritesListener;
-
-    // --- NO CONSTRUCTOR SHOULD BE HERE ---
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,11 +113,10 @@ public class FavouriteActivity extends AppCompatActivity implements BuyerProduct
     private void setupEmptyStateButton() {
         if (btnShopNow != null) {
             btnShopNow.setOnClickListener(v -> {
-                // Navigate to a main shopping activity, for example, HomeActivity or ShopActivity
-                Intent intent = new Intent(FavouriteActivity.this, BuyerActivity.class); // Corrected to BuyerActivity
+                Intent intent = new Intent(FavouriteActivity.this, BuyerActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
-                finish(); // Finish this activity
+                finish();
             });
         }
     }
@@ -134,6 +135,7 @@ public class FavouriteActivity extends AppCompatActivity implements BuyerProduct
                 List<String> favouriteProductIds = new ArrayList<>();
                 if (snapshot.exists()) {
                     for (DataSnapshot idSnapshot : snapshot.getChildren()) {
+                        // Struktur data dipermudahkan: kini hanya simpan ID sebagai key dengan nilai true
                         String productId = idSnapshot.getKey();
                         Boolean isFavourite = idSnapshot.getValue(Boolean.class);
                         if (productId != null && Boolean.TRUE.equals(isFavourite)) {
@@ -146,9 +148,9 @@ public class FavouriteActivity extends AppCompatActivity implements BuyerProduct
 
                 if (favouriteProductIds.isEmpty()) {
                     favouriteProductList.clear();
-                    onAllProductsLoaded(); // Use a single method to update UI state
+                    onAllProductsLoaded();
                 } else {
-                    Collections.reverse(favouriteProductIds); // Show newest first
+                    Collections.reverse(favouriteProductIds);
                     loadFavouriteProducts(favouriteProductIds);
                 }
             }
@@ -203,6 +205,7 @@ public class FavouriteActivity extends AppCompatActivity implements BuyerProduct
 
     private void onAllProductsLoaded() {
         setLoadingState(false);
+        // Guna notifyDataSetChanged() untuk kesederhanaan, DiffUtil boleh ditambah kemudian jika perlu
         productAdapter.notifyDataSetChanged();
         showEmptyState(favouriteProductList.isEmpty());
     }
@@ -210,7 +213,7 @@ public class FavouriteActivity extends AppCompatActivity implements BuyerProduct
     private void setLoadingState(boolean isLoading) {
         progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         favouriteRecyclerView.setVisibility(isLoading ? View.GONE : View.VISIBLE);
-        if(isLoading) {
+        if (isLoading) {
             noFavouritesLayout.setVisibility(View.GONE);
         }
     }
@@ -229,66 +232,139 @@ public class FavouriteActivity extends AppCompatActivity implements BuyerProduct
         startActivity(intent);
     }
 
+    // --- PERUBAHAN 2: Permudahkan kaedah onBuyNowClick ---
     @Override
-    public void onBuyNowClick(Product product, Variant variant) {
+    public void onBuyNowClick(Product product) {
         if (product == null || product.getProductId() == null) {
             Toast.makeText(this, "Product details not available.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (product.hasVariants() && variant == null) {
-            // If it has variants but none is selected, prompt user to select one
-            Toast.makeText(this, "Please select a variant.", Toast.LENGTH_SHORT).show();
-            onProductClick(product); // Go to detail page to select variant
-        } else {
-            if (!product.hasStock() && (variant == null || variant.getStock() <= 0)) {
-                Toast.makeText(this, "Sorry, this product is out of stock.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            ArrayList<CartItem> itemsForCheckout = new ArrayList<>();
-            CartItem item;
-
-            if(variant != null) {
-                item = new CartItem(
-                        product.getProductId(),
-                        product.getName(),
-                        variant.getPriceModifier(),
-                        1,
-                        (product.getImageUrls() != null && !product.getImageUrls().isEmpty()) ? product.getImageUrls().get(0) : "",
-                        variant.getId(),
-                        variant.getName()
-                );
-            } else {
-                item = new CartItem(
-                        product.getProductId(),
-                        product.getName(),
-                        product.getFinalPrice(),
-                        1,
-                        (product.getImageUrls() != null && !product.getImageUrls().isEmpty()) ? product.getImageUrls().get(0) : ""
-                );
-            }
-
-            String sellerId = product.isPreloaded() ? "system" : product.getSellerId();
-            String sellerName = product.isPreloaded() ? "BeautyHub Official" : product.getSellerName();
-            item.setSellerId(sellerId);
-            item.setSellerName(sellerName);
-            item.setFromJson(product.isPreloaded());
-
-            itemsForCheckout.add(item);
-
-            Intent intent = new Intent(this, CheckoutActivity.class);
-            intent.putParcelableArrayListExtra("CHECKOUT_ITEMS", itemsForCheckout);
-            intent.putExtra("SOURCE", "BUY_NOW");
-            startActivity(intent);
+        // Semak stok produk utama
+        if (!product.hasStock()) {
+            Toast.makeText(this, "Sorry, this product is out of stock.", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        ArrayList<CartItem> itemsForCheckout = new ArrayList<>();
+        String imageUrl = (product.getImageUrls() != null && !product.getImageUrls().isEmpty()) ? product.getImageUrls().get(0) : "";
+
+        // Cipta CartItem tanpa sebarang rujukan varian
+        CartItem item = new CartItem(
+                product.getProductId(),
+                product.getName(),
+                product.getFinalPrice(),
+                1,
+                imageUrl,
+                product.getSellerProfileImageUrl()
+        );
+
+        // Tetapkan maklumat penjual
+        item.setSellerId(product.getSellerId());
+        item.setSellerName(product.getSellerName());
+        item.setFromJson(product.isPreloaded());
+
+        itemsForCheckout.add(item);
+
+        Intent intent = new Intent(this, CheckoutActivity.class);
+        intent.putParcelableArrayListExtra("CHECKOUT_ITEMS", itemsForCheckout);
+        intent.putExtra("SOURCE", "BUY_NOW");
+        startActivity(intent);
     }
 
+    // --- PERUBAHAN 3: Permudahkan kaedah onAddToCartClick ---
     @Override
-    public void onAddToCartClick(Product product, Variant variant) {
-        Toast.makeText(this, "Add to cart clicked: " + product.getName(), Toast.LENGTH_SHORT).show();
-        // Implement Add to Cart logic here if needed
+    public void onAddToCartClick(Product product) {
+        if (currentUser == null) {
+            Toast.makeText(this, "Please log in to add items to your cart", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, LoginActivity.class));
+            return;
+        }
+
+        // Semak stok produk utama
+        if (!product.hasStock()) {
+            Toast.makeText(this, "Product is out of stock", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String userId = currentUser.getUid();
+
+        // --- PEMBETULAN UTAMA DI SINI ---
+        // Terus dapatkan sellerId dan pastikan ia wujud. Tiada lagi logik gantian.
+        String sellerId = product.getSellerId();
+
+        if (sellerId == null || sellerId.isEmpty()) {
+            Toast.makeText(this, "Cannot add item: Seller information is missing.", Toast.LENGTH_LONG).show();
+            Log.e("BuyerActivity", "Attempted to add product with missing sellerId: " + product.getProductId());
+            return;
+        }
+        // --- AKHIR PEMBETULAN UTAMA ---
+
+        // Rujukan ke troli seller kini menggunakan sellerId yang sah
+        DatabaseReference sellerCartRef = FirebaseDatabase.getInstance()
+                .getReference("Carts")
+                .child(userId)
+                .child(sellerId); // <-- Guna sellerId yang betul dan sah
+
+        // ID item dalam troli adalah sama dengan ID produk
+        String cartItemId = product.getProductId();
+        DatabaseReference cartItemRef = sellerCartRef.child(cartItemId);
+
+        // Guna Transaction untuk mengendalikan penambahan kuantiti dengan selamat
+        cartItemRef.runTransaction(new com.google.firebase.database.Transaction.Handler() {
+            @NonNull
+            @Override
+            public com.google.firebase.database.Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                CartItem currentItem = mutableData.getValue(CartItem.class);
+
+                if (currentItem == null) {
+                    // Item belum wujud, cipta item baru
+                    String imageUrl = (product.getImageUrls() != null && !product.getImageUrls().isEmpty())
+                            ? product.getImageUrls().get(0) : null;
+
+                    CartItem newItem = new CartItem();
+                    newItem.setProductId(product.getProductId());
+                    newItem.setName(product.getName());
+                    newItem.setPrice(product.getFinalPrice());
+                    newItem.setQuantity(1);
+                    newItem.setImageUrls(imageUrl);
+                    newItem.setSelected(true); // Pilih secara lalai apabila ditambah
+                    newItem.setSellerId(sellerId);
+                    newItem.setSellerName(product.getSellerName());
+                    newItem.setSellerProfileImageUrl(product.getSellerProfileImageUrl());
+
+                    mutableData.setValue(newItem);
+                } else {
+                    // Item sudah ada, hanya tambah kuantiti
+                    int newQuantity = currentItem.getQuantity() + 1;
+
+                    // Semak semula stok sebelum mengemas kini
+                    if (newQuantity > product.getStock()) {
+                        // Jangan teruskan transaksi jika melebihi stok
+                        // Mesej Toast akan dipaparkan dalam onComplete
+                        return com.google.firebase.database.Transaction.abort();
+                    }
+
+                    currentItem.setQuantity(newQuantity);
+                    mutableData.setValue(currentItem);
+                }
+                return com.google.firebase.database.Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {
+                if (error != null) {
+                    Toast.makeText(FavouriteActivity.this, "Failed to add to cart: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                } else if (committed) {
+                    Toast.makeText(FavouriteActivity.this, "Item added to cart", Toast.LENGTH_SHORT).show();
+                } else {
+                    // Transaksi dibatalkan (kemungkinan besar kerana melebihi stok)
+                    Toast.makeText(FavouriteActivity.this, "Maximum quantity in cart reached", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
+
 
     @Override
     public void onFavouriteClick(Product product, boolean isFavourite) {
@@ -311,23 +387,21 @@ public class FavouriteActivity extends AppCompatActivity implements BuyerProduct
                     .addOnSuccessListener(aVoid -> Toast.makeText(FavouriteActivity.this, "Added to Favourites", Toast.LENGTH_SHORT).show())
                     .addOnFailureListener(e -> Toast.makeText(FavouriteActivity.this, "Failed to add favourite", Toast.LENGTH_SHORT).show());
         } else {
-            // This is the important part for this activity
             favRef.removeValue()
                     .addOnSuccessListener(aVoid -> {
                         Toast.makeText(FavouriteActivity.this, "Removed from Favourites", Toast.LENGTH_SHORT).show();
-                        // The ValueEventListener will automatically detect this change and update the list.
-                        // Manually removing from the list here can cause issues.
-                        // Let the listener handle the UI refresh.
+                        // ValueEventListener akan mengemas kini senarai secara automatik
                     })
                     .addOnFailureListener(e -> Toast.makeText(FavouriteActivity.this, "Failed to remove favourite", Toast.LENGTH_SHORT).show());
         }
     }
 
-    // ▼▼▼ THIS IS THE MISSING METHOD ▼▼▼
     @Override
     public void onSellerClick(String sellerId) {
-        Toast.makeText(this, "Seller clicked: " + sellerId, Toast.LENGTH_SHORT).show();
-        // You can implement navigation to a seller's profile page here if you want
+        if (sellerId == null || sellerId.isEmpty() || sellerId.startsWith("json_")) {
+            Toast.makeText(this, "This is an official store, no separate seller page.", Toast.LENGTH_SHORT).show();
+            return;
+        }
         Intent intent = new Intent(this, SellerProfileActivity.class);
         intent.putExtra("SELLER_ID", sellerId);
         startActivity(intent);

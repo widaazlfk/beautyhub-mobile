@@ -1,4 +1,3 @@
-// Make sure this is in your com.example.beautyhub.models package
 package com.example.beautyhub.models;
 
 import android.os.Parcel;

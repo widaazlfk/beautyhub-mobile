@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide; // Pastikan Glide diimport
 import com.example.beautyhub.R;
 import com.example.beautyhub.models.Review;
 
@@ -18,42 +19,34 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-// Pastikan nama fail dan kelas adalah MyReviewsAdapter
 public class MyReviewsAdapter extends RecyclerView.Adapter<MyReviewsAdapter.ReviewViewHolder> {
 
     private final Context context;
     private final List<Review> reviewList;
-    private OnReviewActionListener listener; // Boleh jadi null untuk mod pembeli
+    private OnReviewActionListener listener;
+    private final boolean isActionMode;
 
-    private final boolean isActionMode; // Flag untuk menentukan mod
-
-    // --- INTERFACE ---
     public interface OnReviewActionListener {
         void onActionClick(Review review);
     }
 
-    // --- CONSTRUCTORS ---
-
-    // Constructor untuk Admin/Seller (Mod Tindakan)
     public MyReviewsAdapter(Context context, List<Review> reviewList, OnReviewActionListener listener) {
         this.context = context;
         this.reviewList = reviewList;
         this.listener = listener;
-        this.isActionMode = true; // Aktifkan mod tindakan
+        this.isActionMode = true;
     }
 
-    // Constructor untuk Pembeli (MyReviewsActivity - Mod Paparan Sahaja)
     public MyReviewsAdapter(Context context, List<Review> reviewList) {
         this.context = context;
         this.reviewList = reviewList;
-        this.listener = null; // Tiada tindakan diperlukan
-        this.isActionMode = false; // Matikan mod tindakan
+        this.listener = null;
+        this.isActionMode = false;
     }
 
     @NonNull
     @Override
     public ReviewViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Anda perlu cipta fail layout 'a_item_review.xml' atau nama lain yang sesuai
         View view = LayoutInflater.from(context).inflate(R.layout.a_item_review, parent, false);
         return new ReviewViewHolder(view);
     }
@@ -61,7 +54,7 @@ public class MyReviewsAdapter extends RecyclerView.Adapter<MyReviewsAdapter.Revi
     @Override
     public void onBindViewHolder(@NonNull ReviewViewHolder holder, int position) {
         Review review = reviewList.get(position);
-        holder.bind(review, listener, isActionMode); // Hantar flag mod ke ViewHolder
+        holder.bind(review, context, listener, isActionMode); // Tambah context ke bind
     }
 
     @Override
@@ -69,27 +62,40 @@ public class MyReviewsAdapter extends RecyclerView.Adapter<MyReviewsAdapter.Revi
         return reviewList.size();
     }
 
-    // --- VIEWHOLDER ---
     static class ReviewViewHolder extends RecyclerView.ViewHolder {
-        private final TextView tvUsername, tvComment, tvDate;
+        private final TextView tvProductName, tvComment, tvDate; // Tambah tvProductName
         private final RatingBar ratingBar;
-        private final ImageView ivDeleteReview;
+        private final ImageView ivDeleteReview, ivProductImage; // Tambah ivProductImage
 
         public ReviewViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvUsername = itemView.findViewById(R.id.tv_review_username);
+            // Pastikan ID ini wujud dalam a_item_review.xml
+            ivProductImage = itemView.findViewById(R.id.iv_review_product_image);
+            tvProductName = itemView.findViewById(R.id.tv_review_product_name);
             tvComment = itemView.findViewById(R.id.tv_review_comment);
             tvDate = itemView.findViewById(R.id.tv_review_date);
             ratingBar = itemView.findViewById(R.id.review_rating_bar);
             ivDeleteReview = itemView.findViewById(R.id.iv_delete_review);
         }
 
-        public void bind(final Review review, final OnReviewActionListener listener, boolean isActionMode) {
-            // Logik paparan yang sama untuk kedua-dua mod
-            tvUsername.setText(review.getUsername());
+        public void bind(final Review review, Context context, final OnReviewActionListener listener, boolean isActionMode) {
+            // 1. Papar Nama Produk (Dulu guna username, sekarang guna ProductName lebih sesuai untuk Buyer)
+            tvProductName.setText(review.getProductName());
             tvComment.setText(review.getComment());
             ratingBar.setRating(review.getRating());
 
+            // 2. Papar Gambar Produk guna Glide
+            if (review.getProductImageUrl() != null && !review.getProductImageUrl().isEmpty()) {
+                Glide.with(context)
+                        .load(review.getProductImageUrl())
+                        .placeholder(R.drawable.product_placeholder)
+                        .error(R.drawable.product_placeholder)
+                        .into(ivProductImage);
+            } else {
+                ivProductImage.setImageResource(R.drawable.product_placeholder);
+            }
+
+            // 3. Papar Tarikh
             if (review.getTimestampLong() > 0) {
                 SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
                 tvDate.setText(sdf.format(new Date(review.getTimestampLong())));
@@ -97,13 +103,11 @@ public class MyReviewsAdapter extends RecyclerView.Adapter<MyReviewsAdapter.Revi
                 tvDate.setText("N/A");
             }
 
-            // Logik yang berbeza berdasarkan mod
+            // 4. Logik Mod Tindakan (Padam)
             if (isActionMode && listener != null) {
-                // Mod Admin/Seller: Tunjukkan ikon padam dan tetapkan listener
                 ivDeleteReview.setVisibility(View.VISIBLE);
                 ivDeleteReview.setOnClickListener(v -> listener.onActionClick(review));
             } else {
-                // Mod Pembeli: Sembunyikan ikon padam
                 ivDeleteReview.setVisibility(View.GONE);
             }
         }

@@ -9,6 +9,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -16,8 +17,11 @@ import com.example.beautyhub.R;
 import com.example.beautyhub.models.ProductListing;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -45,7 +49,9 @@ public class AddListingActivity extends AppCompatActivity {
         // Setup Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
         toolbar.setNavigationOnClickListener(v -> finish());
 
         // Dapatkan data dari Intent (dari SearchProductForSellerActivity)
@@ -92,58 +98,106 @@ public class AddListingActivity extends AppCompatActivity {
             return;
         }
 
-        double price = 0;
+        double price;
         try {
             price = Double.parseDouble(priceStr);
         } catch (NumberFormatException e) {
-            editTextPrice.setError("Sila masukkan format harga yang betul");
+            editTextPrice.setError("Format harga tidak sah");
             editTextPrice.requestFocus();
             return;
         }
 
-        int stock = 0;
+        int stock;
         try {
             stock = Integer.parseInt(stockStr);
         } catch (NumberFormatException e) {
-            editTextStock.setError("Sila masukkan format stok yang betul");
+            editTextStock.setError("Format stok tidak sah");
             editTextStock.requestFocus();
             return;
         }
 
         int selectedConditionId = radioGroupCondition.getCheckedRadioButtonId();
+        if (selectedConditionId == -1) {
+            Toast.makeText(this, "Sila pilih kondisi produk", Toast.LENGTH_SHORT).show();
+            return;
+        }
         RadioButton selectedRadioButton = findViewById(selectedConditionId);
         String condition = selectedRadioButton.getText().toString();
 
         String currentUserId = mAuth.getCurrentUser().getUid();
 
-        saveListingToFirebase(currentUserId, price, stock, condition);
+        progressDialog.show(); // Tunjukkan dialog sebelum memuatkan data penjual
+
+        // 1. Dapatkan maklumat penjual dari nod 'Users'
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("Users").child(currentUserId);
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    // Ambil username dan profileImageUrl dari profil pengguna
+                    String sellerName = snapshot.child("username").getValue(String.class);
+                    String sellerProfileImageUrl = snapshot.child("profileImageUrl").getValue(String.class);
+
+                    // Pastikan nilai tidak null untuk mengelakkan ralat
+                    if (sellerName == null) sellerName = "Unknown Seller";
+                    if (sellerProfileImageUrl == null) sellerProfileImageUrl = ""; // URL kosong jika tiada
+
+                    // 2. Panggil kaedah untuk menyimpan dengan maklumat yang lengkap
+                    saveListingToFirebase(currentUserId, sellerName, sellerProfileImageUrl, price, stock, condition);
+
+                } else {
+                    progressDialog.dismiss();
+                    Toast.makeText(AddListingActivity.this, "Gagal mendapatkan data penjual.", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                progressDialog.dismiss();
+                Toast.makeText(AddListingActivity.this, "Ralat pangkalan data: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-    private void saveListingToFirebase(String sellerId, double price, int stock, String condition) {
-        progressDialog.show();
-
-        // Cipta ID unik untuk penyenaraian baru
+    private void saveListingToFirebase(String sellerId, String sellerName, String sellerProfileImageUrl, double price, int stock, String condition) {
         String listingId = listingsRef.push().getKey();
 
-        // Dapatkan tarikh semasa
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         String currentDate = sdf.format(new Date());
 
-        // Cipta objek ProductListing
-        ProductListing newListing = new ProductListing(selectedProductId, sellerId, price, stock, condition, currentDate);
+        // Cipta objek ProductListing dengan maklumat penjual yang lengkap
+        // Pastikan konstruktor dalam ProductListing.java sepadan
+        ProductListing newListing = new ProductListing(
+                selectedProductId,
+                selectedProductName,
+                sellerId,
+                sellerName,
+                price,
+                stock,
+                condition,
+                currentDate,
+               sellerProfileImageUrl,
+                null
+        );
+
+        // Tetapkan URL gambar profil penjual menggunakan setter (ini lebih selamat)
+        newListing.setSellerProfileImageUrl(sellerProfileImageUrl);
 
         if (listingId != null) {
+            // Simpan objek di bawah nod utama "ProductListings"
             listingsRef.child(listingId).setValue(newListing)
                     .addOnCompleteListener(task -> {
                         progressDialog.dismiss();
                         if (task.isSuccessful()) {
                             Toast.makeText(AddListingActivity.this, "Penyenaraian berjaya disimpan!", Toast.LENGTH_SHORT).show();
-                            // Balik ke skrin sebelumnya atau ke papan pemuka penjual
-                            finish();
+                            finish(); // Kembali ke skrin sebelumnya
                         } else {
                             Toast.makeText(AddListingActivity.this, "Gagal menyimpan: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     });
+        } else {
+            progressDialog.dismiss();
+            Toast.makeText(AddListingActivity.this, "Gagal mencipta ID untuk penyenaraian.", Toast.LENGTH_SHORT).show();
         }
     }
 }

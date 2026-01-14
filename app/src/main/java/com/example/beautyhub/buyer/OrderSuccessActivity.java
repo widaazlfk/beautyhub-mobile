@@ -3,13 +3,15 @@ package com.example.beautyhub.buyer;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.example.beautyhub.R;
+import com.google.android.material.button.MaterialButton;
+
+import java.util.ArrayList;
 
 public class OrderSuccessActivity extends AppCompatActivity {
 
@@ -18,75 +20,66 @@ public class OrderSuccessActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_order_success);
 
-        // 1. Inisialisasi semua view dari layout
+        // 1. Inisialisasi View
         TextView tvOrderId = findViewById(R.id.tv_order_id);
-        Button btnViewOrders = findViewById(R.id.btn_view_orders);
-        Button btnContinueShopping = findViewById(R.id.btn_continue_shopping);
+        TextView tvPaymentStatus = findViewById(R.id.tv_payment_status);
+        MaterialButton btnTrackOrders = findViewById(R.id.btn_view_orders);
+        MaterialButton btnBackHome = findViewById(R.id.btn_continue_shopping);
 
-        // 2. Dapatkan ID Pesanan yang dihantar dari CheckoutActivity
-        String orderId = getIntent().getStringExtra("ORDER_ID");
+        // 2. Dapatkan maklumat dari Intent
+        String paymentMethod = getIntent().getStringExtra("PAYMENT_METHOD");
+        ArrayList<String> orderIds = getIntent().getStringArrayListExtra("ORDER_IDS");
 
-        if (orderId != null && !orderId.isEmpty()) {
-            tvOrderId.setText(orderId);
+        // 3. Logik Status Bayaran
+        if ("Online Banking".equalsIgnoreCase(paymentMethod)) {
+            tvPaymentStatus.setText("Paid & Processing");
+            tvPaymentStatus.setTextColor(ContextCompat.getColor(this, R.color.green_success));
+        } else if ("Cash on Delivery".equalsIgnoreCase(paymentMethod)) {
+            tvPaymentStatus.setText("Pending (Cash on Delivery)");
+            tvPaymentStatus.setTextColor(ContextCompat.getColor(this, R.color.status_pending));
         } else {
-            // Urus kes di mana ID pesanan mungkin tiada
-            tvOrderId.setText("N/A");
-            Toast.makeText(this, "Could not retrieve order ID.", Toast.LENGTH_SHORT).show();
+            tvPaymentStatus.setText("Processing");
         }
 
-        // 3. Sediakan listener untuk butang "View My Orders"
-        btnViewOrders.setOnClickListener(v -> {
-                    Intent intent = new Intent(OrderSuccessActivity.this, OrderDetailsActivity.class);
-
-                    // Dapatkan semula ID pesanan yang telah diterima oleh aktiviti ini
-                    String orderIdToPass = getIntent().getStringExtra("ORDER_ID");
-            if (orderIdToPass != null && !orderIdToPass.isEmpty()) {
-                // Hantar ID pesanan ke OrderDetailsActivity
-                intent.putExtra("ORDER_ID", orderIdToPass);
-
-                // Kosongkan tindanan (back stack)
-                intent.addFlags
-                        (Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-
-                startActivity(intent);
-                finish(); // Tutup activity ini
+        // 4. Logik Paparan Order ID (Single vs Multiple Sellers)
+        if (orderIds != null && !orderIds.isEmpty()) {
+            if (orderIds.size() > 1) {
+                // Kes Multiple Sellers: Tunjuk jumlah order
+                tvOrderId.setText(orderIds.size() + " Orders (Multi-Seller)");
             } else {
-                // Jika atas sebab tertentu ID pesanan hilang, beritahu pengguna
-                Toast.makeText(this, "Cannot view order. Order ID  is missing.", Toast.LENGTH_LONG).show();
+                // Kes Single Seller: Tunjuk ID penuh (Contoh: -OJz123...)
+                // Kita ambil ID pertama dari senarai
+                String singleId = orderIds.get(0);
+                tvOrderId.setText(singleId);
             }
+        } else {
+            // Fallback jika ArrayList kosong, cuba ambil rujukan string biasa
+            String backupId = getIntent().getStringExtra("ORDER_ID");
+            tvOrderId.setText(backupId != null ? backupId : "N/A");
+        }
 
-            // --- TAMAT PEMBAIKAN ---
+        // 5. Listener Track Order
+        btnTrackOrders.setOnClickListener(v -> {
+            Intent intent = new Intent(OrderSuccessActivity.this, MyOrdersActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
         });
 
+        // 6. Listener Back to Home
+        btnBackHome.setOnClickListener(v -> navigateToHome());
+    }
 
-
-        // 4. Sediakan listener untuk butang "Continue Shopping"
-        btnContinueShopping.setOnClickListener(v -> {
-            // Hantar pengguna kembali ke skrin utama pembeli
-            navigateToHome();
-        });
-    } // <-- Kurungan penutup untuk onCreate() yang betul
-
-    /**
-     * Mengambil alih fungsi butang kembali fizikal.
-     * Ia menghalang pengguna daripada kembali ke skrin checkout.
-     * Sebaliknya, ia menghantar mereka ke aktiviti utama pembeli.
-     */
     @SuppressLint("MissingSuperCall")
     @Override
     public void onBackPressed() {
-        // JANGAN panggil super.onBackPressed(). Ini memastikan kelakuan asal diganti sepenuhnya.
         navigateToHome();
     }
 
-    /**
-     * Kaedah bantuan untuk mengemaskan navigasi ke skrin utama.
-     * Ia membersihkan tindanan (back stack) dan memulakan BuyerActivity.
-     */
     private void navigateToHome() {
         Intent intent = new Intent(OrderSuccessActivity.this, BuyerActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
-        finish(); // Tutup activity ini
+        finish();
     }
 }

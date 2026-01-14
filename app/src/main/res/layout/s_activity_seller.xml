@@ -5,579 +5,411 @@
     android:id="@+id/drawer_layout_seller"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".seller.SellerActivity"
-    tools:openDrawer="start">
+    android:background="#F8F9FA"
+    tools:context=".seller.SellerActivity">
 
-    <!-- ########## KANDUNGAN UTAMA (Main Content) ########## -->
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- AppBar dengan Toolbar -->
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/white"
-            app:elevation="4dp">
+            app:elevation="0dp">
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar_seller"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                app:contentInsetStart="0dp">
+                android:layout_height="?attr/actionBarSize">
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp">
+                    android:layout_height="match_parent">
 
                     <ImageView
                         android:id="@+id/icon_menu_seller"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:clickable="true"
-                        android:contentDescription="Open Menu"
-                        android:focusable="true"
-                        android:src="@drawable/ic_menu" />
+                        android:layout_centerVertical="true"
+                        android:src="@drawable/ic_menu"
+                        app:tint="@color/black" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:text="Seller Dashboard"
-                        android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+                        android:layout_centerInParent="true"
+                        android:text="Seller Centre"
+                        android:textColor="@color/black"
+                        android:textSize="18sp"
                         android:textStyle="bold" />
 
-                </LinearLayout>
+                    <FrameLayout
+                        android:id="@+id/btn_notifications_seller"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="12dp">
 
+                        <ImageView
+                            android:id="@+id/iv_notification_icon"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/notification_icon" />
+
+                        <TextView
+                            android:id="@+id/tv_notification_badge"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_gravity="top|end"
+                            android:background="@drawable/bg_notification_badge"
+                            android:gravity="center"
+                            android:text="0"
+                            android:textColor="@android:color/white"
+                            android:textSize="9sp"
+                            android:visibility="gone" />
+                    </FrameLayout>
+                </RelativeLayout>
             </com.google.android.material.appbar.MaterialToolbar>
         </com.google.android.material.appbar.AppBarLayout>
 
-        <!-- Layout Asal Anda Kini di dalam ConstraintLayout -->
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#F5F5F5"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            <ScrollView
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                app:layout_constraintBottom_toTopOf="@+id/bottom_navigation_bar"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
 
-                <LinearLayout
+                <!-- Section: Business Insights -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Business Insights"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="12dp"/>
+
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:paddingBottom="16dp">
-
-                    <!-- Header Stats -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="16dp"
-                        android:orientation="horizontal"
-                        android:weightSum="2">
-
-                        <!-- Total Sales Card -->
-                        <com.google.android.material.card.MaterialCardView
-                            android:layout_width="0dp"
-                            android:layout_height="120dp"
-                            android:layout_marginEnd="8dp"
-                            android:layout_weight="1"
-                            app:cardCornerRadius="12dp"
-                            app:cardElevation="4dp">
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:gravity="center"
-                                android:orientation="vertical"
-                                android:padding="16dp">
-
-                                <ImageView
-                                    android:layout_width="32dp"
-                                    android:layout_height="32dp"
-                                    android:contentDescription="@string/content_description_total_sales_icon"
-                                    android:src="@drawable/ic_sales"
-                                    app:tint="#8a2128" />
-
-                                <TextView
-                                    android:id="@+id/tv_total_sales"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="8dp"
-                                    android:gravity="center"
-                                    android:textColor="@android:color/black"
-                                    android:textSize="18sp"
-                                    android:textStyle="bold"
-                                    tools:text="RM 2,540" />
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:gravity="center"
-                                    android:text="Total Sales"
-                                    android:textColor="#666666"
-                                    android:textSize="12sp" />
-
-                            </LinearLayout>
-
-                        </com.google.android.material.card.MaterialCardView>
-
-                        <!-- Orders Card -->
-                        <com.google.android.material.card.MaterialCardView
-                            android:layout_width="0dp"
-                            android:layout_height="120dp"
-                            android:layout_marginStart="8dp"
-                            android:layout_weight="1"
-                            app:cardCornerRadius="12dp"
-                            app:cardElevation="4dp">
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:gravity="center"
-                                android:orientation="vertical"
-                                android:padding="16dp">
-
-                                <ImageView
-                                    android:layout_width="32dp"
-                                    android:layout_height="32dp"
-                                    android:contentDescription="Total orders icon"
-                                    android:src="@drawable/ic_orders"
-                                    app:tint="#8a2128" />
-
-                                <TextView
-                                    android:id="@+id/tv_total_orders"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="8dp"
-                                    android:gravity="center"
-                                    android:textColor="@android:color/black"
-                                    android:textSize="18sp"
-                                    android:textStyle="bold"
-                                    tools:text="24" />
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:gravity="center"
-                                    android:text="Total Orders"
-                                    android:textColor="#666666"
-                                    android:textSize="12sp" />
-
-                            </LinearLayout>
-
-                        </com.google.android.material.card.MaterialCardView>
-
-                    </LinearLayout>
-
-                    <!-- Quick Actions -->
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginTop="16dp"
-                        android:text="Quick Actions"
-                        android:textColor="@android:color/black"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="2dp"
+                    app:strokeWidth="0dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_margin="16dp"
                         android:orientation="horizontal"
+                        android:padding="16dp"
                         android:weightSum="3">
 
-                        <!-- Add Product -->
-                        <com.google.android.material.card.MaterialCardView
-                            android:id="@+id/card_add_product"
+                        <!-- Sales Today -->
+                        <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="100dp"
-                            android:layout_marginEnd="8dp"
+                            android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:clickable="true"
-                            android:focusable="true"
-                            app:cardBackgroundColor="#E8F5E8"
-                            app:cardCornerRadius="12dp"
-                            app:cardElevation="2dp">
+                            android:gravity="center"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@+id/tv_total_sales"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="RM 0.00"
+                                android:textColor="#8a2128"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Sales Today"
+                                android:textSize="11sp" />
+                        </LinearLayout>
 
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:gravity="center"
-                                android:orientation="vertical"
-                                android:padding="12dp">
+                        <View android:layout_width="1dp" android:layout_height="30dp" android:background="#EEEEEE" android:layout_gravity="center"/>
 
-                                <ImageView
-                                    android:layout_width="32dp"
-                                    android:layout_height="32dp"
-                                    android:contentDescription="Add product icon"
-                                    android:src="@drawable/ic_add_product"
-                                    app:tint="#4CAF50" />
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="8dp"
-                                    android:gravity="center"
-                                    android:text="Add Product"
-                                    android:textColor="@android:color/black"
-                                    android:textSize="12sp"
-                                    android:textStyle="bold" />
-
-                            </LinearLayout>
-
-                        </com.google.android.material.card.MaterialCardView>
-
-                        <!-- Manage Products -->
-                        <com.google.android.material.card.MaterialCardView
-                            android:id="@+id/card_manage_products"
+                        <!-- New Orders -->
+                        <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="100dp"
-                            android:layout_marginStart="4dp"
-                            android:layout_marginEnd="4dp"
+                            android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:clickable="true"
-                            android:focusable="true"
-                            app:cardBackgroundColor="#E3F2FD"
-                            app:cardCornerRadius="12dp"
-                            app:cardElevation="2dp">
+                            android:gravity="center"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@+id/tv_total_orders"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textColor="@color/black"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="New Orders"
+                                android:textSize="11sp" />
+                        </LinearLayout>
 
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:gravity="center"
-                                android:orientation="vertical"
-                                android:padding="12dp">
+                        <View android:layout_width="1dp" android:layout_height="30dp" android:background="#EEEEEE" android:layout_gravity="center"/>
 
-                                <ImageView
-                                    android:layout_width="32dp"
-                                    android:layout_height="32dp"
-                                    android:contentDescription="Manage products icon"
-                                    android:src="@drawable/ic_manage_products"
-                                    app:tint="#2196F3" />
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="8dp"
-                                    android:gravity="center"
-                                    android:text="Manage Products"
-                                    android:textColor="@android:color/black"
-                                    android:textSize="12sp"
-                                    android:textStyle="bold" />
-
-                            </LinearLayout>
-
-                        </com.google.android.material.card.MaterialCardView>
-
-                        <!-- View Orders -->
-                        <com.google.android.material.card.MaterialCardView
-                            android:id="@+id/card_view_orders"
+                        <!-- Visitors -->
+                        <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="100dp"
-                            android:layout_marginStart="8dp"
+                            android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:clickable="true"
-                            android:focusable="true"
-                            app:cardBackgroundColor="#FFF3E0"
-                            app:cardCornerRadius="12dp"
-                            app:cardElevation="2dp">
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:gravity="center"
-                                android:orientation="vertical"
-                                android:padding="12dp">
-
-                                <ImageView
-                                    android:layout_width="32dp"
-                                    android:layout_height="32dp"
-                                    android:contentDescription="View orders icon"
-                                    android:src="@drawable/ic_view_orders"
-                                    app:tint="#FF9800" />
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="8dp"
-                                    android:gravity="center"
-                                    android:text="View Orders"
-                                    android:textColor="@android:color/black"
-                                    android:textSize="12sp"
-                                    android:textStyle="bold" />
-
-                            </LinearLayout>
-
-                        </com.google.android.material.card.MaterialCardView>
-
+                            android:gravity="center"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@+id/tv_today_visitors"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textColor="@color/black"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Visitors"
+                                android:textSize="11sp" />
+                        </LinearLayout>
                     </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
-                    <!-- Recent Orders -->
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginTop="24dp"
-                        android:text="Recent Orders"
-                        android:textColor="@android:color/black"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                <!-- Section: To-Do List -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="To-do List"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="12dp"/>
 
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:columnCount="2"
+                    android:rowCount="2">
+
+                    <!-- To Ship Card -->
                     <com.google.android.material.card.MaterialCardView
-                        android:layout_width="match_parent"
+                        android:id="@+id/card_to_ship"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_margin="16dp"
-                        app:cardCornerRadius="12dp"
-                        app:cardElevation="2dp">
-
+                        android:layout_columnWeight="1"
+                        android:layout_margin="4dp"
+                        app:cardCornerRadius="8dp">
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="vertical"
-                            android:padding="16dp">
-
-                            <!-- Order 1 -->
-                            <LinearLayout
-                                android:layout_width="match_parent"
+                            android:padding="12dp"
+                            android:gravity="center">
+                            <TextView
+                                android:id="@+id/tv_to_ship_count"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:paddingVertical="12dp">
-
-                                <ImageView
-                                    android:layout_width="40dp"
-                                    android:layout_height="40dp"
-                                    android:contentDescription="Package icon"
-                                    android:src="@drawable/ic_package"
-                                    app:tint="#8a2128" />
-
-                                <LinearLayout
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginStart="12dp"
-                                    android:layout_weight="1"
-                                    android:orientation="vertical">
-
-                                    <TextView
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:text="Order #BH28374"
-                                        android:textColor="@android:color/black"
-                                        android:textSize="14sp"
-                                        android:textStyle="bold" />
-
-                                    <TextView
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:text="2 items • RM 89.99"
-                                        android:textColor="#666666"
-                                        android:textSize="12sp" />
-
-                                    <TextView
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:text="Today, 10:30 AM"
-                                        android:textColor="#666666"
-                                        android:textSize="10sp" />
-
-                                </LinearLayout>
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/status_pending_bg"
-                                    android:paddingHorizontal="8dp"
-                                    android:paddingVertical="4dp"
-                                    android:text="Pending"
-                                    android:textColor="#FF9800"
-                                    android:textSize="10sp"
-                                    android:textStyle="bold" />
-
-                            </LinearLayout>
-
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="1dp"
-                                android:background="#F0F0F0" />
-
-                            <!-- Order 2 -->
-                            <LinearLayout
-                                android:layout_width="match_parent"
+                                android:text="0"
+                                android:textColor="#2196F3"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+                            <TextView
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:paddingVertical="12dp">
-
-                                <ImageView
-                                    android:layout_width="40dp"
-                                    android:layout_height="40dp"
-                                    android:contentDescription="Package icon"
-                                    android:src="@drawable/ic_package"
-                                    app:tint="#8a2128" />
-
-                                <LinearLayout
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginStart="12dp"
-                                    android:layout_weight="1"
-                                    android:orientation="vertical">
-
-                                    <TextView
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:text="Order #BH28373"
-                                        android:textColor="@android:color/black"
-                                        android:textSize="14sp"
-                                        android:textStyle="bold" />
-
-                                    <TextView
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:text="1 item • RM 45.50"
-                                        android:textColor="#666666"
-                                        android:textSize="12sp" />
-
-                                    <TextView
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:text="Yesterday, 3:15 PM"
-                                        android:textColor="#666666"
-                                        android:textSize="10sp" />
-
-                                </LinearLayout>
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/status_shipped_bg"
-                                    android:paddingHorizontal="8dp"
-                                    android:paddingVertical="4dp"
-                                    android:text="Shipped"
-                                    android:textColor="#2196F3"
-                                    android:textSize="10sp"
-                                    android:textStyle="bold" />
-
-                            </LinearLayout>
-
-                            <!-- View All Orders Button -->
-                            <Button
-                                android:id="@+id/btn_view_all_orders"
-                                style="?attr/materialButtonOutlinedStyle"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:text="View All Orders"
-                                android:textColor="#8a2128"
-                                app:strokeColor="#8a2128" />
-
+                                android:text="To Ship"
+                                android:textSize="12sp" />
                         </LinearLayout>
-
                     </com.google.android.material.card.MaterialCardView>
 
-                    <!-- Inventory Alert -->
+                    <!-- Low Stock Card -->
                     <com.google.android.material.card.MaterialCardView
-                        android:layout_width="match_parent"
+                        android:id="@+id/low_stock_card_mini"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="16dp"
-                        android:layout_marginTop="0dp"
-                        android:layout_marginBottom="16dp"
-                        app:cardCornerRadius="12dp"
-                        app:cardElevation="2dp"
-                        app:strokeColor="#FF6B6B"
-                        app:strokeWidth="1dp">
-
+                        android:layout_columnWeight="1"
+                        android:layout_margin="4dp"
+                        app:cardCornerRadius="8dp">
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal"
-                            android:padding="16dp">
-
-                            <ImageView
-                                android:layout_width="24dp"
-                                android:layout_height="24dp"
-                                android:contentDescription="Low stock warning icon"
-                                android:src="@drawable/warning_icon"
-                                app:tint="#FF6B6B" />
-
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="12dp"
-                                android:layout_weight="1"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:text="Low Stock Alert"
-                                    android:textColor="@android:color/black"
-                                    android:textSize="14sp"
-                                    android:textStyle="bold" />
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:text="3 products are running low on stock"
-                                    android:textColor="#666666"
-                                    android:textSize="12sp" />
-
-                            </LinearLayout>
-
-                            <Button
-                                android:id="@+id/btn_manage_inventory"
-                                style="@style/Widget.Material3.Button"
+                            android:orientation="vertical"
+                            android:padding="12dp"
+                            android:gravity="center">
+                            <TextView
+                                android:id="@+id/tv_mini_low_stock"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:backgroundTint="#FF6B6B"
-                                android:text="Manage"
-                                android:textColor="@android:color/white"
+                                android:text="0"
+                                android:textColor="#F44336"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Low Stock"
                                 android:textSize="12sp" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                </GridLayout>
 
+                <!-- Quick Actions -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Quick Actions"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="12dp"/>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="2dp">
+
+                    <GridLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:columnCount="4"
+                        android:padding="12dp">
+
+                        <LinearLayout
+                            android:id="@+id/card_add_product"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+                            <ImageView
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:src="@drawable/ic_add_circle"
+                                app:tint="#4CAF50" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Add"
+                                android:textSize="11sp"
+                                android:layout_marginTop="4dp"/>
                         </LinearLayout>
 
-                    </com.google.android.material.card.MaterialCardView>
+                        <LinearLayout
+                            android:id="@+id/card_manage_products"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+                            <ImageView
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:src="@drawable/ic_inventory"
+                                app:tint="#FF9800" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Products"
+                                android:textSize="11sp"
+                                android:layout_marginTop="4dp"/>
+                        </LinearLayout>
 
-                </LinearLayout>
+                        <LinearLayout
+                            android:id="@+id/card_view_orders"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+                            <ImageView
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:src="@drawable/ic_orders"
+                                app:tint="#2196F3" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Orders"
+                                android:textSize="11sp"
+                                android:layout_marginTop="4dp"/>
+                        </LinearLayout>
 
-            </ScrollView>
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+                            <ImageView
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:src="@drawable/ic_wallet"
+                                app:tint="#9C27B0" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Finance"
+                                android:textSize="11sp"
+                                android:layout_marginTop="4dp"/>
+                        </LinearLayout>
+                    </GridLayout>
+                </com.google.android.material.card.MaterialCardView>
 
-            <!-- Bottom Navigation -->
-            <com.google.android.material.bottomnavigation.BottomNavigationView
-                android:id="@+id/bottom_navigation_bar"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:background="?attr/colorSurface"
-                app:itemIconTint="@color/seller_bottom_nav"
-                app:itemTextColor="@color/seller_bottom_nav"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:menu="@menu/seller_bottom_nav" />
+                <!-- Sales Chart -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sales Performance"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="12dp"/>
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="2dp">
+                    <com.github.mikephil.charting.charts.BarChart
+                        android:id="@+id/bar_chart_statistics"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="8dp" />
+                </com.google.android.material.card.MaterialCardView>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp" />
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottom_navigation_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="@android:color/white"
+            app:menu="@menu/seller_bottom_nav" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-    <!-- ▼▼▼ BLOK YANG DIPERBAIKI ▼▼▼ -->
-    <!-- NavigationView diletakkan di sini sebagai child kepada DrawerLayout -->
     <com.google.android.material.navigation.NavigationView
-        android:id="@+id/navigation_view_seller"
+        android:id="@+id/nav_view_seller"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         app:headerLayout="@layout/nav_header_seller"
         app:menu="@menu/navigation_menu" />
-    <!-- ▲▲▲ AKHIR BLOK ▲▲▲ -->
 
 </androidx.drawerlayout.widget.DrawerLayout>

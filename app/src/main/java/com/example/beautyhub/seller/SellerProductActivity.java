@@ -105,11 +105,17 @@ public class SellerProductActivity extends Fragment implements SellerProductAdap
         startActivity(intent);
     }
 
+    // KOD BARU YANG BETUL
     @Override
     public void onEditClick(Product product) {
-        // Open EditProductActivity
-        Intent intent = new Intent(getActivity(), EditProductActivity.class);
-        intent.putExtra("PRODUCT_ID", product.getProductId()); // Pass the product ID to the edit activity
+        // Buka AddProductActivity dalam mod 'Edit'
+        Intent intent = new Intent(getActivity(), AddProductActivity.class);
+
+        // Hantar ID produk dan keseluruhan objek produk
+        // Objek 'Product' mesti implement 'Serializable' untuk ini berfungsi
+        intent.putExtra("EDIT_PRODUCT_ID", product.getProductId());
+        intent.putExtra("EDIT_PRODUCT", product);
+
         startActivity(intent);
     }
 

@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,7 +14,6 @@ import com.bumptech.glide.Glide;
 import com.example.beautyhub.R;
 import com.example.beautyhub.models.CartItem;
 import com.example.beautyhub.models.Product;
-import com.example.beautyhub.models.Variant;
 
 import java.util.List;
 import java.util.Locale;
@@ -25,25 +23,32 @@ public class CheckoutItemsAdapter extends RecyclerView.Adapter<CheckoutItemsAdap
 
     private final Context context;
     private final List<CartItem> cartItems;
-
-    // NEW: Product cache untuk stock validation
     private Map<String, Product> productCache;
+    private String userZone = "West Malaysia";
+    private boolean isShippingEnabled = true; // Logik untuk COD
 
-    // Antara muka untuk callback ke Activity
     public interface OnQuantityChangeListener {
         void onQuantityChanged(int position, int newQuantity);
     }
-    private OnQuantityChangeListener quantityChangeListener;
+    private final OnQuantityChangeListener quantityChangeListener;
 
-    public CheckoutItemsAdapter(Context context, List<CartItem> cartItems) {
+    public CheckoutItemsAdapter(Context context, List<CartItem> cartItems, OnQuantityChangeListener listener) {
         this.context = context;
         this.cartItems = cartItems;
-        if (context instanceof OnQuantityChangeListener) {
-            this.quantityChangeListener = (OnQuantityChangeListener) context;
-        }
+        this.quantityChangeListener = listener;
     }
 
-    // NEW: Set product cache
+    // Fungsi untuk mematikan/menghidupkan shipping fee (digunakan oleh CheckoutActivity untuk COD)
+    public void setShippingEnabled(boolean enabled) {
+        this.isShippingEnabled = enabled;
+        notifyDataSetChanged();
+    }
+
+    public void setUserZone(String zone) {
+        this.userZone = zone;
+        notifyDataSetChanged();
+    }
+
     public void setProductCache(Map<String, Product> productCache) {
         this.productCache = productCache;
         notifyDataSetChanged();
@@ -61,162 +66,95 @@ public class CheckoutItemsAdapter extends RecyclerView.Adapter<CheckoutItemsAdap
         CartItem item = cartItems.get(position);
         if (item == null) return;
 
-        // NEW: Display product name dengan variant jika ada
-        holder.itemName.setText(item.getDisplayName());
-
-        // NEW: Display variant info jika ada
-        if (item.getVariantName() != null && !item.getVariantName().isEmpty()) {
-            holder.tvVariantInfo.setVisibility(View.VISIBLE);
-            holder.tvVariantInfo.setText(item.getVariantName());
-        } else {
-            holder.tvVariantInfo.setVisibility(View.GONE);
-        }
-
-        // Calculate total price untuk item ini
+        // 1. Set Maklumat Produk
+        holder.itemName.setText(item.getName());
         double itemTotal = item.getPrice() * item.getQuantity();
         holder.itemPrice.setText(String.format(Locale.US, "RM %.2f", itemTotal));
-        holder.itemQuantity.setText(String.format("x %d", item.getQuantity()));
+        holder.itemQuantity.setText(String.format(Locale.US, "x %d", item.getQuantity()));
 
-        // Display seller info
+        // 2. Set Nama Penjual
         if (item.getSellerName() != null && !item.getSellerName().isEmpty()) {
-            holder.sellerName.setText("Sold by: " + item.getSellerName());
-            holder.sellerName.setVisibility(View.VISIBLE);
-
-            // NEW: Show official badge untuk "system" seller
-            if ("system".equals(item.getSellerId())) {
-                holder.tvOfficialBadge.setVisibility(View.VISIBLE);
-            } else {
-                holder.tvOfficialBadge.setVisibility(View.GONE);
-            }
+            holder.sellerName.setText(item.getSellerName());
         } else {
-            holder.sellerName.setVisibility(View.GONE);
-            holder.tvOfficialBadge.setVisibility(View.GONE);
+            holder.sellerName.setText("BeautyHub Seller");
         }
 
-        // Load image
-        if (item.getImageUrl() != null && !item.getImageUrl().isEmpty()) {
+        // 3. LOGIK SHIPPING FEE (Berubah jadi RM 0 jika isShippingEnabled = false)
+        double shippingFee = isShippingEnabled ?
+                ("East Malaysia".equalsIgnoreCase(userZone) ? 10.00 : 5.00) : 0.0;
+        holder.tvItemShippingFee.setText(String.format(Locale.US, "RM %.2f", shippingFee));
+
+        // 4. Load Imej
+        if (item.getImageUrls() != null && !item.getImageUrls().isEmpty()) {
             Glide.with(context)
-                    .load(item.getImageUrl())
+                    .load(item.getImageUrls())
                     .placeholder(R.drawable.product_placeholder)
                     .error(R.drawable.product_placeholder)
+                    .centerCrop()
                     .into(holder.itemImage);
         } else {
             holder.itemImage.setImageResource(R.drawable.product_placeholder);
         }
 
-        // NEW: Quantity controls
+        // 5. Kawalan Kuantiti
         holder.tvQuantity.setText(String.valueOf(item.getQuantity()));
 
         holder.btnIncrease.setOnClickListener(v -> {
             int newQuantity = item.getQuantity() + 1;
-
-            // Check stock limit
-            if (productCache != null) {
-                Product product = productCache.get(item.getProductId());
-                if (product != null) {
-                    int maxQuantity = getMaxQuantity(product, item.getVariantId());
-                    if (newQuantity > maxQuantity) {
-                        showStockLimitToast(maxQuantity, item.getDisplayName());
-                        return;
-                    }
-                }
-            }
-
-            item.setQuantity(newQuantity);
-            holder.tvQuantity.setText(String.valueOf(newQuantity));
-            notifyItemChanged(position);
-
             if (quantityChangeListener != null) {
-                quantityChangeListener.onQuantityChanged(position, newQuantity);
+                quantityChangeListener.onQuantityChanged(holder.getAdapterPosition(), newQuantity);
             }
         });
 
         holder.btnDecrease.setOnClickListener(v -> {
             int newQuantity = item.getQuantity() - 1;
-            if (newQuantity >= 1) {
-                item.setQuantity(newQuantity);
-                holder.tvQuantity.setText(String.valueOf(newQuantity));
-                notifyItemChanged(position);
-
-                if (quantityChangeListener != null) {
-                    quantityChangeListener.onQuantityChanged(position, newQuantity);
-                }
+            if (newQuantity >= 1 && quantityChangeListener != null) {
+                quantityChangeListener.onQuantityChanged(holder.getAdapterPosition(), newQuantity);
             }
         });
 
-        // NEW: Check stock status
-        checkStockStatus(holder, item);
+        checkStockAndBadgeStatus(holder, item);
     }
 
-    // NEW: Helper method untuk dapatkan max quantity
-    private int getMaxQuantity(Product product, String variantId) {
-        if (variantId != null && !variantId.isEmpty()) {
-            Variant variant = product.getVariantById(variantId);
-            return variant != null ? variant.getStock() : 0;
-        } else {
-            return product.getStock();
-        }
-    }
-
-    // NEW: Show stock limit toast
-    private void showStockLimitToast(int maxQuantity, String itemName) {
-        String message;
-        if (maxQuantity <= 0) {
-            message = itemName + " is out of stock";
-        } else {
-            message = "Maximum " + maxQuantity + " available for " + itemName;
-        }
-        android.widget.Toast.makeText(context, message, android.widget.Toast.LENGTH_SHORT).show();
-    }
-
-    // NEW: Check stock status dan update UI
-    private void checkStockStatus(ViewHolder holder, CartItem item) {
-        if (productCache == null) return;
-
-        Product product = productCache.get(item.getProductId());
-        if (product == null || !product.isActive()) {
-            // Product unavailable
-            holder.tvStockStatus.setVisibility(View.VISIBLE);
-            holder.tvStockStatus.setText("Product unavailable");
-            holder.tvStockStatus.setTextColor(ContextCompat.getColor(context, R.color.stock_out));
-            holder.btnIncrease.setEnabled(false);
-            holder.btnDecrease.setEnabled(false);
+    private void checkStockAndBadgeStatus(ViewHolder holder, CartItem item) {
+        if (productCache == null) {
+            holder.tvStockStatus.setVisibility(View.GONE);
+            holder.tvOfficialBadge.setVisibility(View.GONE);
             return;
         }
 
-        int availableStock = getMaxQuantity(product, item.getVariantId());
-
-        if (availableStock <= 0) {
-            // Out of stock
-            holder.tvStockStatus.setVisibility(View.VISIBLE);
-            holder.tvStockStatus.setText("Out of stock");
+        Product product = productCache.get(item.getProductId());
+        if (product == null || !product.isActive()) {
+            holder.tvStockStatus.setText("Unavailable");
             holder.tvStockStatus.setTextColor(ContextCompat.getColor(context, R.color.stock_out));
+            holder.tvStockStatus.setVisibility(View.VISIBLE);
             holder.btnIncrease.setEnabled(false);
             holder.btnDecrease.setEnabled(false);
-        } else if (availableStock < item.getQuantity()) {
-            // Quantity exceeds available stock
-            holder.tvStockStatus.setVisibility(View.VISIBLE);
-            holder.tvStockStatus.setText("Only " + availableStock + " available");
-            holder.tvStockStatus.setTextColor(ContextCompat.getColor(context, R.color.stock_warning));
-            holder.btnIncrease.setEnabled(false);
-            holder.btnDecrease.setEnabled(true);
-        } else if (availableStock <= 5) {
-            // Low stock
-            holder.tvStockStatus.setVisibility(View.VISIBLE);
-            holder.tvStockStatus.setText("Low stock: " + availableStock + " left");
-            holder.tvStockStatus.setTextColor(ContextCompat.getColor(context, R.color.stock_low));
-            holder.btnIncrease.setEnabled(true);
-            holder.btnDecrease.setEnabled(true);
-        } else {
-            // In stock
-            holder.tvStockStatus.setVisibility(View.GONE);
-            holder.btnIncrease.setEnabled(true);
-            holder.btnDecrease.setEnabled(true);
+            holder.tvOfficialBadge.setVisibility(View.GONE);
+            return;
         }
 
-        // Disable increase button jika quantity sudah mencapai max
-        if (availableStock <= item.getQuantity()) {
+        holder.tvOfficialBadge.setVisibility(product.isPreloaded() ? View.VISIBLE : View.GONE);
+
+        int availableStock = product.getStock();
+        if (availableStock <= 0) {
+            holder.tvStockStatus.setText("Out of stock");
+            holder.tvStockStatus.setTextColor(ContextCompat.getColor(context, R.color.stock_out));
+            holder.tvStockStatus.setVisibility(View.VISIBLE);
             holder.btnIncrease.setEnabled(false);
+        } else if (availableStock < item.getQuantity()) {
+            holder.tvStockStatus.setText("Only " + availableStock + " left");
+            holder.tvStockStatus.setTextColor(ContextCompat.getColor(context, R.color.stock_warning));
+            holder.tvStockStatus.setVisibility(View.VISIBLE);
+            holder.btnIncrease.setEnabled(false);
+        } else if (availableStock <= 5) {
+            holder.tvStockStatus.setText("Low stock: " + availableStock + " left");
+            holder.tvStockStatus.setTextColor(ContextCompat.getColor(context, R.color.stock_low));
+            holder.tvStockStatus.setVisibility(View.VISIBLE);
+            holder.btnIncrease.setEnabled(true);
+        } else {
+            holder.tvStockStatus.setVisibility(View.GONE);
+            holder.btnIncrease.setEnabled(true);
         }
     }
 
@@ -228,9 +166,7 @@ public class CheckoutItemsAdapter extends RecyclerView.Adapter<CheckoutItemsAdap
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView itemImage;
         TextView itemName, itemPrice, itemQuantity, sellerName;
-
-        // NEW: Views untuk variant info dan quantity controls
-        TextView tvVariantInfo, tvQuantity, tvStockStatus, tvOfficialBadge;
+        TextView tvQuantity, tvStockStatus, tvOfficialBadge, tvItemShippingFee;
         View btnIncrease, btnDecrease;
 
         public ViewHolder(@NonNull View itemView) {
@@ -240,12 +176,10 @@ public class CheckoutItemsAdapter extends RecyclerView.Adapter<CheckoutItemsAdap
             itemPrice = itemView.findViewById(R.id.tv_checkout_item_price);
             itemQuantity = itemView.findViewById(R.id.tv_checkout_item_quantity_total);
             sellerName = itemView.findViewById(R.id.tv_checkout_item_seller_name);
-
-            // NEW: Initialize new views
-            tvVariantInfo = itemView.findViewById(R.id.tv_checkout_item_variant);
             tvQuantity = itemView.findViewById(R.id.tv_checkout_quantity);
             tvStockStatus = itemView.findViewById(R.id.tv_checkout_stock_status);
             tvOfficialBadge = itemView.findViewById(R.id.tv_checkout_official_badge);
+            tvItemShippingFee = itemView.findViewById(R.id.tv_item_shipping_fee);
             btnIncrease = itemView.findViewById(R.id.btn_checkout_increase);
             btnDecrease = itemView.findViewById(R.id.btn_checkout_decrease);
         }

@@ -34,6 +34,7 @@ public class ShippingAddressListActivity extends AppCompatActivity {
     private static final String TAG = "ShippingAddressList";
 
     // Views
+
     private MaterialToolbar toolbar;
     private RecyclerView recyclerViewAddresses;
     private FloatingActionButton fabAddAddress;
@@ -158,9 +159,13 @@ public class ShippingAddressListActivity extends AppCompatActivity {
 
     // Kaedah baru untuk set alamat default dan kembali
     private void setDefaultAddressAndFinish(ShippingAddress selectedAddress) {
+        // Buat Intent untuk menghantar data kembali
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra("SELECTED_ADDRESS", selectedAddress);
+
+        // Jika alamat yang dipilih sudah pun default, terus kembali dengan data
         if (selectedAddress.isDefault()) {
-            // Jika alamat yang dipilih sudah default, terus kembali
-            setResult(RESULT_OK);
+            setResult(RESULT_OK, resultIntent);
             finish();
             return;
         }
@@ -178,13 +183,16 @@ public class ShippingAddressListActivity extends AppCompatActivity {
                     addressSnapshot.getRef().child("default").setValue(false);
                 }
 
-                // 2. Set alamat yang baru dipilih ke true
+                // Tandakan alamat yang baru dipilih sebagai default dalam objek itu sendiri
+                selectedAddress.setDefault(true);
+
+                // 2. Set alamat yang baru dipilih ke true di Firebase
                 userAddressesRef.child(selectedAddress.getAddressId()).child("default").setValue(true)
                         .addOnCompleteListener(task -> {
                             progressDialog.dismiss();
                             if (task.isSuccessful()) {
-                                // 3. Hantar isyarat berjaya dan tutup skrin
-                                setResult(RESULT_OK);
+                                // 3. Hantar isyarat berjaya DAN data alamat, kemudian tutup skrin
+                                setResult(RESULT_OK, resultIntent); // <-- INI PEMBETULANNYA
                                 finish();
                             } else {
                                 Toast.makeText(ShippingAddressListActivity.this, "Failed to set default address.", Toast.LENGTH_SHORT).show();
@@ -199,6 +207,7 @@ public class ShippingAddressListActivity extends AppCompatActivity {
             }
         });
     }
+
 
     private void deleteAddress(String addressId) {
         if (addressId == null || addressId.isEmpty()) return;

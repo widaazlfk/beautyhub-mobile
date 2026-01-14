@@ -19,6 +19,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
+import com.canhub.cropper.CropImageContract;
+import com.canhub.cropper.CropImageContractOptions;
+import com.canhub.cropper.CropImageOptions;
+import com.canhub.cropper.CropImageView;
 import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
@@ -43,7 +47,7 @@ public class EditSellerProfileActivity extends AppCompatActivity {
 
     // Deklarasi UI
     private MaterialToolbar toolbar;
-    private TextInputEditText etSellerName, etSellerEmail;
+    private TextInputEditText etSellerName, etSellerEmail, etSellerPhone, etSellerAddress; // Tambah phone & address
     private MaterialButton btnSaveProfile;
     private CircleImageView profileImage;
     private TextView tvChangePhoto;
@@ -53,35 +57,17 @@ public class EditSellerProfileActivity extends AppCompatActivity {
     private DatabaseReference userRef;
     private FirebaseUser currentUser;
 
-    // URI untuk gambar yang dipilih
-    private Uri imageUri;
-
-    // Launcher untuk meminta kebenaran akses galeri
-    private final ActivityResultLauncher<String> requestPermissionLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-                if (isGranted) {
-                    openGallery();
-                } else {
-                    Toast.makeText(this, "Permission to access gallery is required to change photo.", Toast.LENGTH_SHORT).show();
-                }
-            });
-
-    // Launcher untuk membuka galeri dan menerima hasil gambar
-    private final ActivityResultLauncher<Intent> galleryLauncher =
-            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                    imageUri = result.getData().getData();
-                    // Paparkan gambar yang baru dipilih
-                    profileImage.setImageURI(imageUri);
-                }
-            });
+    // Launcher untuk image cropper
+    private ActivityResultLauncher<CropImageContractOptions> cropImageLauncher;
+    private ActivityResultLauncher<String> galleryPermissionLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.s_activity_edit_seller_profile);
 
-        initViews(); // Inisialisasi semua elemen UI
+        initViews();
+        setupLaunchers();
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null) {
@@ -99,7 +85,9 @@ public class EditSellerProfileActivity extends AppCompatActivity {
     private void initViews() {
         toolbar = findViewById(R.id.toolbar_edit_profile);
         etSellerName = findViewById(R.id.et_seller_name);
-        etSellerEmail = findViewById(R.id.et_seller_email); // EditText untuk e-mel
+        etSellerEmail = findViewById(R.id.et_seller_email);
+        etSellerPhone = findViewById(R.id.et_seller_phone); // Baru
+        etSellerAddress = findViewById(R.id.et_seller_address); // Baru
         btnSaveProfile = findViewById(R.id.btn_save_profile);
         profileImage = findViewById(R.id.profile_image_edit);
         tvChangePhoto = findViewById(R.id.tv_change_photo);
@@ -110,17 +98,46 @@ public class EditSellerProfileActivity extends AppCompatActivity {
         progressDialog.setCancelable(false);
     }
 
+    private void setupLaunchers() {
+        galleryPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+            if (isGranted) {
+                startImageCrop();
+            } else {
+                Toast.makeText(this, "Permission to access gallery is required.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        cropImageLauncher = registerForActivityResult(new CropImageContract(), result -> {
+            if (result.isSuccessful()) {
+                Uri croppedImageUri = result.getUriContent();
+                if (croppedImageUri != null) {
+                    profileImage.setImageURI(croppedImageUri); // Pamerkan gambar yang di-crop
+                    // Simpan URI untuk dimuat naik kemudian bila user tekan "Save"
+                    uploadImageToCloudinary(croppedImageUri);
+                }
+            } else {
+                Toast.makeText(this, "Image cropping cancelled.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     private void loadCurrentData() {
+        progressDialog.setMessage("Loading data...");
+        progressDialog.show();
         userRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    String currentName = snapshot.child("name").getValue(String.class);
+                    String currentName = snapshot.child("storeName").getValue(String.class);
                     String currentEmail = snapshot.child("email").getValue(String.class);
-                    String currentImageUrl = snapshot.child("profileImageUrl").getValue(String.class);
+                    String currentPhone = snapshot.child("phone").getValue(String.class);
+                    String currentAddress = snapshot.child("address").getValue(String.class);
+                    String currentImageUrl = snapshot.child("profileImage").getValue(String.class);
 
                     etSellerName.setText(currentName);
                     etSellerEmail.setText(currentEmail);
+                    etSellerPhone.setText(currentPhone);
+                    etSellerAddress.setText(currentAddress);
 
                     if (currentImageUrl != null && !currentImageUrl.isEmpty()) {
                         Glide.with(EditSellerProfileActivity.this)
@@ -129,10 +146,12 @@ public class EditSellerProfileActivity extends AppCompatActivity {
                                 .into(profileImage);
                     }
                 }
+                progressDialog.dismiss();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
+                progressDialog.dismiss();
                 Toast.makeText(EditSellerProfileActivity.this, "Failed to load current data.", Toast.LENGTH_SHORT).show();
             }
         });
@@ -141,65 +160,63 @@ public class EditSellerProfileActivity extends AppCompatActivity {
     private void setupListeners() {
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        // Listener untuk gambar profil dan teks "Change Photo"
-        View.OnClickListener changePhotoListener = v -> checkPermissionAndOpenGallery();
+        View.OnClickListener changePhotoListener = v -> checkPermissionAndStartCrop();
         profileImage.setOnClickListener(changePhotoListener);
         tvChangePhoto.setOnClickListener(changePhotoListener);
 
-        btnSaveProfile.setOnClickListener(v -> {
-            String newName = etSellerName.getText().toString().trim();
-            if (TextUtils.isEmpty(newName)) {
-                etSellerName.setError("Name cannot be empty");
-                return;
-            }
-            progressDialog.show();
-            saveProfileChanges(newName);
-        });
+        btnSaveProfile.setOnClickListener(v -> saveProfileChanges());
     }
 
-    private void checkPermissionAndOpenGallery() {
-        String permission = Manifest.permission.READ_EXTERNAL_STORAGE;
-        if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) {
-            openGallery();
+    private void checkPermissionAndStartCrop() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            startImageCrop();
         } else {
-            // Minta kebenaran dari pengguna
-            requestPermissionLauncher.launch(permission);
+            galleryPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
         }
     }
 
-    private void openGallery() {
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        galleryLauncher.launch(intent);
+    private void startImageCrop() {
+        CropImageOptions cropOptions = new CropImageOptions();
+        cropOptions.guidelines = CropImageView.Guidelines.ON;
+        cropOptions.aspectRatioX = 1;
+        cropOptions.aspectRatioY = 1;
+        cropOptions.fixAspectRatio = true;
+
+        CropImageContractOptions options = new CropImageContractOptions(null, cropOptions);
+        cropOptions.imageSourceIncludeGallery = true; // Ini akan buka galeri
+        cropOptions.imageSourceIncludeCamera = true; // (Opsyen) benarkan juga kamera
+        cropImageLauncher.launch(options);
     }
 
-    private void saveProfileChanges(String newName) {
-        if (imageUri != null) {
-            // Jika ada gambar baru, muat naik ke Cloudinary terlebih dahulu
-            uploadImageToCloudinary(newName);
-        } else {
-            // Jika hanya nama yang ditukar, terus kemas kini Firebase
-            updateFirebaseDatabase(newName, null);
+    private void saveProfileChanges() {
+        String newName = etSellerName.getText().toString().trim();
+        String newPhone = etSellerPhone.getText().toString().trim();
+        String newAddress = etSellerAddress.getText().toString().trim();
+
+        if (TextUtils.isEmpty(newName)) {
+            etSellerName.setError("Store name cannot be empty");
+            return;
         }
+
+        progressDialog.show();
+        updateFirebaseDatabase(newName, newPhone, newAddress);
     }
 
-    private void uploadImageToCloudinary(String newName) {
+    private void uploadImageToCloudinary(Uri imageUri) {
+        progressDialog.setMessage("Uploading image...");
+        progressDialog.show();
         MediaManager.get().upload(imageUri).callback(new UploadCallback() {
             @Override
-            public void onStart(String requestId) {
-                progressDialog.setMessage("Uploading image...");
-            }
-
-            @Override
-            public void onProgress(String requestId, long bytes, long totalBytes) {
-                // Boleh digunakan untuk tunjuk progress bar, tapi kita biarkan kosong untuk sekarang
-            }
-
-            @Override
             public void onSuccess(String requestId, Map resultData) {
-                // Gambar berjaya dimuat naik, dapatkan URL
                 String imageUrl = (String) resultData.get("secure_url");
-                // Kemas kini pangkalan data dengan nama dan URL gambar baru
-                updateFirebaseDatabase(newName, imageUrl);
+                userRef.child("profileImage").setValue(imageUrl).addOnCompleteListener(task -> {
+                    progressDialog.dismiss();
+                    if(task.isSuccessful()){
+                        Toast.makeText(EditSellerProfileActivity.this, "Photo updated successfully!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(EditSellerProfileActivity.this, "Failed to save photo URL.", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
 
             @Override
@@ -209,30 +226,30 @@ public class EditSellerProfileActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onReschedule(String requestId, ErrorInfo error) {
-                // Dibiarkan kosong
-            }
+            public void onStart(String requestId) {}
+            @Override
+            public void onProgress(String requestId, long bytes, long totalBytes) {}
+            @Override
+            public void onReschedule(String requestId, ErrorInfo error) {}
         }).dispatch();
     }
 
-    private void updateFirebaseDatabase(String newName, String newImageUrl) {
+    private void updateFirebaseDatabase(String newName, String newPhone, String newAddress) {
         progressDialog.setMessage("Saving data...");
 
         Map<String, Object> profileUpdates = new HashMap<>();
-        profileUpdates.put("name", newName);
-
-        // Hanya tambah URL gambar jika ada yang baru
-        if (newImageUrl != null) {
-            profileUpdates.put("profileImageUrl", newImageUrl);
-        }
+        profileUpdates.put("storeName", newName);
+        profileUpdates.put("phone", newPhone);
+        profileUpdates.put("address", newAddress);
+        // Kita tidak update gambar di sini kerana ia diuruskan secara berasingan
 
         userRef.updateChildren(profileUpdates).addOnCompleteListener(task -> {
             progressDialog.dismiss();
             if (task.isSuccessful()) {
-                Toast.makeText(EditSellerProfileActivity.this, "Profile updated successfully!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditSellerProfileActivity.this, "Profile details updated successfully!", Toast.LENGTH_SHORT).show();
                 finish(); // Kembali ke skrin profil
             } else {
-                Toast.makeText(EditSellerProfileActivity.this, "Failed to update profile.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditSellerProfileActivity.this, "Failed to update details.", Toast.LENGTH_SHORT).show();
             }
         });
     }

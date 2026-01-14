@@ -50,6 +50,16 @@
                 android:textColor="?android:attr/textColorPrimary"
                 tools:text="Order from: Seller Name" />
 
+            <!-- Di dalam item_sub_order.xml -->
+            <TextView
+                android:id="@+id/tv_sub_order_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Shipped"
+                android:textColor="@color/status_shipped"
+                android:textStyle="bold" />
+
+
             <!-- Saiz ikon dikecilkan agar lebih seimbang -->
             <ImageView
                 android:id="@+id/iv_arrow_right"

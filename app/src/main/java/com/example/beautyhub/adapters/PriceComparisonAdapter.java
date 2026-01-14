@@ -1,109 +1,85 @@
 package com.example.beautyhub.adapters;
 
-import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
 import com.example.beautyhub.R;
-import com.example.beautyhub.models.ProductListing;
-import com.example.beautyhub.models.User; // Anda perlukan model User untuk dapatkan nama kedai
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.example.beautyhub.buyer.ProductDetailActivity;
+import com.example.beautyhub.databinding.ItemSimilarBeautyBinding;
+import com.example.beautyhub.models.ProductComparison;
 import java.util.List;
-import java.util.Locale;
 
-public class PriceComparisonAdapter extends RecyclerView.Adapter<PriceComparisonAdapter.ListingViewHolder> {
+public class PriceComparisonAdapter extends RecyclerView.Adapter<PriceComparisonAdapter.ViewHolder> {
+    private List<ProductComparison> list;
 
-    private final Context context;
-    private final List<ProductListing> listingList;
-    private final OnItemActionListener listener;
-
-    // Interface untuk tindakan seperti "Tambah ke Troli"
-    public interface OnItemActionListener {
-        void onAddToCartClicked(ProductListing listing);
-    }
-
-    public PriceComparisonAdapter(Context context, List<ProductListing> listingList, OnItemActionListener listener) {
-        this.context = context;
-        this.listingList = listingList;
-        this.listener = listener;
-    }
+    public PriceComparisonAdapter(List<ProductComparison> list) { this.list = list; }
 
     @NonNull
     @Override
-    public ListingViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Kita akan cipta layout baru untuk item ini
-        View view = LayoutInflater.from(context).inflate(R.layout.item_price_comparison, parent, false);
-        return new ListingViewHolder(view);
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new ViewHolder(ItemSimilarBeautyBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ListingViewHolder holder, int position) {
-        ProductListing listing = listingList.get(position);
-        holder.bind(listing);
-    }
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        ProductComparison p = list.get(position);
 
-    @Override
-    public int getItemCount() {
-        return listingList.size();
-    }
+        // 1. Set Nama dan Harga
+        holder.binding.tvName.setText(p.getName());
+        holder.binding.tvPriceStore.setText(p.getSellerName() + " - RM " + String.format("%.2f", p.getPrice()));
 
-    class ListingViewHolder extends RecyclerView.ViewHolder {
-        TextView textViewSellerName, textViewPrice, textViewStock;
-        Button buttonAddToCart;
-
-        public ListingViewHolder(@NonNull View itemView) {
-            super(itemView);
-            textViewSellerName = itemView.findViewById(R.id.text_view_seller_name);
-            textViewPrice = itemView.findViewById(R.id.text_view_price);
-            textViewStock = itemView.findViewById(R.id.text_view_stock);
-            buttonAddToCart = itemView.findViewById(R.id.button_add_to_cart);
+        // 2. Set Gambar (Pastikan bahagian ini di luar block else yang salah)
+        if (p.getImageUrls() != null && !p.getImageUrls().isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(p.getImageUrls().get(0))
+                    .placeholder(R.drawable.product_placeholder)
+                    .error(R.drawable.product_placeholder)
+                    .into(holder.binding.ivProduct);
+        } else {
+            holder.binding.ivProduct.setImageResource(R.drawable.product_placeholder);
         }
 
-        void bind(final ProductListing listing) {
-            // Paparkan harga dan stok
-            textViewPrice.setText(String.format(Locale.getDefault(), "RM %.2f", listing.getPrice()));
-            textViewStock.setText("Stok: " + listing.getStock());
+        // 3. Set Match Percentage (Pastikan logik ini berada di luar block else gambar)
+        int match = p.getMatchPercentage();
+        if (match > 0) {
+            holder.binding.tvIngredientCount.setVisibility(View.VISIBLE);
+            holder.binding.tvIngredientCount.setText(match + "% Match");
 
-            // Dapatkan nama penjual dari /Users/{sellerId}
-            loadSellerInfo(listing.getSellerId());
-
-            // Set listener untuk butang
-            buttonAddToCart.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onAddToCartClicked(listing);
-                }
-            });
+            if (match >= 80) {
+                holder.binding.tvIngredientCount.setBackgroundResource(R.drawable.bg_ingredient_tag);
+                holder.binding.tvIngredientCount.setTextColor(Color.parseColor("#2E7D32"));
+            } else if (match >= 50) {
+                holder.binding.tvIngredientCount.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#FFF9C4")));
+                holder.binding.tvIngredientCount.setTextColor(Color.parseColor("#F57F17"));
+            } else {
+                holder.binding.tvIngredientCount.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#F5F5F5")));
+                holder.binding.tvIngredientCount.setTextColor(Color.parseColor("#757575"));
+            }
+        } else {
+            holder.binding.tvIngredientCount.setVisibility(View.GONE);
         }
 
-        private void loadSellerInfo(String sellerId) {
-            DatabaseReference sellerRef = FirebaseDatabase.getInstance().getReference("Users").child(sellerId);
-            sellerRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists()) {
-                        User seller = dataSnapshot.getValue(User.class);
-                        if (seller != null && seller.getUsername() != null) {
-                            // Anda mungkin mahu guna 'storeName' jika ada, jika tidak, 'username' pun boleh
-                            textViewSellerName.setText(seller.getUsername());
-                        } else {
-                            textViewSellerName.setText("Penjual tidak diketahui");
-                        }
-                    }
-                }
+        // 4. Navigasi ke Product Detail
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), ProductDetailActivity.class);
+            // PENTING: Gunakan key yang sama dengan ComparisonActivity ("productId")
+            intent.putExtra("productId", p.getProductId());
+            v.getContext().startActivity(intent);
+        });
+    }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-                    textViewSellerName.setText("Gagal memuatkan nama penjual");
-                }
-            });
+    @Override public int getItemCount() { return list.size(); }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        ItemSimilarBeautyBinding binding;
+        public ViewHolder(ItemSimilarBeautyBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
         }
     }
 }

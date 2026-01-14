@@ -6,8 +6,11 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import com.example.beautyhub.data.ProductRepository;
 import com.example.beautyhub.models.Product;
-import com.example.beautyhub.models.Variant;
+// --- PERUBAHAN 1: Padam import Variant ---
+// import com.example.beautyhub.models.Variant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ProductViewModel extends AndroidViewModel {
 
@@ -15,6 +18,7 @@ public class ProductViewModel extends AndroidViewModel {
 
     // LiveData untuk UI
     private final MutableLiveData<List<Product>> productsLiveData = new MutableLiveData<>();
+    private final MutableLiveData<Map<String, Product>> productsAsMapLiveData = new MutableLiveData<>();
     private final MutableLiveData<Product> productLiveData = new MutableLiveData<>();
     private final MutableLiveData<Boolean> loadingLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> errorLiveData = new MutableLiveData<>();
@@ -27,37 +31,39 @@ public class ProductViewModel extends AndroidViewModel {
 
     // ==================== GETTERS ====================
     public LiveData<List<Product>> getProducts() { return productsLiveData; }
+    public LiveData<Map<String, Product>> getProductsAsMap() { return productsAsMapLiveData; }
     public LiveData<Product> getProduct() { return productLiveData; }
-    public LiveData<Boolean> getLoading() { return loadingLiveData; } // FIXED: Changed from isLoading() to getLoading()
+    public LiveData<Boolean> getLoading() { return loadingLiveData; }
     public LiveData<String> getError() { return errorLiveData; }
     public LiveData<String> getSuccessMessage() { return successMessageLiveData; }
 
     // ==================== PUBLIC METHODS ====================
-
-    // Di dalam C:/Users/widaa/beautyhub/app/src/main/java/com/example/beautyhub/ui/ProductViewModel.java
 
     public void loadAllProducts() {
         loadingLiveData.setValue(true);
         productRepository.getAllProducts(new ProductRepository.ProductsCallback() {
             @Override
             public void onSuccess(List<Product> products) {
-                // ▼▼▼ TAMBAH LOG INI ▼▼▼
-                android.util.Log.d("ViewModelDebug", "onSuccess dipanggil. Bilangan produk diterima: " + products.size());
-                if (!products.isEmpty()) {
-                    android.util.Log.d("ViewModelDebug", "Produk pertama: " + products.get(0).getName());
+                // Cipta Map daripada senarai produk
+                Map<String, Product> productMap = new HashMap<>();
+                for (Product product : products) {
+                    // Pastikan productId tidak null sebelum dimasukkan ke dalam map
+                    if (product.getProductId() != null) {
+                        productMap.put(product.getProductId(), product);
+                    }
                 }
-                // ▲▲▲ TAMBAH LOG INI ▲▲▲
 
-                loadingLiveData.postValue(false);
+                // Hantar data ke kedua-dua LiveData
                 productsLiveData.postValue(products);
+                productsAsMapLiveData.postValue(productMap);
+                loadingLiveData.postValue(false);
+
+                android.util.Log.d("ViewModelDebug", "onSuccess: Products loaded into List and Map. Count: " + products.size());
             }
 
             @Override
             public void onError(String message) {
-                // ▼▼▼ TAMBAH LOG INI ▼▼▼
-                android.util.Log.e("ViewModelDebug", "onError dipanggil. Mesej: " + message);
-                // ▲▲▲ TAMBAH LOG INI ▲▲▲
-
+                android.util.Log.e("ViewModelDebug", "onError: " + message);
                 loadingLiveData.postValue(false);
                 errorLiveData.postValue(message);
             }
@@ -82,13 +88,17 @@ public class ProductViewModel extends AndroidViewModel {
         });
     }
 
-    public void addSellerProduct(Product product, List<Variant> variants) {
+    // --- PERUBAHAN 2: Permudahkan kaedah addSellerProduct ---
+    public void addSellerProduct(Product product) {
         loadingLiveData.setValue(true);
-        productRepository.addSellerProduct(product, variants, new ProductRepository.StringCallback() {
+        // Panggil kaedah repository yang telah dikemas kini
+        productRepository.addSellerProduct(product, new ProductRepository.StringCallback() {
             @Override
             public void onSuccess(String productId) {
                 loadingLiveData.postValue(false);
                 successMessageLiveData.postValue("Product added successfully!");
+                // Anda mungkin mahu memuat semula senarai produk di sini jika perlu
+                loadAllProducts();
             }
 
             @Override

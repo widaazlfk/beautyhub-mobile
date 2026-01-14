@@ -5,111 +5,245 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:colorBackground"
+    android:background="#F8F9FA"
     tools:context=".buyer.MyRewardsActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
-        app:liftOnScroll="true">
+        android:background="@android:color/transparent"
+        app:elevation="0dp">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar_my_rewards"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:navigationIcon="@drawable/ic_arrow_back"
-            app:navigationIconTint="?attr/colorOnPrimary"
+            app:navigationIconTint="@color/black"
             app:title="My Rewards"
-            app:titleTextColor="?attr/colorOnPrimary" />
-
+            app:titleCentered="true"
+            app:titleTextColor="@color/black" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="24dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <!-- Bahagian Paparan Mata Ganjaran -->
+            <!-- Card Mata Ganjaran yang lebih moden -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="16dp"
+                android:layout_marginBottom="24dp"
                 app:cardBackgroundColor="@color/purple_500"
-                app:cardCornerRadius="12dp">
+                app:cardCornerRadius="24dp"
+                app:cardElevation="8dp"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="vertical"
-                    android:padding="24dp">
+                    android:padding="32dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Your Current Points"
-                        android:alpha="0.8"
-                        android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="@color/white"/>
-
-                    <TextView
-                        android:id="@+id/tv_reward_points"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="0"
-                        android:textSize="48sp"
-                        android:textStyle="bold"
+                        android:alpha="0.85"
+                        android:text="Total Balance"
+                        android:textAllCaps="true"
+                        android:letterSpacing="0.1"
+                        android:textAppearance="?attr/textAppearanceLabelLarge"
                         android:textColor="@color/white" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:gravity="bottom"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tv_reward_points"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="1,250"
+                            android:textColor="@color/white"
+                            android:textSize="42sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:text="pts"
+                            android:textColor="@color/white"
+                            android:alpha="0.9"
+                            android:textSize="18sp" />
+                    </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+
+            <!-- Section: How to Earn -->
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:text="Available Rewards"
-                android:textAppearance="?attr/textAppearanceTitleLarge"
+                android:layout_marginBottom="12dp"
+                android:text="Ways to Earn"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="#333333"
                 android:textStyle="bold" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:strokeColor="#EEEEEE"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <!-- Item 1 -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp">
+
+                        <ImageView
+                            android:id="@+id/icon_order"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="#E8F5E9"
+                            android:padding="6dp"
+                            android:src="@drawable/ic_check_circle"
+                            app:tint="#4CAF50" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_toEndOf="@id/icon_order"
+                            android:layout_marginStart="12dp"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Make an order"
+                                android:textStyle="bold"
+                                android:textColor="#222222"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Get 5 points for every purchase"
+                                android:textSize="12sp"
+                                android:alpha="0.7"/>
+                        </LinearLayout>
+                    </RelativeLayout>
+
+                    <!-- Item 2 -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:id="@+id/icon_review"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="#E3F2FD"
+                            android:padding="6dp"
+                            android:src="@drawable/ic_check_circle"
+                            app:tint="#2196F3" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_toEndOf="@id/icon_review"
+                            android:layout_marginStart="12dp"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Write a review"
+                                android:textStyle="bold"
+                                android:textColor="#222222"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Get 10 points for your feedback"
+                                android:textSize="12sp"
+                                android:alpha="0.7"/>
+                        </LinearLayout>
+                    </RelativeLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Section: Available Rewards -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="12dp"
+                android:text="Redeem Your Points"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textStyle="bold"
+                android:textColor="#333333"/>
 
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="200dp">
 
-                <!-- RecyclerView untuk senarai ganjaran -->
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_available_rewards"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:nestedScrollingEnabled="false"
                     android:visibility="gone"
-                    tools:listitem="@layout/b_item_available_reward" />
+                    tools:listitem="@layout/b_item_available_reward"
+                    tools:visibility="visible" />
 
-                <!-- Paparan jika tiada ganjaran -->
-                <TextView
-                    android:id="@+id/tv_no_rewards"
+                <LinearLayout
+                    android:id="@+id/tv_no_rewards_container"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:text="No rewards available."
-                    android:textAppearance="?attr/textAppearanceBodyLarge"
-                    android:visibility="gone" />
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+                    <TextView
+                        android:id="@+id/tv_no_rewards"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="No rewards available yet"
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        android:alpha="0.5" />
+                </LinearLayout>
 
-                <!-- ProgressBar semasa memuat turun -->
                 <ProgressBar
                     android:id="@+id/progress_bar_rewards"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center" />
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center"
+                    android:indeterminateTint="@color/purple_500" />
             </FrameLayout>
 
         </LinearLayout>

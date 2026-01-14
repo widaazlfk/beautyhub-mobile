@@ -20,6 +20,7 @@
     <dimen name="button_elevation">2dp</dimen>
     <dimen name="category_spacing">12dp</dimen>
     <dimen name="product_grid_spacing">8dp</dimen>
+    <dimen name="dialog_horizontal_margin">16dp</dimen>
 
     <dimen name="text_size_large">20sp</dimen>
     <dimen name="text_size_medium">16sp</dimen>

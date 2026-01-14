@@ -1,50 +1,80 @@
 package com.example.beautyhub.seller;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
+import android.text.InputType;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.RatingBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.canhub.cropper.CropImageContract;
+import com.canhub.cropper.CropImageContractOptions;
+import com.canhub.cropper.CropImageOptions;
+import com.cloudinary.android.MediaManager;
+import com.cloudinary.android.callback.ErrorInfo;
+import com.cloudinary.android.callback.UploadCallback;
 import com.example.beautyhub.R;
+import com.example.beautyhub.adapters.ProductAdapter;
+import com.example.beautyhub.auth.LoginActivity;
+import com.example.beautyhub.models.Product;
+import com.example.beautyhub.models.User;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class SellerProfileActivity extends AppCompatActivity {
 
-    private static final String TAG = "SellerProfileActivity";
-
-    // Views
     private CircleImageView ivSellerProfile;
-    private TextView tvSellerName, tvRatingValue, tvStoreId, tvStoreDescription;
-    private TextView tvTotalProductsCount, tvTotalSales, tvConversionRate;
-    private TextView tvStoreEmail, tvStorePhone, tvStoreAddress, tvMemberSince;
-    private TextView tvVerificationStatus, tvEditDescription;
+    private TextView tvChangeImage, tvRatingValue, tvStoreDescValue, tvPhoneValue, tvAddressValue, tvNoProducts;
+    private EditText etSellerNameHeader;
+    private ImageButton ibEditNameHeader;
     private RatingBar ratingBarSeller;
-    private MaterialButton btnEditDetails;
-    private MaterialToolbar toolbar;
+    private RelativeLayout itemStoreDesc, itemPhone, itemAddress;
 
-    // Firebase
-    private DatabaseReference sellersRef;
     private FirebaseAuth mAuth;
-    private FirebaseUser currentUser;
+    private DatabaseReference sellerRef;
+    private DatabaseReference productsRef;
+    private ProgressDialog progressDialog;
 
-    // Seller Info
-    private String sellerId;
+    private RecyclerView rvSellerProducts;
+    private ProductAdapter productAdapter;
+    private List<Product> productList;
+    private String targetSellerId;
+
+    private final ActivityResultLauncher<CropImageContractOptions> cropImageLauncher =
+            registerForActivityResult(new CropImageContract(), result -> {
+                if (result.isSuccessful()) {
+                    Uri croppedImageUri = result.getUriContent();
+                    if (croppedImageUri != null) {
+                        uploadProfileImageToCloudinary(croppedImageUri);
+                    }
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,330 +82,228 @@ public class SellerProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_seller_profile);
 
         mAuth = FirebaseAuth.getInstance();
-        currentUser = mAuth.getCurrentUser();
 
-        if (currentUser == null) {
-            Toast.makeText(this, "Please login as seller", Toast.LENGTH_SHORT).show();
+        // 1. Get Seller ID from Intent (if opened by Buyer)
+        targetSellerId = getIntent().getStringExtra("SELLER_ID");
+
+        // 2. If no ID in Intent, default to the logged-in user's UID
+        if (targetSellerId == null && mAuth.getCurrentUser() != null) {
+            targetSellerId = mAuth.getCurrentUser().getUid();
+        }
+
+        if (targetSellerId == null) {
+            startActivity(new Intent(this, LoginActivity.class));
             finish();
             return;
         }
 
-        sellerId = currentUser.getUid();
+        // Initialize Firebase References using targetSellerId
+        sellerRef = FirebaseDatabase.getInstance().getReference("Users").child(targetSellerId);
+        productsRef = FirebaseDatabase.getInstance().getReference("Products");
 
         initViews();
         setupToolbar();
-        fetchSellerProfile();
-        setupListeners();
+        setupClickListeners();
+        loadSellerData();
     }
 
     private void initViews() {
         ivSellerProfile = findViewById(R.id.iv_seller_profile);
-        tvSellerName = findViewById(R.id.tv_seller_name);
-        tvRatingValue = findViewById(R.id.tv_rating_value);
-        tvStoreId = findViewById(R.id.tv_store_id);
-        tvStoreDescription = findViewById(R.id.tv_store_description);
+        tvChangeImage = findViewById(R.id.tv_change_image);
+        etSellerNameHeader = findViewById(R.id.et_seller_name_header);
+        ibEditNameHeader = findViewById(R.id.ib_edit_name_header);
         ratingBarSeller = findViewById(R.id.rating_bar_seller);
+        tvRatingValue = findViewById(R.id.tv_rating_value);
 
-        // Stats
-        tvTotalProductsCount = findViewById(R.id.tv_total_products_count);
-        tvTotalSales = findViewById(R.id.tv_total_sales);
-        tvConversionRate = findViewById(R.id.tv_conversion_rate);
+        itemStoreDesc = findViewById(R.id.item_store_desc);
+        tvStoreDescValue = findViewById(R.id.tv_store_desc_value);
+        itemPhone = findViewById(R.id.item_phone);
+        tvPhoneValue = findViewById(R.id.tv_phone_value);
+        itemAddress = findViewById(R.id.item_address);
+        tvAddressValue = findViewById(R.id.tv_address_value);
 
-        // Store details
-        tvStoreEmail = findViewById(R.id.tv_store_email);
-        tvStorePhone = findViewById(R.id.tv_store_phone);
-        tvStoreAddress = findViewById(R.id.tv_store_address);
-        tvMemberSince = findViewById(R.id.tv_member_since);
+        tvNoProducts = findViewById(R.id.tv_no_products_seller);
+        rvSellerProducts = findViewById(R.id.rv_seller_products);
+        rvSellerProducts.setLayoutManager(new GridLayoutManager(this, 2));
+        rvSellerProducts.setNestedScrollingEnabled(false);
 
-        // Verification
-        tvVerificationStatus = findViewById(R.id.tv_verification_status);
-        tvEditDescription = findViewById(R.id.tv_edit_description);
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setCancelable(false);
 
-        // Buttons
-        btnEditDetails = findViewById(R.id.btn_edit_details);
-        toolbar = findViewById(R.id.toolbar_seller_profile);
+        productList = new ArrayList<>();
+        setupAdapter();
+    }
+
+    private void setupAdapter() {
+        // Only show edit/delete icons if the logged-in user owns this profile
+        boolean isMyProfile = targetSellerId.equals(mAuth.getUid());
+
+        ProductAdapter.OnProductClickListener productClickListener = new ProductAdapter.OnProductClickListener() {
+            @Override public void onProductClick(Product product) { /* Open Product Detail */ }
+            @Override public void onEditClick(Product product) { /* Open Edit Activity */ }
+            @Override public void onDeleteClick(Product product) { confirmDeleteProduct(product); }
+            @Override public void onAddToCartClick(Product product) {}
+            @Override public void onBuyNowClick(Product product) {}
+            @Override public void onSellerClick(String sellerId) {}
+            @Override public void onWishlistClick(Product product) {}
+        };
+
+        productAdapter = new ProductAdapter(this, productList, isMyProfile, productClickListener);
+        rvSellerProducts.setAdapter(productAdapter);
     }
 
     private void setupToolbar() {
+        MaterialToolbar toolbar = findViewById(R.id.toolbar_seller_profile);
+        setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
-        toolbar.setTitle("My Store Profile");
     }
 
-    private void fetchSellerProfile() {
-        sellersRef = FirebaseDatabase.getInstance().getReference("Users").child(sellerId);
-        sellersRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    // Check if user is a seller
-                    String userType = snapshot.child("userType").getValue(String.class);
-                    if (!"Seller".equals(userType)) {
-                        Toast.makeText(SellerProfileActivity.this, "User is not a seller", Toast.LENGTH_SHORT).show();
-                        finish();
-                        return;
-                    }
+    private void setupClickListeners() {
+        boolean isMyProfile = targetSellerId.equals(mAuth.getUid());
 
-                    // Store Name - CHECK IN Users NODE
-                    String storeName = snapshot.child("storeName").getValue(String.class);
-                    if (storeName == null || storeName.isEmpty()) {
-                        // Try username or display name
-                        storeName = snapshot.child("username").getValue(String.class);
-                        if (storeName == null || storeName.isEmpty()) {
-                            storeName = snapshot.child("displayName").getValue(String.class);
-                            if (storeName == null || storeName.isEmpty()) {
-                                storeName = snapshot.child("email").getValue(String.class);
-                                if (storeName != null) {
-                                    // Extract username from email
-                                    storeName = storeName.split("@")[0];
-                                }
-                            }
-                        }
-                    }
+        if (isMyProfile) {
+            // Owner can edit profile
+            tvChangeImage.setOnClickListener(v -> startImageCrop());
+            ivSellerProfile.setOnClickListener(v -> startImageCrop());
+            ibEditNameHeader.setOnClickListener(v -> toggleNameEditMode());
 
-                    if (storeName != null && !storeName.isEmpty()) {
-                        tvSellerName.setText(storeName);
-                    } else {
-                        tvSellerName.setText("My Beauty Store");
-                    }
-
-                    // Store ID
-                    tvStoreId.setText("Store ID: " + sellerId.substring(0, Math.min(8, sellerId.length())).toUpperCase());
-
-                    // Profile Image
-                    String profileImage = snapshot.child("profileImage").getValue(String.class);
-                    if (profileImage == null || profileImage.isEmpty()) {
-                        profileImage = snapshot.child("profileImageUrl").getValue(String.class);
-                        if (profileImage == null || profileImage.isEmpty()) {
-                            profileImage = snapshot.child("imageUrl").getValue(String.class);
-                        }
-                    }
-
-                    if (profileImage != null && !profileImage.isEmpty()) {
-                        Glide.with(SellerProfileActivity.this)
-                                .load(profileImage)
-                                .placeholder(R.drawable.ic_profile)
-                                .error(R.drawable.ic_profile)
-                                .into(ivSellerProfile);
-                    }
-
-                    // Store Description - might be in separate node
-                    String description = snapshot.child("storeDescription").getValue(String.class);
-                    if (description == null || description.isEmpty()) {
-                        description = snapshot.child("description").getValue(String.class);
-                        if (description == null || description.isEmpty()) {
-                            description = snapshot.child("bio").getValue(String.class);
-                        }
-                    }
-
-                    if (description != null && !description.isEmpty()) {
-                        tvStoreDescription.setText(description);
-                    } else {
-                        tvStoreDescription.setText("Add a description for your store to attract more customers!");
-                    }
-
-                    // Rating - might need to calculate from reviews
-                    fetchSellerRating();
-
-                    // Store Contact Details
-                    String email = snapshot.child("email").getValue(String.class);
-                    if (email == null || email.isEmpty()) {
-                        email = currentUser.getEmail();
-                    }
-
-                    String phone = snapshot.child("phone").getValue(String.class);
-                    if (phone == null || phone.isEmpty()) {
-                        phone = snapshot.child("phoneNumber").getValue(String.class);
-                        if (phone == null || phone.isEmpty()) {
-                            phone = snapshot.child("contactNumber").getValue(String.class);
-                        }
-                    }
-
-                    String address = snapshot.child("address").getValue(String.class);
-                    if (address == null || address.isEmpty()) {
-                        address = snapshot.child("location").getValue(String.class);
-                        if (address == null || address.isEmpty()) {
-                            address = snapshot.child("city").getValue(String.class);
-                        }
-                    }
-
-                    String memberSince = snapshot.child("createdAt").getValue(String.class);
-                    if (memberSince == null || memberSince.isEmpty()) {
-                        memberSince = snapshot.child("joinDate").getValue(String.class);
-                        if (memberSince == null || memberSince.isEmpty()) {
-                            memberSince = snapshot.child("createdDate").getValue(String.class);
-                            if (memberSince == null || memberSince.isEmpty()) {
-                                memberSince = snapshot.child("timestamp").getValue(String.class);
-                            }
-                        }
-                    }
-
-                    if (email != null) tvStoreEmail.setText(email);
-                    if (phone != null) tvStorePhone.setText(phone);
-                    if (address != null) tvStoreAddress.setText(address);
-                    if (memberSince != null) {
-                        // Format date if needed
-                        tvMemberSince.setText("Member since: " + memberSince);
-                    } else {
-                        tvMemberSince.setText("Member since: N/A");
-                    }
-
-                    // Store Stats
-                    fetchSellerStats();
-
-                    // Verification Status
-                    Boolean isVerified = snapshot.child("isVerified").getValue(Boolean.class);
-                    if (isVerified == null) {
-                        isVerified = snapshot.child("verified").getValue(Boolean.class);
-                    }
-
-                    if (isVerified != null && isVerified) {
-                        tvVerificationStatus.setText("VERIFIED");
-                        tvVerificationStatus.setBackgroundResource(R.drawable.bg_verified_badge);
-                    } else {
-                        tvVerificationStatus.setText("PENDING");
-                        tvVerificationStatus.setBackgroundResource(R.drawable.bg_pending_badge);
-                    }
-                } else {
-                    // User not found in database
-                    tvSellerName.setText("Welcome to BeautyHub!");
-                    tvStoreDescription.setText("Complete your seller profile to start selling.");
-                    tvVerificationStatus.setText("SETUP REQUIRED");
-
-                    // Set default values
-                    tvStoreId.setText("Store ID: " + sellerId.substring(0, Math.min(8, sellerId.length())).toUpperCase());
-                    if (currentUser.getEmail() != null) {
-                        tvStoreEmail.setText(currentUser.getEmail());
-                    }
-                    tvStorePhone.setText("Not set");
-                    tvStoreAddress.setText("Not set");
-                    tvMemberSince.setText("Member since: Not set");
-                    tvTotalProductsCount.setText("0");
-                    tvTotalSales.setText("0");
-                    tvConversionRate.setText("0%");
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG, "Failed to fetch seller profile: " + error.getMessage());
-                Toast.makeText(SellerProfileActivity.this, "Failed to load profile", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-    private void fetchSellerStats() {
-        // Fetch total products count
-        DatabaseReference productsRef = FirebaseDatabase.getInstance().getReference("Products");
-        productsRef.orderByChild("sellerId").equalTo(sellerId)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        long productCount = snapshot.getChildrenCount();
-                        tvTotalProductsCount.setText(String.valueOf(productCount));
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Log.e(TAG, "Failed to fetch product count: " + error.getMessage());
-                        tvTotalProductsCount.setText("0");
-                    }
-                });
-
-        // Fetch total sales and conversion rate (you need to implement based on your orders structure)
-        DatabaseReference ordersRef = FirebaseDatabase.getInstance().getReference("Orders");
-        ordersRef.orderByChild("sellerId").equalTo(sellerId)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        long totalOrders = snapshot.getChildrenCount();
-                        double totalRevenue = 0;
-
-                        for (DataSnapshot orderSnap : snapshot.getChildren()) {
-                            Double amount = orderSnap.child("totalAmount").getValue(Double.class);
-                            if (amount != null) {
-                                totalRevenue += amount;
-                            }
-                        }
-
-                        tvTotalSales.setText(formatCount((long) totalRevenue));
-
-                        // Simple conversion rate calculation (adjust based on your business logic)
-                        // This is just an example - you might want to calculate differently
-                        double conversionRate = totalOrders > 0 ? 4.2 : 0.0; // Example fixed rate
-                        tvConversionRate.setText(String.format("%.1f%%", conversionRate));
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Log.e(TAG, "Failed to fetch sales data: " + error.getMessage());
-                        tvTotalSales.setText("0");
-                        tvConversionRate.setText("0%");
-                    }
-                });
-    }
-    private void fetchSellerRating() {
-        // Calculate rating from reviews
-        DatabaseReference reviewsRef = FirebaseDatabase.getInstance().getReference("Reviews");
-        reviewsRef.orderByChild("sellerId").equalTo(sellerId)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        long reviewCount = snapshot.getChildrenCount();
-                        double totalRating = 0;
-
-                        for (DataSnapshot reviewSnap : snapshot.getChildren()) {
-                            Double rating = reviewSnap.child("rating").getValue(Double.class);
-                            if (rating != null) {
-                                totalRating += rating;
-                            }
-                        }
-
-                        double averageRating = reviewCount > 0 ? totalRating / reviewCount : 0;
-
-                        ratingBarSeller.setRating((float) averageRating);
-                        tvRatingValue.setText(String.format("%.1f (%d reviews)", averageRating, reviewCount));
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Log.e(TAG, "Failed to fetch seller rating: " + error.getMessage());
-                        ratingBarSeller.setRating(0);
-                        tvRatingValue.setText("No ratings yet");
-                    }
-                });
-    }
-    private void setupListeners() {
-        btnEditDetails.setOnClickListener(v -> {
-            Intent intent = new Intent(this, EditSellerProfileActivity.class);
-            startActivity(intent);
-        });
-
-        tvEditDescription.setOnClickListener(v -> {
-            // Open edit description dialog
-            // showEditDescriptionDialog();
-            Toast.makeText(this, "Edit description", Toast.LENGTH_SHORT).show();
-        });
-
-        ivSellerProfile.setOnClickListener(v -> {
-            // Change profile picture
-            // openImagePicker();
-            Toast.makeText(this, "Change profile picture", Toast.LENGTH_SHORT).show();
-        });
-    }
-
-    private String formatCount(long count) {
-        if (count < 1000) {
-            return String.valueOf(count);
-        } else if (count < 1000000) {
-            return String.format("%.1fK", count / 1000.0);
+            itemStoreDesc.setOnClickListener(v -> showEditDialog("Store Description", tvStoreDescValue.getText().toString(), "shopDescription", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE));
+            itemPhone.setOnClickListener(v -> showEditDialog("Phone Number", tvPhoneValue.getText().toString(), "phone", InputType.TYPE_CLASS_PHONE));
+            itemAddress.setOnClickListener(v -> showEditDialog("Store Address", tvAddressValue.getText().toString(), "address", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE));
         } else {
-            return String.format("%.1fM", count / 1000000.0);
+            // Visitors (Buyers) cannot edit
+            tvChangeImage.setVisibility(View.GONE);
+            ibEditNameHeader.setVisibility(View.GONE);
+            etSellerNameHeader.setEnabled(false);
+            etSellerNameHeader.setFocusable(false);
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // Refresh profile data when returning from edit screens
-        fetchSellerProfile();
+    private void loadSellerData() {
+        sellerRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                User seller = snapshot.getValue(User.class);
+                if (seller != null) {
+                    updateUI(seller);
+                    loadSellerProducts(targetSellerId);
+                }
+            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
+
+    private void updateUI(User seller) {
+        etSellerNameHeader.setText(seller.getUsername());
+        tvStoreDescValue.setText(TextUtils.isEmpty(seller.getShopDescription()) ? "No description provided" : seller.getShopDescription());
+        tvPhoneValue.setText(TextUtils.isEmpty(seller.getPhone()) ? "No phone number" : seller.getPhone());
+        tvAddressValue.setText(TextUtils.isEmpty(seller.getAddress()) ? "No address provided" : seller.getAddress());
+
+        if (!isDestroyed() && seller.getProfileImage() != null && !seller.getProfileImage().isEmpty()) {
+            Glide.with(this)
+                    .load(seller.getProfileImage())
+                    .placeholder(R.drawable.ic_profile)
+                    .into(ivSellerProfile);
+        }
+    }
+
+    private void loadSellerProducts(String sellerId) {
+        productsRef.orderByChild("sellerId").equalTo(sellerId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                productList.clear();
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    Product product = ds.getValue(Product.class);
+                    if (product != null) productList.add(product);
+                }
+
+                if (productList.isEmpty()) {
+                    tvNoProducts.setVisibility(View.VISIBLE);
+                    rvSellerProducts.setVisibility(View.GONE);
+                } else {
+                    tvNoProducts.setVisibility(View.GONE);
+                    rvSellerProducts.setVisibility(View.VISIBLE);
+                }
+                productAdapter.notifyDataSetChanged();
+            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
+
+    private void startImageCrop() {
+        CropImageOptions options = new CropImageOptions();
+        options.aspectRatioX = 1;
+        options.aspectRatioY = 1;
+        options.fixAspectRatio = true;
+        cropImageLauncher.launch(new CropImageContractOptions(null, options));
+    }
+
+    private void uploadProfileImageToCloudinary(Uri uri) {
+        progressDialog.setMessage("Updating profile image...");
+        progressDialog.show();
+
+        MediaManager.get().upload(uri)
+                .callback(new UploadCallback() {
+                    @Override
+                    public void onSuccess(String requestId, Map resultData) {
+                        String imageUrl = (String) resultData.get("secure_url");
+                        sellerRef.child("profileImage").setValue(imageUrl)
+                                .addOnSuccessListener(aVoid -> {
+                                    progressDialog.dismiss();
+                                    Toast.makeText(SellerProfileActivity.this, "Profile image updated", Toast.LENGTH_SHORT).show();
+                                });
+                    }
+                    @Override public void onError(String requestId, ErrorInfo error) {
+                        progressDialog.dismiss();
+                        Toast.makeText(SellerProfileActivity.this, "Upload failed: " + error.getDescription(), Toast.LENGTH_SHORT).show();
+                    }
+                    @Override public void onStart(String requestId) {}
+                    @Override public void onProgress(String requestId, long bytes, long totalBytes) {}
+                    @Override public void onReschedule(String requestId, ErrorInfo error) {}
+                }).dispatch();
+    }
+
+    private void toggleNameEditMode() {
+        if (etSellerNameHeader.isEnabled()) {
+            String newName = etSellerNameHeader.getText().toString().trim();
+            if (!TextUtils.isEmpty(newName)) {
+                sellerRef.child("username").setValue(newName);
+            }
+            etSellerNameHeader.setEnabled(false);
+            ibEditNameHeader.setImageResource(R.drawable.ic_edit);
+        } else {
+            etSellerNameHeader.setEnabled(true);
+            etSellerNameHeader.requestFocus();
+            ibEditNameHeader.setImageResource(R.drawable.ic_check);
+        }
+    }
+
+    private void showEditDialog(String title, String currentVal, String dbKey, int inputType) {
+        final EditText input = new EditText(this);
+        input.setInputType(inputType);
+        input.setText(currentVal);
+        input.setPadding(50, 40, 50, 40);
+
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Update " + title)
+                .setView(input)
+                .setPositiveButton("Save", (dialog, which) -> {
+                    String val = input.getText().toString().trim();
+                    sellerRef.child(dbKey).setValue(val);
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void confirmDeleteProduct(Product product) {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Delete Product")
+                .setMessage("Are you sure you want to delete " + product.getName() + "?")
+                .setPositiveButton("Delete", (dialog, which) -> {
+                    productsRef.child(product.getProductId()).removeValue()
+                            .addOnSuccessListener(aVoid -> Toast.makeText(this, "Product deleted", Toast.LENGTH_SHORT).show());
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 }

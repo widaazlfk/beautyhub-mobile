@@ -72,8 +72,6 @@
             app:layout_constraintTop_toBottomOf="@id/rv_product_images"
             tools:text="Nama Produk Yang Sangat Panjang Sehingga Dua Baris" />
 
-        <!-- ▼▼▼ SUSUNAN HARGA DIPERBAIKI ▼▼▼ -->
-
         <!-- Harga Diskaun (utama jika ada) -->
         <TextView
             android:id="@+id/tv_product_discount_price"
@@ -101,9 +99,6 @@
             app:layout_constraintBottom_toBottomOf="@id/tv_product_discount_price"
             app:layout_constraintStart_toEndOf="@id/tv_product_discount_price"
             tools:text="RM 49.90" />
-
-        <!-- ▲▲▲ AKHIR SUSUNAN HARGA ▲▲▲ -->
-
 
         <!-- Rating & Sold Count (Constraint diubah ke tv_product_discount_price) -->
         <RatingBar
@@ -169,6 +164,7 @@
                 tools:text="BeautyCorner MY" />
         </LinearLayout>
 
+        <!-- Container untuk butang BUYER -->
         <LinearLayout
             android:id="@+id/button_container"
             android:layout_width="0dp"
@@ -178,7 +174,7 @@
             android:weightSum="2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/layout_seller_info"> <!-- CORRECTED ID -->
+            app:layout_constraintTop_toBottomOf="@id/layout_seller_info">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_add_to_cart"
@@ -203,6 +199,49 @@
                 android:textSize="12sp" />
 
         </LinearLayout>
+
+        <!-- ======================================================== -->
+        <!-- ▼▼▼ BLOK KOD YANG DITAMBAH UNTUK TINDAKAN SELLER ▼▼▼ -->
+        <!-- ======================================================== -->
+        <LinearLayout
+            android:id="@+id/layoutSellerActions"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/button_container"
+            app:layout_constraintBottom_toBottomOf="@id/button_container">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEditProduct"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="4dp"
+                android:layout_weight="1"
+                android:text="Edit"
+                android:textSize="12sp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDeleteProduct"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:text="Delete"
+                android:textColor="@android:color/white"
+                app:backgroundTint="@android:color/holo_red_dark"
+                android:textSize="12sp"/>
+
+        </LinearLayout>
+        <!-- =================== ▲▲▲ TAMAT BLOK TAMBAHAN ▲▲▲ =================== -->
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

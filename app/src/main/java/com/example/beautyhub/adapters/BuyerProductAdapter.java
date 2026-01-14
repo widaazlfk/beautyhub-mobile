@@ -1,6 +1,5 @@
 package com.example.beautyhub.adapters;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Paint;
 import android.view.LayoutInflater;
@@ -17,9 +16,9 @@ import com.bumptech.glide.Glide;
 import com.example.beautyhub.R;
 import com.example.beautyhub.databinding.BItemProductGrid2Binding;
 import com.example.beautyhub.models.Product;
-import com.example.beautyhub.models.Variant;
+// --- PERUBAHAN 1: Padam import Variant ---
+// import com.example.beautyhub.models.Variant;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -32,10 +31,11 @@ public class BuyerProductAdapter extends RecyclerView.Adapter<BuyerProductAdapte
     private final OnProductInteractionListener listener;
     private final Set<String> favouriteProductIds = new HashSet<>();
 
+    // --- PERUBAHAN 2: Permudahkan Listener Interface ---
     public interface OnProductInteractionListener {
         void onProductClick(Product product);
-        void onBuyNowClick(Product product, Variant variant);
-        void onAddToCartClick(Product product, Variant variant);
+        void onBuyNowClick(Product product); // Parameter Variant dibuang
+        void onAddToCartClick(Product product); // Parameter Variant dibuang
         void onFavouriteClick(Product product, boolean isFavourite);
         void onSellerClick(String sellerId);
     }
@@ -91,7 +91,6 @@ public class BuyerProductAdapter extends RecyclerView.Adapter<BuyerProductAdapte
         void bind(Product product) {
             binding.tvProductName.setText(product.getName());
 
-            // Set Rating
             if (product.getAverageRating() > 0) {
                 binding.rbProductRating.setRating(product.getAverageRating());
                 binding.rbProductRating.setVisibility(View.VISIBLE);
@@ -99,7 +98,6 @@ public class BuyerProductAdapter extends RecyclerView.Adapter<BuyerProductAdapte
                 binding.rbProductRating.setVisibility(View.GONE);
             }
 
-            // Set Sold Count
             if (product.getSoldCount() > 0) {
                 binding.tvSoldCount.setText(String.format(Locale.getDefault(), "(%s sold)", formatSoldCount(product.getSoldCount())));
                 binding.tvSoldCount.setVisibility(View.VISIBLE);
@@ -115,106 +113,85 @@ public class BuyerProductAdapter extends RecyclerView.Adapter<BuyerProductAdapte
         }
 
         private void setupClickListeners(Product product) {
-            // Set listener on the root view to handle product clicks
             binding.getRoot().setOnClickListener(v -> {
                 if (listener != null) {
                     listener.onProductClick(product);
                 }
             });
 
-            // Set listener for the 'Buy Now' button
-            binding.btnBuyNow.setOnClickListener(v -> handleAction(product, false));
+            // --- PERUBAHAN 3: Permudahkan listener butang ---
+            binding.btnBuyNow.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onBuyNowClick(product);
+                }
+            });
 
-            // Set listener for the 'Add to Cart' button
-            binding.btnAddToCart.setOnClickListener(v -> handleAction(product, true));
+            binding.btnAddToCart.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onAddToCartClick(product);
+                }
+            });
 
-            // Set listener for the seller information section
             binding.layoutSellerInfo.setOnClickListener(v -> {
                 if (listener != null && product.getSellerId() != null && !product.getSellerId().isEmpty()) {
-                    listener.onSellerClick(product.getSellerId());
-                }
-            });
-
-            // Set listener for the favourite icon
-            binding.icFavourite.setOnClickListener(v -> {
-                if (listener != null) {
-                    boolean isCurrentlyFavourite = favouriteProductIds.contains(product.getProductId());
-                    listener.onFavouriteClick(product, !isCurrentlyFavourite);
-                }
-            });
-        }
-
-        private void handleAction(Product product, boolean isAddToCart) {
-            if (listener == null) return;
-
-            if (product.hasVariants()) {
-                showVariantSelectionDialog(product, isAddToCart);
-            } else {
-                if (isAddToCart) {
-                    listener.onAddToCartClick(product, null);
-                } else {
-                    listener.onBuyNowClick(product, null);
-                }
-            }
-        }
-
-        private void showVariantSelectionDialog(Product product, boolean isAddToCart) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(context);
-            builder.setTitle("Select Variant");
-
-            List<String> variantNames = new ArrayList<>();
-            for (Variant variant : product.getVariants()) {
-                variantNames.add(variant.getDisplayNameWithPrice()); // Assuming this method exists in Variant model
-            }
-
-            builder.setItems(variantNames.toArray(new String[0]), (dialog, which) -> {
-                Variant selectedVariant = product.getVariants().get(which);
-
-                if (selectedVariant.getStock() <= 0) {
-                    Toast.makeText(context, "This variant is out of stock", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                if (listener != null) {
-                    if (isAddToCart) {
-                        listener.onAddToCartClick(product, selectedVariant);
+                    // Semak jika produk adalah 'preloaded'
+                    if (product.isPreloaded()) {
+                        // Dapatkan nama penjual, jika tiada, guna "BeautyHub" sebagai lalai
+                        String sellerName = product.getSellerName() != null ? product.getSellerName() : "BeautyHub";
+                        // Paparkan mesej yang lebih spesifik
+                        Toast.makeText(itemView.getContext(), "Official Product from " + sellerName, Toast.LENGTH_SHORT).show();
                     } else {
-                        listener.onBuyNowClick(product, selectedVariant);
+                        // Jika bukan produk preloaded, benarkan navigasi ke profil penjual
+                        listener.onSellerClick(product.getSellerId());
                     }
                 }
             });
 
-            builder.setNegativeButton("Cancel", null);
-            builder.show();
+
+            binding.icFavourite.setOnClickListener(v -> {
+                if (listener != null) {
+                    boolean isCurrentlyFavourite = favouriteProductIds.contains(product.getProductId());
+                    listener.onFavouriteClick(product, !isCurrentlyFavourite);
+                    updateFavouriteIconOnClick(product.getProductId());
+                }
+            });
         }
+
+        private void updateFavouriteIconOnClick(String productId) {
+            boolean isNowFavourite = !favouriteProductIds.contains(productId);
+            if (isNowFavourite) {
+                favouriteProductIds.add(productId);
+                binding.icFavourite.setImageResource(R.drawable.ic_favourite_filled);
+            } else {
+                favouriteProductIds.remove(productId);
+                binding.icFavourite.setImageResource(R.drawable.ic_favorite_border);
+            }
+        }
+
+        // --- PERUBAHAN 4: Padam kaedah handleAction dan showVariantSelectionDialog ---
+        /*
+        private void handleAction(Product product, boolean isAddToCart) { ... }
+        private void showVariantSelectionDialog(Product product, boolean isAddToCart) { ... }
+        */
 
         private void setupPriceDisplay(Product product) {
             boolean hasDiscount = product.hasDiscount();
-
-            // Set visibility of discount price view
             binding.tvProductDiscountPrice.setVisibility(hasDiscount ? View.VISIBLE : View.GONE);
 
             if (hasDiscount) {
-                // Set discounted price
                 binding.tvProductDiscountPrice.setText(String.format(Locale.US, "RM%.2f", product.getDiscountPrice()));
-
-                // Set original price with strikethrough
                 binding.tvProductPrice.setText(String.format(Locale.US, "RM%.2f", product.getPrice()));
                 binding.tvProductPrice.setPaintFlags(binding.tvProductPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
                 binding.tvProductPrice.setTextColor(ContextCompat.getColor(context, android.R.color.darker_gray));
 
-                // Align original price to the end of the discount price
                 ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) binding.tvProductPrice.getLayoutParams();
                 params.startToEnd = binding.tvProductDiscountPrice.getId();
                 binding.tvProductPrice.setLayoutParams(params);
-
             } else {
-                // Set regular price
                 binding.tvProductPrice.setText(String.format(Locale.US, "RM%.2f", product.getPrice()));
                 binding.tvProductPrice.setPaintFlags(binding.tvProductPrice.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-                binding.tvProductPrice.setTextColor(ContextCompat.getColor(context, R.color.purple_700)); // Ensure you have this color
+                binding.tvProductPrice.setTextColor(ContextCompat.getColor(context, R.color.purple_700));
 
-                // Align price to the start of the parent
                 ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) binding.tvProductPrice.getLayoutParams();
                 params.startToStart = ConstraintLayout.LayoutParams.PARENT_ID;
                 binding.tvProductPrice.setLayoutParams(params);
@@ -223,7 +200,7 @@ public class BuyerProductAdapter extends RecyclerView.Adapter<BuyerProductAdapte
 
         private void updateFavouriteIcon(Product product) {
             if (favouriteProductIds.contains(product.getProductId())) {
-                binding.icFavourite.setImageResource(R.drawable.ic_favourite_filled); // Assumes you have a filled favorite icon
+                binding.icFavourite.setImageResource(R.drawable.ic_favourite_filled);
             } else {
                 binding.icFavourite.setImageResource(R.drawable.ic_favorite_border);
             }
@@ -236,7 +213,6 @@ public class BuyerProductAdapter extends RecyclerView.Adapter<BuyerProductAdapte
                 binding.rvProductImages.setVisibility(View.VISIBLE);
             } else {
                 binding.rvProductImages.setVisibility(View.GONE);
-                // Optionally show a placeholder
             }
         }
 

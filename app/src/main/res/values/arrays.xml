@@ -1,22 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- in res/values/arrays.xml -->
+
     <string-array name="product_categories">
         <item>Skincare</item>
         <item>Makeup</item>
-
     </string-array>
-    <array name="initial_price_range">
-        <item>10.0</item>
-        <item>200.0</item>
-    </array>
+
     <string-array name="order_status_options">
         <item>Pending</item>
         <item>Shipped</item>
         <item>Completed</item>
         <item>Cancelled</item>
     </string-array>
-    <array name="initial_slider_values">
+
+    <!-- Use integer-array for numeric values if they are whole numbers,
+         or string-array if they have decimal points. -->
+    <string-array name="initial_slider_values">
         <item>10.0</item>
         <item>300.0</item>
-    </array>
+    </string-array>
+
 </resources>

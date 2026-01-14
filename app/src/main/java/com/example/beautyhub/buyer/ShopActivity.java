@@ -3,6 +3,7 @@ package com.example.beautyhub.buyer;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import java.util.List;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -19,7 +20,6 @@ import com.example.beautyhub.R;
 import com.example.beautyhub.adapters.BuyerProductAdapter;
 import com.example.beautyhub.models.CartItem;
 import com.example.beautyhub.models.Product;
-import com.example.beautyhub.models.Variant;
 import com.example.beautyhub.seller.SellerProfileActivity;
 import com.example.beautyhub.ui.ProductViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -32,12 +32,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.List;
+
 
 public class ShopActivity extends AppCompatActivity implements
         FilterBottomSheetDialog.FilterListener,
-        BuyerProductAdapter.OnProductInteractionListener,
-        VariantSelectionBottomSheet.VariantSelectionListener {
+        BuyerProductAdapter.OnProductInteractionListener {
 
     private static final String TAG = "ShopActivity";
 
@@ -46,6 +45,8 @@ public class ShopActivity extends AppCompatActivity implements
     private ProgressBar progressBar;
     private TextView tvNoProducts;
     private SearchView searchView;
+    private View cartIconLayout; // <-- PENGISYTIHARAN DITAMBAH
+    private TextView cartBadge; // <-- PENGISYTIHARAN DITAMBAH
 
     // Adapter and Data List
     private BuyerProductAdapter buyerProductAdapter;
@@ -65,15 +66,15 @@ public class ShopActivity extends AppCompatActivity implements
     private FirebaseUser currentUser;
     private ValueEventListener favouritesListener;
     private DatabaseReference favouritesRef;
+    private DatabaseReference cartRef; // <-- Tambah untuk cart badge
+    private ValueEventListener cartListener; // <-- Tambah untuk cart badge
 
     // ViewModel untuk produk
     private ProductViewModel productViewModel;
 
     // Cache untuk semua produk
     private List<Product> allProductsCache = new ArrayList<>();
-
-    // Flag untuk membezakan tindakan dari BottomSheet
-    private boolean isForBuyNow = false;
+    private List<String> currentSubCategoryFilter = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,15 +84,14 @@ public class ShopActivity extends AppCompatActivity implements
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
 
-        // Initialize ViewModel
         productViewModel = new ViewModelProvider(this).get(ProductViewModel.class);
 
         initViews();
         setupToolbar();
         setupRecyclerView();
         handleIncomingIntent();
+        setupCartBadge(); // <-- Panggil kaedah setup badge
 
-        // Load produk menggunakan ViewModel
         loadProductsWithViewModel();
 
         if (currentUser != null) {
@@ -104,13 +104,51 @@ public class ShopActivity extends AppCompatActivity implements
         progressBar = findViewById(R.id.progress_bar_shop);
         tvNoProducts = findViewById(R.id.tv_no_products_shop);
         searchView = findViewById(R.id.search_view_shop);
+        cartIconLayout = findViewById(R.id.btn_cart_icon); // <-- Gunakan ID FrameLayout
+        cartBadge = findViewById(R.id.cart_badge_shop); // <-- Gunakan ID TextView badge
+    }
+
+    private void setupCartBadge() {
+        if (currentUser == null) {
+            cartBadge.setVisibility(View.GONE);
+            return;
+        }
+        String userId = currentUser.getUid();
+        cartRef = FirebaseDatabase.getInstance().getReference("Carts").child(userId);
+
+        cartListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                long itemCount = 0;
+                if (snapshot.exists()) {
+                    for (DataSnapshot sellerSnapshot : snapshot.getChildren()) {
+                        if (sellerSnapshot.hasChildren()) {
+                            itemCount += sellerSnapshot.getChildrenCount();
+                        }
+                    }
+                }
+
+                if (itemCount > 0) {
+                    cartBadge.setText(String.valueOf(itemCount));
+                    cartBadge.setVisibility(View.VISIBLE);
+                } else {
+                    cartBadge.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.w(TAG, "Failed to read cart data for badge.", error.toException());
+                cartBadge.setVisibility(View.GONE);
+            }
+        };
+        cartRef.addValueEventListener(cartListener);
     }
 
     private void setupToolbar() {
         MaterialToolbar toolbar = findViewById(R.id.toolbar_shop);
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        // Set up search functionality
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -130,27 +168,40 @@ public class ShopActivity extends AppCompatActivity implements
             }
         });
 
+        // 'findViewById' di sini sudah betul kerana ia merujuk pada layout yang baru disambungkan
         findViewById(R.id.btn_cart_icon).setOnClickListener(v ->
                 startActivity(new Intent(ShopActivity.this, CartActivity.class)));
 
         findViewById(R.id.btn_filter_icon).setOnClickListener(v -> {
-            try {
-                FilterBottomSheetDialog bottomSheet = FilterBottomSheetDialog.newInstance(
-                        currentCategoryFilter,
-                        currentBrandFilter,
-                        currentMinPrice,
-                        currentMaxPrice,
-                        currentSkinTypeFilter,
-                        currentIngredientFilter
-                );
-                bottomSheet.show(getSupportFragmentManager(), FilterBottomSheetDialog.TAG);
-            } catch (Exception e) {
-                Log.e(TAG, "Error showing filter bottom sheet: " + e.getMessage());
-                Toast.makeText(this, "Filter feature not available yet", Toast.LENGTH_SHORT).show();
-            }
+            FilterBottomSheetDialog.newInstance(
+                    currentCategoryFilter,
+                    new ArrayList<>(currentSubCategoryFilter),
+                    currentBrandFilter,
+                    currentMinPrice,
+                    currentMaxPrice,
+                    currentSkinTypeFilter,
+                    currentIngredientFilter
+            ).show(getSupportFragmentManager(), FilterBottomSheetDialog.TAG);
         });
     }
 
+    // ... (Kod yang lain tidak perlu diubah)
+
+
+    // --- KEMAS KINI onStop untuk menguruskan listener ---
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (favouritesRef != null && favouritesListener != null) {
+            favouritesRef.removeEventListener(favouritesListener);
+        }
+        // Hentikan cart listener apabila activity tidak lagi kelihatan
+        if (cartRef != null && cartListener != null) {
+            cartRef.removeEventListener(cartListener);
+        }
+    }
+
+    // ... (Semua kod lain kekal sama) ...
     private void setupRecyclerView() {
         allProductsList = new ArrayList<>();
         buyerProductAdapter = new BuyerProductAdapter(this, allProductsList, this);
@@ -187,57 +238,67 @@ public class ShopActivity extends AppCompatActivity implements
 
     private void handleIncomingIntent() {
         Intent intent = getIntent();
-        if (intent != null && intent.hasExtra("CATEGORY_NAME")) {
+        if (intent == null) return;
+
+        MaterialToolbar toolbar = findViewById(R.id.toolbar_shop);
+
+        // KES 1: Menerima senarai sub-kategori (apabila klik Skincare/Makeup)
+        if (intent.hasExtra("SUB_CATEGORIES")) {
+            currentSubCategoryFilter = intent.getStringArrayListExtra("SUB_CATEGORIES");
+            String parentCategoryName = intent.getStringExtra("PARENT_CATEGORY_NAME");
+
+            if (parentCategoryName != null) {
+                toolbar.setTitle(parentCategoryName);
+                // Reset penapis kategori tunggal untuk elak konflik
+                currentCategoryFilter = "All";
+            }
+            // KES 2: Menerima satu nama kategori (logik sedia ada)
+        } else if (intent.hasExtra("CATEGORY_NAME")) {
             String categoryFromIntent = intent.getStringExtra("CATEGORY_NAME");
             if (categoryFromIntent != null && !categoryFromIntent.isEmpty()) {
                 currentCategoryFilter = categoryFromIntent;
-                MaterialToolbar toolbar = findViewById(R.id.toolbar_shop);
                 toolbar.setTitle(categoryFromIntent);
             }
         }
     }
 
+
     private void filterProducts() {
         allProductsList.clear();
 
         for (Product product : allProductsCache) {
-            // --- START OF FIX ---
-            // Replace the complex stock check with this single line
-            boolean hasStock = product.hasStock();
-            // --- END OF FIX ---
-
-            if (product.isActive() && hasStock && matchesAllFilters(product)) {
+            if (product.isActive() && product.hasStock() && matchesAllFilters(product)) {
                 allProductsList.add(product);
             }
         }
         updateUiAfterFilter();
     }
 
-
     private boolean matchesAllFilters(Product product) {
-        // Search filter
         boolean matchesSearch = currentSearchQuery.isEmpty() ||
                 (product.getName() != null && product.getName().toLowerCase().contains(currentSearchQuery)) ||
-                (product.getDescription() != null && product.getDescription().toLowerCase().contains(currentSearchQuery)) ||
-                (product.getBrand() != null && product.getBrand().toLowerCase().contains(currentSearchQuery));
+                (product.getBrand() != null && product.getBrand().toLowerCase().contains(currentSearchQuery)) ||
+                (product.getSellerName() != null && product.getSellerName().toLowerCase().contains(currentSearchQuery));
 
-        // Category filter
-        boolean matchesCategory = currentCategoryFilter.equalsIgnoreCase("All") ||
-                (product.getCategory() != null && product.getCategory().equalsIgnoreCase(currentCategoryFilter));
+        // --- Kod seterusnya kekal sama ---
+        boolean matchesCategory;
+        if (currentSubCategoryFilter != null && !currentSubCategoryFilter.isEmpty()) {
+            // Jika ada senarai sub-kategori, semak jika kategori produk ada dalam senarai itu
+            matchesCategory = product.getCategory() != null && currentSubCategoryFilter.contains(product.getCategory());
+        } else {
+            // Jika tidak, guna logik penapis kategori tunggal sedia ada
+            matchesCategory = currentCategoryFilter.equalsIgnoreCase("All") ||
+                    (product.getCategory() != null && product.getCategory().equalsIgnoreCase(currentCategoryFilter));
+        }
 
-        // Brand filter
         boolean matchesBrand = currentBrandFilter.isEmpty() ||
                 (product.getBrand() != null && product.getBrand().equalsIgnoreCase(currentBrandFilter));
 
-        // Price filter
-        double priceToCheck = product.hasDiscount() ? product.getDiscountPrice() : product.getPrice();
-        boolean matchesPrice = priceToCheck >= currentMinPrice && priceToCheck <= currentMaxPrice;
+        boolean matchesPrice = product.getFinalPrice() >= currentMinPrice && product.getFinalPrice() <= currentMaxPrice;
 
-        // Skin type filter
         boolean matchesSkinType = currentSkinTypeFilter.equalsIgnoreCase("All") ||
                 (product.getSkinType() != null && product.getSkinType().toLowerCase().contains(currentSkinTypeFilter.toLowerCase()));
 
-        // Ingredient filter
         boolean matchesIngredient = currentIngredientFilter.isEmpty() ||
                 (product.getIngredients() != null && product.getIngredients().toLowerCase().contains(currentIngredientFilter.toLowerCase()));
 
@@ -250,7 +311,6 @@ public class ShopActivity extends AppCompatActivity implements
         if (allProductsList.isEmpty()) {
             tvNoProducts.setVisibility(View.VISIBLE);
             allProductsRecyclerView.setVisibility(View.GONE);
-            tvNoProducts.setText("No products found. Try adjusting your filters.");
         } else {
             tvNoProducts.setVisibility(View.GONE);
             allProductsRecyclerView.setVisibility(View.VISIBLE);
@@ -260,10 +320,6 @@ public class ShopActivity extends AppCompatActivity implements
     private void listenToFavourites() {
         if (currentUser == null) return;
         favouritesRef = FirebaseDatabase.getInstance().getReference("Favourites").child(currentUser.getUid());
-
-        if (favouritesListener != null) {
-            favouritesRef.removeEventListener(favouritesListener);
-        }
 
         favouritesListener = new ValueEventListener() {
             @Override
@@ -287,24 +343,43 @@ public class ShopActivity extends AppCompatActivity implements
         favouritesRef.addValueEventListener(favouritesListener);
     }
 
-    // FilterListener implementation
+    // In ShopActivity.java
+
+    // Example: Let's assume the correct signature has 7 parameters.
+    // YOU MUST CHECK your FilterListener interface to confirm the correct order and type.
     @Override
-    public void onFilterApplied(String category, String brand, float minPrice, float maxPrice, String skinType, String ingredient) {
-        this.currentCategoryFilter = category;
+    public void onFilterApplied(String category, List<String> subCategories, String brand, float minPrice, float maxPrice, String skinType, String ingredient) {
+
+        // Reset single category if multiple sub-categories are applied
+        if (subCategories != null && !subCategories.isEmpty()) {
+            this.currentCategoryFilter = "All";
+            this.currentSubCategoryFilter = subCategories;
+        } else {
+            this.currentCategoryFilter = category;
+            this.currentSubCategoryFilter.clear();
+        }
+
         this.currentBrandFilter = brand;
         this.currentMinPrice = minPrice;
         this.currentMaxPrice = maxPrice;
         this.currentSkinTypeFilter = skinType;
         this.currentIngredientFilter = ingredient;
 
+        // Update toolbar title logic
         if (!category.equals("All")) {
             ((MaterialToolbar) findViewById(R.id.toolbar_shop)).setTitle(category);
+        } else if (getIntent().hasExtra("PARENT_CATEGORY_NAME")) {
+            // Keep the parent category title if we came from there
+            ((MaterialToolbar) findViewById(R.id.toolbar_shop)).setTitle(getIntent().getStringExtra("PARENT_CATEGORY_NAME"));
+        } else {
+            ((MaterialToolbar) findViewById(R.id.toolbar_shop)).setTitle("Shop");
         }
+
         filterProducts();
-        Toast.makeText(this, "Filters applied!", Toast.LENGTH_SHORT).show();
     }
 
-    // OnProductInteractionListener implementation
+
+
     @Override
     public void onProductClick(Product product) {
         Intent intent = new Intent(this, ProductDetailActivity.class);
@@ -312,202 +387,123 @@ public class ShopActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
+    // --- PERUBAHAN 3: Kemas kini kaedah onAddToCartClick ---
     @Override
-    public void onAddToCartClick(Product product, Variant variant) {
+    public void onAddToCartClick(Product product) {
         if (currentUser == null) {
             Toast.makeText(this, "Please log in to add items to your cart.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (product.hasVariants() && variant == null) {
-            try {
-                showVariantSelectionDialog(product, false);
-            } catch (Exception e) {
-                Log.e(TAG, "Error showing variant selection: " + e.getMessage());
-                Toast.makeText(this, "Please select a variant first", Toast.LENGTH_SHORT).show();
-            }
-        } else {
-            addToCartDirectly(product, variant, 1);
+        // Semak stok sebelum menambah
+        if (!product.hasStock()) {
+            Toast.makeText(this, "This item is out of stock.", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        addToCartDirectly(product, 1);
     }
 
+    // --- PERUBAHAN 4: Kemas kini kaedah onBuyNowClick ---
     @Override
-    public void onBuyNowClick(Product product, Variant variant) {
+    public void onBuyNowClick(Product product) {
         if (currentUser == null) {
             Toast.makeText(this, "Please log in to purchase.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Check stock
-        int stock = (variant != null) ? variant.getStock() : product.getStock();
-        if (stock <= 0) {
+        if (!product.hasStock()) {
             Toast.makeText(this, "This item is out of stock.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (product.hasVariants() && variant == null) {
-            try {
-                showVariantSelectionDialog(product, true);
-            } catch (Exception e) {
-                Log.e(TAG, "Error showing variant selection: " + e.getMessage());
-                Toast.makeText(this, "Please select a variant first", Toast.LENGTH_SHORT).show();
-            }
-        } else {
-            proceedToCheckout(product, variant, 1);
-        }
+        proceedToCheckout(product, 1);
     }
 
-    // VariantSelectionListener implementation
+    // --- PERUBAHAN 5: Padam kaedah berkaitan VariantSelectionListener ---
+    /*
     @Override
-    public void onVariantSelected(Product product, Variant variant, int quantity) {
-        if (isForBuyNow) {
-            proceedToCheckout(product, variant, quantity);
-        } else {
-            addToCartDirectly(product, variant, quantity);
-        }
-    }
+    public void onVariantSelected(Product product, Variant variant, int quantity) { ... }
 
-    private void showVariantSelectionDialog(Product product, boolean isBuyNow) {
-        this.isForBuyNow = isBuyNow;
+    private void showVariantSelectionDialog(Product product, boolean isBuyNow) { ... }
 
-        // Pass the product ID to the bottom sheet
-        try {
-            VariantSelectionBottomSheet bottomSheet = VariantSelectionBottomSheet.newInstance(product.getProductId());
-            bottomSheet.setVariantSelectionListener(this);
-            bottomSheet.setBuyNowMode(isBuyNow);
-            bottomSheet.show(getSupportFragmentManager(), VariantSelectionBottomSheet.TAG);
-        } catch (Exception e) {
-            Log.e(TAG, "Error creating variant selection dialog: " + e.getMessage());
-            // Fallback: Show an AlertDialog for variant selection
-            showFallbackVariantSelection(product, isBuyNow);
-        }
-    }
+    private void showFallbackVariantSelection(Product product, boolean isBuyNow) { ... }
+    */
 
-    private void showFallbackVariantSelection(Product product, boolean isBuyNow) {
-        // Fallback method if the bottom sheet is not available
-        if (product.hasVariants()) {
-            // Create a simple dialog for variant selection
-            android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
-            builder.setTitle("Select Variant");
-
-            String[] variantNames = new String[product.getVariants().size()];
-            for (int i = 0; i < product.getVariants().size(); i++) {
-                Variant variant = product.getVariants().get(i);
-                variantNames[i] = variant.getName() + " (Stock: " + variant.getStock() + ")";
-            }
-
-            builder.setItems(variantNames, (dialog, which) -> {
-                Variant selectedVariant = product.getVariants().get(which);
-                if (isBuyNow) {
-                    proceedToCheckout(product, selectedVariant, 1);
-                } else {
-                    addToCartDirectly(product, selectedVariant, 1);
-                }
-            });
-            builder.setNegativeButton("Cancel", null);
-            builder.show();
-        }
-    }
-
-    private void addToCartDirectly(Product product, Variant variant, int quantity) {
-        if (currentUser == null) return;
-
-        // Validate stock
-        int availableStock = (variant != null) ? variant.getStock() : product.getStock();
-        if (availableStock < quantity) {
-            Toast.makeText(this, "Not enough stock available. Only " + availableStock + " items left.", Toast.LENGTH_SHORT).show();
+    // --- PERUBAHAN 6: Permudahkan kaedah addToCartDirectly ---
+    private void addToCartDirectly(Product product, int quantity) {
+        String sellerId = product.getSellerId();
+        if (sellerId == null || sellerId.isEmpty()) {
+            Toast.makeText(this, "Cannot add to cart: Seller info is missing.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        DatabaseReference cartRef = FirebaseDatabase.getInstance().getReference("Carts").child(currentUser.getUid());
-        String cartItemId = product.getProductId();
-
-        // If variant exists, append variant ID to cart item ID
-        if (variant != null && variant.getId() != null && !variant.getId().isEmpty()) {
-            cartItemId += "_" + variant.getId();
-        }
-
-        DatabaseReference cartItemRef = cartRef.child(cartItemId);
+        DatabaseReference cartItemRef = FirebaseDatabase.getInstance()
+                .getReference("Carts")
+                .child(currentUser.getUid())
+                .child(sellerId)
+                .child(product.getProductId()); // ID Item kini sama dengan ID Produk
 
         cartItemRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                double finalPrice = product.getPriceWithVariant(variant);
-
                 if (snapshot.exists()) {
-                    // Item already exists, update quantity
-                    int currentQuantity = snapshot.child("quantity").getValue(Integer.class);
-                    cartItemRef.child("quantity").setValue(currentQuantity + quantity);
-                    Toast.makeText(ShopActivity.this, "Updated cart quantity!", Toast.LENGTH_SHORT).show();
+                    // Item sudah ada, tambah kuantiti
+                    Integer currentQuantity = snapshot.child("quantity").getValue(Integer.class);
+                    int newQuantity = (currentQuantity != null ? currentQuantity : 0) + quantity;
+
+                    if (newQuantity > product.getStock()) {
+                        Toast.makeText(ShopActivity.this, "Maximum stock reached!", Toast.LENGTH_SHORT).show();
+                        cartItemRef.child("quantity").setValue(product.getStock());
+                    } else {
+                        cartItemRef.child("quantity").setValue(newQuantity);
+                        Toast.makeText(ShopActivity.this, "Cart updated!", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
-                    // New item, create CartItem object
+                    // Item baru
                     String imageUrl = (product.getImageUrls() != null && !product.getImageUrls().isEmpty()) ?
                             product.getImageUrls().get(0) : "";
 
                     CartItem cartItem = new CartItem(
                             product.getProductId(),
                             product.getName(),
-                            finalPrice,
+                            product.getFinalPrice(),
                             quantity,
-                            imageUrl
+                            imageUrl,
+                            product.getSellerProfileImageUrl()
                     );
+                    cartItem.setSellerId(sellerId);
+                    cartItem.setSellerName(product.getSellerName());
+                    cartItem.setCartItemId(product.getProductId());
 
-                    // Set variant information if available
-                    if (variant != null) {
-                        cartItem.setVariantId(variant.getId());
-                        cartItem.setVariantName(variant.getName());
-                    }
-
-                    // Set seller information
-                    cartItem.setSellerId(product.getSellerId() != null ? product.getSellerId() : "system");
-                    cartItem.setSellerName(product.getSellerName() != null ? product.getSellerName() : "BeautyHub Official Store");
-                    cartItem.setFromJson(product.isPreloaded());
-                    cartItem.setHasVariants(product.hasVariants());
-
-                    cartItemRef.setValue(cartItem);
-                    Toast.makeText(ShopActivity.this, "Added to cart!", Toast.LENGTH_SHORT).show();
+                    cartItemRef.setValue(cartItem)
+                            .addOnSuccessListener(aVoid -> Toast.makeText(ShopActivity.this, "Added to cart!", Toast.LENGTH_SHORT).show());
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(ShopActivity.this, "Failed to add to cart.", Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "Add to cart failed: " + error.getMessage());
             }
         });
     }
 
-    private void proceedToCheckout(Product product, Variant variant, int quantity) {
-        // Validate stock before proceeding
-        int availableStock = (variant != null) ? variant.getStock() : product.getStock();
-        if (availableStock < quantity) {
-            Toast.makeText(this, "Not enough stock available. Only " + availableStock + " items left.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
+    // --- PERUBAHAN 7: Permudahkan kaedah proceedToCheckout ---
+    private void proceedToCheckout(Product product, int quantity) {
         String imageUrl = (product.getImageUrls() != null && !product.getImageUrls().isEmpty()) ?
                 product.getImageUrls().get(0) : "";
-        double finalPrice = product.getPriceWithVariant(variant);
 
         CartItem buyNowItem = new CartItem(
                 product.getProductId(),
                 product.getName(),
-                finalPrice,
+                product.getFinalPrice(),
                 quantity,
-                imageUrl
+                imageUrl,
+                product.getSellerProfileImageUrl()
         );
-
-        // Set variant information if available
-        if (variant != null) {
-            buyNowItem.setVariantId(variant.getId());
-            buyNowItem.setVariantName(variant.getName());
-        }
-
-        // Set seller information
-        buyNowItem.setSellerId(product.getSellerId() != null ? product.getSellerId() : "system");
-        buyNowItem.setSellerName(product.getSellerName() != null ? product.getSellerName() : "BeautyHub Official Store");
-        buyNowItem.setFromJson(product.isPreloaded());
-        buyNowItem.setHasVariants(product.hasVariants());
+        buyNowItem.setSellerId(product.getSellerId());
+        buyNowItem.setSellerName(product.getSellerName());
+        buyNowItem.setCartItemId(product.getProductId());
 
         ArrayList<CartItem> itemsForCheckout = new ArrayList<>();
         itemsForCheckout.add(buyNowItem);
@@ -530,18 +526,18 @@ public class ShopActivity extends AppCompatActivity implements
                 .child(product.getProductId());
 
         if (isFavourite) {
-            favRef.setValue(true).addOnSuccessListener(aVoid ->
-                    Toast.makeText(this, "Added to Favourites", Toast.LENGTH_SHORT).show());
+            favRef.setValue(true);
         } else {
-            favRef.removeValue().addOnSuccessListener(aVoid ->
-                    Toast.makeText(this, "Removed from Favourites", Toast.LENGTH_SHORT).show());
+            favRef.removeValue();
         }
     }
 
+
+
     @Override
     public void onSellerClick(String sellerId) {
-        if ("system".equals(sellerId)) {
-            Toast.makeText(this, "This is an official BeautyHub product.", Toast.LENGTH_SHORT).show();
+        if (sellerId == null || sellerId.isEmpty() || sellerId.startsWith("json_")) {
+            Toast.makeText(this, "This is an official store.", Toast.LENGTH_SHORT).show();
             return;
         }
         Intent intent = new Intent(this, SellerProfileActivity.class);
@@ -549,20 +545,4 @@ public class ShopActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (favouritesRef != null && favouritesListener != null) {
-            favouritesRef.removeEventListener(favouritesListener);
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        // Clean up listeners
-        if (favouritesRef != null && favouritesListener != null) {
-            favouritesRef.removeEventListener(favouritesListener);
-        }
-    }
 }
