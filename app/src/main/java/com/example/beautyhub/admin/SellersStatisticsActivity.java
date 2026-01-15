@@ -2,20 +2,27 @@ package com.example.beautyhub.admin;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.beautyhub.R;
-import com.github.mikephil.charting.charts.PieChart;
-import com.github.mikephil.charting.components.Legend;
-import com.github.mikephil.charting.data.PieData;
-import com.github.mikephil.charting.data.PieDataSet;
-import com.github.mikephil.charting.data.PieEntry;
-import com.github.mikephil.charting.formatter.PercentFormatter;
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
+import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -24,32 +31,67 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class SellersStatisticsActivity extends AppCompatActivity {
 
-    private static final String TAG = "SellersStatistics";
-    private PieChart pieChart;
-    private DatabaseReference ordersRef;
-    private DatabaseReference usersRef;
+    private BarChart barChart;
+    private DatabaseReference ordersRef, usersRef;
+    private TextView tvTotalSellersCount, tvTopSellerName;
+
+    private RecyclerView recyclerView;
+    private SellerAdapter adapter;
+    private List<SellerStat> sellerList;
+    private List<String> fullNamesForChart; // Untuk rujukan klik pada graf
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sellers_statistics);
 
+        fullNamesForChart = new ArrayList<>();
+        initViews();
         setupToolbar();
+        setupProfessionalBarChart();
 
-        pieChart = findViewById(R.id.sellers_pie_chart);
-        setupProfessionalPieChart();
-
-        // Rujukan database
         ordersRef = FirebaseDatabase.getInstance().getReference("Orders");
         usersRef = FirebaseDatabase.getInstance().getReference("Users");
 
         fetchSellersStatistics();
+    }
+
+    private void initViews() {
+        barChart = findViewById(R.id.sellers_bar_chart);
+        tvTotalSellersCount = findViewById(R.id.tv_total_sellers_count);
+        tvTopSellerName = findViewById(R.id.tv_top_seller_name);
+
+        recyclerView = findViewById(R.id.rv_sellers_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        sellerList = new ArrayList<>();
+        adapter = new SellerAdapter(sellerList);
+        recyclerView.setAdapter(adapter);
+
+        // Listener: Apabila Admin klik pada Bar di dalam graf
+        barChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            @Override
+            public void onValueSelected(Entry e, Highlight h) {
+                int index = (int) e.getX();
+                if (index >= 0 && index < fullNamesForChart.size()) {
+                    String fullName = fullNamesForChart.get(index);
+                    float revenue = e.getY();
+                    Toast.makeText(SellersStatisticsActivity.this,
+                            "Seller: " + fullName + "\nTotal Revenue: RM " + String.format("%.2f", revenue),
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onNothingSelected() {
+            }
+        });
     }
 
     private void setupToolbar() {
@@ -57,127 +99,224 @@ public class SellersStatisticsActivity extends AppCompatActivity {
         if (toolbar != null) {
             setSupportActionBar(toolbar);
             if (getSupportActionBar() != null) {
-                getSupportActionBar().setTitle("Seller Sales Performance");
+                getSupportActionBar().setTitle("Seller Analytics");
                 getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             }
-            // Fungsi Butang Back
-            toolbar.setNavigationOnClickListener(v -> onBackPressed());
+            toolbar.setNavigationOnClickListener(v -> finish());
         }
     }
 
-    private void setupProfessionalPieChart() {
-        pieChart.setUsePercentValues(true);
-        pieChart.getDescription().setEnabled(false);
-        pieChart.setExtraOffsets(10, 10, 10, 10);
+    private void setupProfessionalBarChart() {
+        barChart.getDescription().setEnabled(false);
+        barChart.setDrawGridBackground(false);
+        barChart.animateY(1500);
 
-        // Design Hole (Lubang Tengah) supaya nampak moden (Donut Chart)
-        pieChart.setDrawHoleEnabled(true);
-        pieChart.setHoleColor(Color.TRANSPARENT);
-        pieChart.setTransparentCircleRadius(61f);
-        pieChart.setHoleRadius(58f);
+        XAxis xAxis = barChart.getXAxis();
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setGranularity(1f);
+        xAxis.setDrawGridLines(false);
+        xAxis.setLabelRotationAngle(-45);
+        xAxis.setTextColor(Color.DKGRAY);
 
-        pieChart.setEntryLabelColor(Color.DKGRAY);
-        pieChart.setEntryLabelTextSize(11f);
-        pieChart.setCenterText("Sales by Seller");
-        pieChart.setCenterTextSize(16f);
+        barChart.getAxisRight().setEnabled(false);
+        barChart.getAxisLeft().setAxisMinimum(0f);
+        barChart.getAxisLeft().setDrawGridLines(true);
 
-        Legend l = pieChart.getLegend();
-        l.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
-        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
-        l.setOrientation(Legend.LegendOrientation.HORIZONTAL);
-        l.setDrawInside(false);
-        l.setTextSize(12f);
-        l.setWordWrapEnabled(true);
+        barChart.setFitBars(true); // Supaya bar tidak rapat ke tepi
     }
 
     private void fetchSellersStatistics() {
-        ordersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (!dataSnapshot.exists()) {
-                    Toast.makeText(SellersStatisticsActivity.this, "No order data found", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+            public void onDataChange(@NonNull DataSnapshot usersSnapshot) {
+                Map<String, String> sellerNamesMap = new HashMap<>();
+                for (DataSnapshot ds : usersSnapshot.getChildren()) {
+                    // Berdasarkan input anda, role adalah HURUF BESAR
+                    String role = ds.child("userType").getValue(String.class);
 
-                Map<String, Float> sellerSales = new HashMap<>();
-                for (DataSnapshot orderSnapshot : dataSnapshot.getChildren()) {
-                    String sellerId = orderSnapshot.child("sellerId").getValue(String.class);
-
-                    // TUKAR: totalPayment -> totalAmount (ikut Firebase anda)
-                    Object amountObj = orderSnapshot.child("totalAmount").getValue();
-                    float amountValue = 0f;
-
-                    if (amountObj instanceof Long) amountValue = ((Long) amountObj).floatValue();
-                    else if (amountObj instanceof Double) amountValue = ((Double) amountObj).floatValue();
-
-                    if (sellerId != null && amountValue > 0) {
-                        sellerSales.put(sellerId, sellerSales.getOrDefault(sellerId, 0f) + amountValue);
+                    if ("SELLER".equalsIgnoreCase(role)) {
+                        String id = ds.getKey();
+                        String name = ds.child("username").getValue(String.class);
+                        sellerNamesMap.put(id, name != null ? name : "Unknown Seller");
                     }
                 }
 
-                if (sellerSales.isEmpty()) {
-                    Toast.makeText(SellersStatisticsActivity.this, "No sales found", Toast.LENGTH_SHORT).show();
-                } else {
-                    fetchSellerNamesAndLoadChart(sellerSales);
-                }
+                ordersRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot ordersSnapshot) {
+                        Map<String, Float> salesMap = new HashMap<>();
+
+                        // Init RM 0 untuk semua seller
+                        for (String id : sellerNamesMap.keySet()) {
+                            salesMap.put(id, 0f);
+                        }
+
+                        for (DataSnapshot ds : ordersSnapshot.getChildren()) {
+                            String status = ds.child("status").getValue(String.class);
+
+                            // Kira semua status kecuali Cancelled
+                            if (!"Cancelled".equalsIgnoreCase(status)) {
+                                String sId = ds.child("sellerId").getValue(String.class);
+                                Object amt = ds.child("totalAmount").getValue();
+
+                                float val = 0f;
+                                if (amt instanceof Double) val = ((Double) amt).floatValue();
+                                else if (amt instanceof Long) val = ((Long) amt).floatValue();
+
+                                if (sId != null && salesMap.containsKey(sId)) {
+                                    salesMap.put(sId, salesMap.get(sId) + val);
+                                }
+                            }
+                        }
+                        prepareFinalData(sellerNamesMap, salesMap);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                    }
+                });
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.e(TAG, "Database Error: " + databaseError.getMessage());
+            public void onCancelled(@NonNull DatabaseError error) {
             }
         });
     }
 
-    private void fetchSellerNamesAndLoadChart(Map<String, Float> sellerSales) {
-        ArrayList<PieEntry> entries = new ArrayList<>();
-        AtomicInteger counter = new AtomicInteger(sellerSales.size());
+    private void prepareFinalData(Map<String, String> namesMap, Map<String, Float> salesMap) {
+        sellerList.clear();
+        fullNamesForChart.clear();
 
-        for (Map.Entry<String, Float> entry : sellerSales.entrySet()) {
-            String sellerId = entry.getKey();
-            Float totalSales = entry.getValue();
+        for (Map.Entry<String, String> entry : namesMap.entrySet()) {
+            sellerList.add(new SellerStat(entry.getValue(), salesMap.get(entry.getKey())));
+        }
 
-            usersRef.child(sellerId).child("username").addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    String name = snapshot.exists() ? snapshot.getValue(String.class) : "Unknown Seller";
-                    entries.add(new PieEntry(totalSales, name));
+        // Susun Ranking Teratas ke Bawah
+        Collections.sort(sellerList, (o1, o2) -> Float.compare(o2.revenue, o1.revenue));
 
-                    if (counter.decrementAndGet() == 0) {
-                        loadPieChartData(entries);
-                    }
-                }
+        tvTotalSellersCount.setText(String.valueOf(sellerList.size()));
+        if (!sellerList.isEmpty()) {
+            tvTopSellerName.setText(sellerList.get(0).name);
+        }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    if (counter.decrementAndGet() == 0) loadPieChartData(entries);
-                }
-            });
+        List<BarEntry> chartEntries = new ArrayList<>();
+        List<String> chartLabels = new ArrayList<>();
+
+        // Hanya paparkan top 10 seller dalam carta supaya tidak terlalu sesak
+        int limit = Math.min(sellerList.size(), 10);
+        for (int i = 0; i < limit; i++) {
+            SellerStat stat = sellerList.get(i);
+            chartEntries.add(new BarEntry(i, stat.revenue));
+            fullNamesForChart.add(stat.name); // Simpan nama penuh
+
+            // Pendekkan nama pada Label Paksi-X
+            String shortName = stat.name.length() > 10 ? stat.name.substring(0, 8) + ".." : stat.name;
+            chartLabels.add(shortName);
+        }
+
+        updateUI(chartEntries, chartLabels);
+    }
+
+    private void updateUI(List<BarEntry> entries, List<String> labels) {
+        BarDataSet dataSet = new BarDataSet(entries, "Revenue (RM)");
+        dataSet.setColors(new int[]{
+                Color.parseColor("#8a2128"),
+                Color.parseColor("#0984E3"),
+                Color.parseColor("#00B894"),
+                Color.parseColor("#6C5CE7")
+        });
+        dataSet.setValueTextSize(10f);
+        dataSet.setValueTextColor(Color.BLACK);
+
+        barChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
+        barChart.getXAxis().setLabelCount(labels.size());
+
+        BarData barData = new BarData(dataSet);
+        barChart.setData(barData);
+        barChart.invalidate();
+
+        adapter.notifyDataSetChanged();
+    }
+
+    private static class SellerStat {
+        String name;
+        float revenue;
+
+        SellerStat(String name, float revenue) {
+            this.name = name;
+            this.revenue = revenue;
         }
     }
 
-    private void loadPieChartData(ArrayList<PieEntry> entries) {
-        PieDataSet dataSet = new PieDataSet(entries, "");
-        dataSet.setSliceSpace(3f);
-        dataSet.setSelectionShift(5f);
+    private class SellerAdapter extends RecyclerView.Adapter<SellerAdapter.SellerViewHolder> {
+        private List<SellerStat> list;
 
-        // Skema warna yang lebih matang/profesional
-        int[] customColors = {
-                Color.parseColor("#8a2128"), // Deep Red
-                Color.parseColor("#2196F3"), // Blue
-                Color.parseColor("#4CAF50"), // Green
-                Color.parseColor("#FF9800"), // Orange
-                Color.parseColor("#9C27B0")  // Purple
-        };
-        dataSet.setColors(customColors);
+        SellerAdapter(List<SellerStat> list) {
+            this.list = list;
+        }
 
-        PieData data = new PieData(dataSet);
-        data.setValueFormatter(new PercentFormatter(pieChart));
-        data.setValueTextSize(12f);
-        data.setValueTextColor(Color.WHITE);
+        @NonNull
+        @Override
+        public SellerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_admin_order, parent, false);
+            return new SellerViewHolder(v);
+        }
 
-        pieChart.setData(data);
-        pieChart.animateY(1400);
-        pieChart.invalidate();
+        @Override
+        public void onBindViewHolder(@NonNull SellerViewHolder holder, int position) {
+            SellerStat stat = list.get(position);
+            holder.tvName.setText(stat.name);
+            holder.tvRevenue.setText(String.format("RM %.2f", stat.revenue));
+            holder.tvRank.setText("Rank #" + (position + 1));
+
+            if (position == 0) holder.tvRank.setTextColor(Color.parseColor("#8a2128"));
+            else holder.tvRank.setTextColor(Color.GRAY);
+
+            holder.itemView.setOnClickListener(v -> {
+                Toast.makeText(SellersStatisticsActivity.this, "Seller: " + stat.name, Toast.LENGTH_SHORT).show();
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return list.size();
+        }
+
+        class SellerViewHolder extends RecyclerView.ViewHolder {
+            TextView tvRank, tvName, tvRevenue;
+
+            public SellerViewHolder(@NonNull View itemView) {
+                super(itemView);
+                // 1. Mapping ID utama
+                tvRank = itemView.findViewById(R.id.tv_order_id);
+                tvName = itemView.findViewById(R.id.tv_order_customer);
+                tvRevenue = itemView.findViewById(R.id.tv_order_amount);
+
+                // 2. Sembunyikan Status & Tarikh
+                View status = itemView.findViewById(R.id.tv_order_status);
+                if (status != null) status.setVisibility(View.GONE);
+
+                View date = itemView.findViewById(R.id.tv_order_date);
+                if (date != null) date.setVisibility(View.GONE);
+
+                // 3. Sembunyikan bahagian "Earn (10%)" (Seluruh kotak kanan)
+                View commissionValue = itemView.findViewById(R.id.tv_admin_commission);
+                if (commissionValue != null && commissionValue.getParent() instanceof View) {
+                    ((View) commissionValue.getParent()).setVisibility(View.GONE);
+                }
+
+                // 4. Sembunyikan label statik "Total Amount"
+                // Kita cari parent kepada tvRevenue (LinearLayout) dan sorokkan anak pertama (label)
+                if (tvRevenue != null && tvRevenue.getParent() instanceof View) {
+                    View container = (View) tvRevenue.getParent();
+                    if (container instanceof ViewGroup) {
+                        ViewGroup vg = (ViewGroup) container;
+                        if (vg.getChildCount() > 0) {
+                            vg.getChildAt(0).setVisibility(View.GONE);
+                        }
+                    }
+                }
+            }
+        }
     }
 }

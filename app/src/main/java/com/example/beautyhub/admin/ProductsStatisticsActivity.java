@@ -1,25 +1,29 @@
 package com.example.beautyhub.admin;
 
 import android.graphics.Color;
-import android.graphics.LinearGradient;
-import android.graphics.Paint;
-import android.graphics.Shader;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.beautyhub.R;
-import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.animation.Easing;
+import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.data.BarDataSet;
-import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
-import com.github.mikephil.charting.renderer.BarChartRenderer;
+import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -37,24 +41,58 @@ import java.util.stream.Collectors;
 
 public class ProductsStatisticsActivity extends AppCompatActivity {
 
-    private static final String TAG = "ProductsStatistics";
-    private BarChart barChart;
-    private DatabaseReference ordersRef, productsRef;
+    private LineChart ogiveChart;
+    private DatabaseReference ordersRef;
+    private TextView tvTopProductName, tvTopProductCount;
+
+    private RecyclerView recyclerView;
+    private ProductAdapter adapter;
+    private List<ProductStat> productList;
+    private List<String> fullProductNamesForChart; // Untuk simpan nama penuh bagi Toast
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_products_statistics);
 
+        fullProductNamesForChart = new ArrayList<>();
+        initViews();
         setupToolbar();
-        barChart = findViewById(R.id.products_bar_chart);
-
-        setupProfessionalBarChart();
+        setupProfessionalOgiveChart();
 
         ordersRef = FirebaseDatabase.getInstance().getReference("Orders");
-        productsRef = FirebaseDatabase.getInstance().getReference("Products");
-
         fetchPopularProducts();
+    }
+
+    private void initViews() {
+        ogiveChart = findViewById(R.id.products_ogive_chart);
+        tvTopProductName = findViewById(R.id.tv_top_product_name);
+        tvTopProductCount = findViewById(R.id.tv_top_product_count);
+
+        recyclerView = findViewById(R.id.rv_products_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        productList = new ArrayList<>();
+        adapter = new ProductAdapter(productList);
+        recyclerView.setAdapter(adapter);
+
+        // Listener: Apabila Admin klik pada titik graf
+        ogiveChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            @Override
+            public void onValueSelected(Entry e, Highlight h) {
+                int index = (int) e.getX();
+                if (index >= 0 && index < fullProductNamesForChart.size()) {
+                    String name = fullProductNamesForChart.get(index);
+                    int cumulativeValue = (int) e.getY();
+                    Toast.makeText(ProductsStatisticsActivity.this,
+                            "Product: " + name + "\nCumulative Sales: " + cumulativeValue,
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onNothingSelected() {
+            }
+        });
     }
 
     private void setupToolbar() {
@@ -62,167 +100,214 @@ public class ProductsStatisticsActivity extends AppCompatActivity {
         if (toolbar != null) {
             setSupportActionBar(toolbar);
             if (getSupportActionBar() != null) {
-                getSupportActionBar().setTitle("Product Popularity");
+                getSupportActionBar().setTitle("Market Performance");
                 getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             }
-            toolbar.setNavigationOnClickListener(v -> onBackPressed());
+            toolbar.setNavigationOnClickListener(v -> finish());
         }
     }
 
-    private void setupProfessionalBarChart() {
-        barChart.getDescription().setEnabled(false); // Buang description text
-        barChart.setDrawGridBackground(false);
-        barChart.setDrawBarShadow(false); // Jangan lukis shadow di belakang bar
-        barChart.setHighlightFullBarEnabled(false);
+    private void setupProfessionalOgiveChart() {
+        ogiveChart.getDescription().setEnabled(false);
+        ogiveChart.setDrawGridBackground(false);
+        ogiveChart.setExtraOffsets(10f, 10f, 10f, 20f);
+        ogiveChart.setTouchEnabled(true);
+        ogiveChart.setDragEnabled(true);
+        ogiveChart.setScaleEnabled(true);
+        ogiveChart.setPinchZoom(true);
 
-        // Tambah padding supaya carta tidak rapat ke tepi
-        barChart.setExtraOffsets(10f, 20f, 10f, 20f);
-
-        // Paksi-X (Label Produk)
-        XAxis xAxis = barChart.getXAxis();
+        XAxis xAxis = ogiveChart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setDrawGridLines(false); // Buang garisan grid mencancang
+        xAxis.setDrawGridLines(false);
         xAxis.setGranularity(1f);
-        xAxis.setLabelCount(10);
-        xAxis.setLabelRotationAngle(-45f); // Sendengkan teks supaya tidak bertindih
-        xAxis.setTextColor(Color.parseColor("#2D3436"));
-        xAxis.setTextSize(11f);
+        xAxis.setLabelRotationAngle(-45f);
+        xAxis.setTextColor(Color.DKGRAY);
 
-        // Paksi-Y (Kiri)
-        YAxis leftAxis = barChart.getAxisLeft();
+        YAxis leftAxis = ogiveChart.getAxisLeft();
+        leftAxis.setAxisMinimum(0f);
         leftAxis.setDrawGridLines(true);
-        leftAxis.setGridColor(Color.parseColor("#E0E0E0")); // Garisan grid halus
-        leftAxis.setAxisMinimum(0f); // Mula dari 0
-        leftAxis.setTextColor(Color.parseColor("#636E72"));
-        leftAxis.setTextSize(11f);
 
-        // Paksi-Y (Kanan) - Sembunyikan untuk rupa minimalis
-        barChart.getAxisRight().setEnabled(false);
-
-        // Animasi
-        barChart.animateY(1500);
+        ogiveChart.getAxisRight().setEnabled(false);
+        ogiveChart.animateX(1500, Easing.EaseInOutQuart);
     }
 
     private void fetchPopularProducts() {
-        ordersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        ordersRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (!dataSnapshot.exists()) {
-                    Toast.makeText(ProductsStatisticsActivity.this, "No orders found", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+                if (!dataSnapshot.exists()) return;
 
                 Map<String, Integer> productCounts = new HashMap<>();
-
                 for (DataSnapshot orderSnapshot : dataSnapshot.getChildren()) {
-                    // TUKAR: 'items' -> 'orderItems'
-                    DataSnapshot itemsSnapshot = orderSnapshot.child("orderItems");
-
-                    for (DataSnapshot itemSnapshot : itemsSnapshot.getChildren()) {
-                        // TUKAR: Ambil 'name' terus dari item order
-                        // (Biasanya populariti dikira berdasarkan nama produk dalam order)
-                        String productName = itemSnapshot.child("productName").getValue(String.class);
-
-                        if (productName != null) {
-                            productCounts.put(productName, productCounts.getOrDefault(productName, 0) + 1);
+                    // Hanya kira jika order tidak dibatalkan
+                    String status = orderSnapshot.child("status").getValue(String.class);
+                    if (!"Cancelled".equalsIgnoreCase(status)) {
+                        DataSnapshot itemsSnapshot = orderSnapshot.child("orderItems");
+                        for (DataSnapshot itemSnapshot : itemsSnapshot.getChildren()) {
+                            String productName = itemSnapshot.child("productName").getValue(String.class);
+                            if (productName != null) {
+                                productCounts.put(productName, productCounts.getOrDefault(productName, 0) + 1);
+                            }
                         }
                     }
                 }
 
                 if (!productCounts.isEmpty()) {
-                    // Isih 10 produk paling popular
+                    // Susun produk dari yang paling laris ke kurang laris
                     Map<String, Integer> sortedProducts = productCounts.entrySet()
                             .stream()
                             .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
-                            .limit(10)
                             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 
-                    prepareChartData(sortedProducts);
-                } else {
-                    Toast.makeText(ProductsStatisticsActivity.this, "No valid items found in orders", Toast.LENGTH_SHORT).show();
+                    prepareData(sortedProducts);
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG, "Error: " + error.getMessage());
             }
         });
     }
 
-    private void prepareChartData(Map<String, Integer> sortedProducts) {
-        List<BarEntry> entries = new ArrayList<>();
-        List<String> labels = new ArrayList<>();
+    private void prepareData(Map<String, Integer> sortedProducts) {
+        productList.clear();
+        fullProductNamesForChart.clear();
+        List<Entry> chartEntries = new ArrayList<>();
+        List<String> chartLabels = new ArrayList<>();
+
         int index = 0;
+        int cumulativeSum = 0;
 
         for (Map.Entry<String, Integer> entry : sortedProducts.entrySet()) {
             String name = entry.getKey();
+            int salesCount = entry.getValue();
 
-            // Pendekkan nama jika terlalu panjang untuk carta
-            if (name.length() > 12) {
-                name = name.substring(0, 10) + "..";
+            // Masukkan dalam list untuk RecyclerView di bawah
+            productList.add(new ProductStat(name, salesCount));
+
+            // Logik Ogive: Ambil 10 produk teratas untuk visual yang bersih
+            if (index < 10) {
+                cumulativeSum += salesCount;
+                chartEntries.add(new Entry(index, (float) cumulativeSum));
+                fullProductNamesForChart.add(name); // Simpan nama penuh untuk klik
+
+                // Label pada paksi X (Dipendekkan jika terlalu panjang)
+                String displayLabel = name.length() > 10 ? name.substring(0, 8) + ".." : name;
+                chartLabels.add(displayLabel);
             }
 
-            entries.add(new BarEntry(index, entry.getValue().floatValue()));
-            labels.add(name);
+            // Update KPI Cards (Top 1)
+            if (index == 0) {
+                tvTopProductName.setText(name);
+                tvTopProductCount.setText(salesCount + " Units Sold");
+            }
             index++;
         }
 
-        loadProfessionalData(entries, labels);
+        loadChart(chartEntries, chartLabels);
+        adapter.notifyDataSetChanged();
     }
-    private void fetchProductNamesAndLoadChart(Map<String, Integer> sortedProducts) {
-        List<BarEntry> entries = new ArrayList<>();
-        List<String> labels = new ArrayList<>();
 
-        final int totalToFetch = sortedProducts.size();
-        final int[] fetchedCount = {0};
+    private void loadChart(List<Entry> entries, List<String> labels) {
+        LineDataSet dataSet = new LineDataSet(entries, "Cumulative Market Share");
 
-        int i = 0;
-        for (Map.Entry<String, Integer> entry : sortedProducts.entrySet()) {
-            final int index = i;
-            final int count = entry.getValue();
-            String productId = entry.getKey();
+        // Styling Professional
+        dataSet.setColor(Color.parseColor("#8a2128"));
+        dataSet.setCircleColor(Color.parseColor("#8a2128"));
+        dataSet.setLineWidth(3f);
+        dataSet.setCircleRadius(5f);
+        dataSet.setDrawCircleHole(true);
+        dataSet.setValueTextSize(10f);
+        dataSet.setDrawFilled(true);
+        dataSet.setFillColor(Color.parseColor("#8a2128"));
+        dataSet.setFillAlpha(40);
+        dataSet.setMode(LineDataSet.Mode.HORIZONTAL_BEZIER); // Garisan nampak smooth
 
-            productsRef.child(productId).child("productName").addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    String name = snapshot.exists() ? snapshot.getValue(String.class) : "Unknown";
-                    // Jika nama terlalu panjang, potong (truncate)
-                    if (name != null && name.length() > 12) name = name.substring(0, 10) + "..";
+        ogiveChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
+        ogiveChart.getXAxis().setLabelCount(labels.size());
 
-                    entries.add(new BarEntry(index, count));
-                    labels.add(name);
-                    fetchedCount[0]++;
+        LineData lineData = new LineData(dataSet);
+        ogiveChart.setData(lineData);
+        ogiveChart.invalidate();
+    }
 
-                    if (fetchedCount[0] == totalToFetch) {
-                        loadProfessionalData(entries, labels);
-                    }
-                }
+    // --- Model Class ---
+    private static class ProductStat {
+        String name;
+        int sales;
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {}
-            });
-            i++;
+        ProductStat(String name, int sales) {
+            this.name = name;
+            this.sales = sales;
         }
     }
 
-    private void loadProfessionalData(List<BarEntry> entries, List<String> labels) {
-        BarDataSet dataSet = new BarDataSet(entries, "Total Orders");
+    // --- Adapter Class ---
+    private class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
+        private List<ProductStat> list;
 
-        // Gunakan satu warna profesional (Contoh: Deep Red atau Blue)
-        int startColor = Color.parseColor("#8a2128"); // Warna tema anda
-        int endColor = Color.parseColor("#E57373");
+        ProductAdapter(List<ProductStat> list) {
+            this.list = list;
+        }
 
-        dataSet.setGradientColor(startColor, endColor);
-        dataSet.setDrawValues(true); // Tunjukkan angka di atas bar
-        dataSet.setValueTextSize(10f);
-        dataSet.setValueTextColor(Color.parseColor("#2D3436"));
+        @NonNull
+        @Override
+        public ProductViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_admin_order, parent, false);
+            return new ProductViewHolder(v);
+        }
 
-        BarData data = new BarData(dataSet);
-        data.setBarWidth(0.5f); // Kecilkan lebar bar supaya nampak kemas (tidak "gemuk")
+        @Override
+        public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
+            ProductStat stat = list.get(position);
+            holder.tvName.setText(stat.name);
+            holder.tvSales.setText(stat.sales + " Sold");
+            holder.tvRank.setText("Rank #" + (position + 1));
 
-        barChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
-        barChart.setData(data);
-        barChart.invalidate();
+            // Highlight ranking 1
+            if (position == 0) holder.tvRank.setTextColor(Color.parseColor("#8a2128"));
+            else holder.tvRank.setTextColor(Color.GRAY);
+        }
+
+        @Override
+        public int getItemCount() {
+            return list.size();
+        }
+
+        class ProductViewHolder extends RecyclerView.ViewHolder {
+            TextView tvRank, tvName, tvSales;
+
+            public ProductViewHolder(@NonNull View itemView) {
+                super(itemView);
+                // 1. Mapping ID
+                tvRank = itemView.findViewById(R.id.tv_order_id);
+                tvName = itemView.findViewById(R.id.tv_order_customer);
+                tvSales = itemView.findViewById(R.id.tv_order_amount);
+
+                // 2. Sembunyikan Status & Tarikh
+                View status = itemView.findViewById(R.id.tv_order_status);
+                if (status != null) status.setVisibility(View.GONE);
+
+                View date = itemView.findViewById(R.id.tv_order_date);
+                if (date != null) date.setVisibility(View.GONE);
+
+                // 3. Sembunyikan bahagian "Earn (10%)"
+                View commissionValue = itemView.findViewById(R.id.tv_admin_commission);
+                if (commissionValue != null && commissionValue.getParent() instanceof View) {
+                    ((View) commissionValue.getParent()).setVisibility(View.GONE);
+                }
+
+                // 4. Sembunyikan label "Total Amount" supaya hanya keluar jumlah unit sahaja
+                if (tvSales != null && tvSales.getParent() instanceof View) {
+                    View container = (View) tvSales.getParent();
+                    if (container instanceof ViewGroup) {
+                        ViewGroup vg = (ViewGroup) container;
+                        if (vg.getChildCount() > 0) {
+                            vg.getChildAt(0).setVisibility(View.GONE); // Sorok label statik "Total Amount"
+                        }
+                    }
+                }
+            }
+        }
     }
 }

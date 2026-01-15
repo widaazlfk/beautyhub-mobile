@@ -78,6 +78,7 @@ dependencies {
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
     implementation("com.google.firebase:firebase-messaging:23.4.1")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
 
     // Testing libraries

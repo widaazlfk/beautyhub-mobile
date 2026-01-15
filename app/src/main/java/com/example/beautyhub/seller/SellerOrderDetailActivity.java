@@ -1,5 +1,6 @@
 package com.example.beautyhub.seller;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -15,12 +16,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.beautyhub.R;
 import com.example.beautyhub.adapters.SellerOrderItemAdapter;
+import com.example.beautyhub.buyer.ReportProblemActivity;
 import com.example.beautyhub.models.Order;
 import com.example.beautyhub.models.OrderItem;
 import com.example.beautyhub.models.ShippingAddress;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -42,10 +43,11 @@ public class SellerOrderDetailActivity extends AppCompatActivity {
             tvShippingName, tvShippingPhone, tvShippingAddress,
             tvPaymentMethod, tvTotalAmount, tvSubtotal, tvShippingFee;
     private RecyclerView rvItems;
-    private MaterialButton btnUpdateStatus;
+    private MaterialButton btnUpdateStatus, btnReportBuyer;
     private ProgressBar progressBar;
     private DatabaseReference orderRef;
     private SellerOrderItemAdapter itemAdapter;
+    private Order currentOrder; // To store order data for reporting
     private static final String TAG = "SellerOrderDetail";
 
     @Override
@@ -67,6 +69,26 @@ public class SellerOrderDetailActivity extends AppCompatActivity {
         }
 
         btnUpdateStatus.setOnClickListener(v -> showUpdateStatusDialog());
+
+        // Logik untuk lapor Buyer
+        btnReportBuyer.setOnClickListener(v -> {
+            if (currentOrder != null) {
+                Intent intent = new Intent(SellerOrderDetailActivity.this, ReportProblemActivity.class);
+                intent.putExtra("REPORT_TYPE", "SELLER_REPORT_BUYER");
+                intent.putExtra("TARGET_ID", currentOrder.getUserId()); // ID Buyer
+
+                // Guna recipient name dari shipping address sebagai target name
+                String buyerName = "Buyer";
+                if (currentOrder.getShippingAddress() != null) {
+                    buyerName = currentOrder.getShippingAddress().getRecipientName();
+                }
+                intent.putExtra("TARGET_NAME", buyerName);
+
+                startActivity(intent);
+            } else {
+                Toast.makeText(this, "Order data is still loading...", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void initViews() {
@@ -82,6 +104,7 @@ public class SellerOrderDetailActivity extends AppCompatActivity {
         tvShippingFee = findViewById(R.id.tv_detail_shipping_fee);
         rvItems = findViewById(R.id.rv_sub_order_items);
         btnUpdateStatus = findViewById(R.id.btn_update_status);
+        btnReportBuyer = findViewById(R.id.btn_report_buyer);
         progressBar = findViewById(R.id.progress_bar_order_detail);
 
         rvItems.setLayoutManager(new LinearLayoutManager(this));
@@ -99,9 +122,10 @@ public class SellerOrderDetailActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
 
                 if (snapshot.exists()) {
-                    Order order = snapshot.getValue(Order.class);
-                    if (order != null) {
-                        displayGeneralInfo(order, snapshot.getKey());
+                    currentOrder = snapshot.getValue(Order.class);
+                    if (currentOrder != null) {
+                        currentOrder.setOrderId(snapshot.getKey());
+                        displayGeneralInfo(currentOrder, snapshot.getKey());
 
                         String status = snapshot.child("status").getValue(String.class);
                         tvOrderStatus.setText(status != null ? status : "Pending");
@@ -216,7 +240,6 @@ public class SellerOrderDetailActivity extends AppCompatActivity {
             String buyerId = snapshot.child("userId").getValue(String.class);
             String sellerName = snapshot.child("sellerName").getValue(String.class);
 
-            // Get info from orderItems node directly
             DataSnapshot orderItemsSnap = snapshot.child("orderItems");
             String firstProductName = "";
             String firstProductImage = "";

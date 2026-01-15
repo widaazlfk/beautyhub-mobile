@@ -6,6 +6,7 @@
     android:orientation="vertical"
     android:background="@color/white">
 
+    <!-- Toolbar dengan ID yang betul untuk diakses dalam Java -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -28,12 +29,25 @@
             android:padding="20dp"
             android:gravity="center_horizontal">
 
+            <!-- PENAMBAHAN: Label Maklumat Laporan -->
+            <TextView
+                android:id="@+id/tvTargetInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="Reporting for: General Issue"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:visibility="gone"/>
+
+            <!-- Subject/Reason Input -->
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:hint="Subject">
+                android:hint="Reason/Subject">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editTextSubject"
@@ -42,13 +56,15 @@
                     android:inputType="textCapSentences"/>
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Attach Evidence Photo -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Attach Evidence Photo"
                 android:layout_gravity="start"
                 android:layout_marginBottom="8dp"
-                android:textStyle="bold"/>
+                android:textStyle="bold"
+                android:textColor="@color/black"/>
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardImage"
@@ -57,7 +73,9 @@
                 android:layout_marginBottom="20dp"
                 app:cardCornerRadius="12dp"
                 app:strokeWidth="1dp"
-                app:strokeColor="#CCCCCC">
+                app:strokeColor="#CCCCCC"
+                android:clickable="true"
+                android:focusable="true">
 
                 <ImageView
                     android:id="@+id/ivReportImage"
@@ -69,6 +87,7 @@
 
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Description Input -->
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
@@ -80,16 +99,18 @@
                     android:id="@+id/editTextDescription"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minLines="4"
+                    android:minLines="5"
                     android:gravity="top"
                     android:inputType="textMultiLine"/>
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Submit Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonSubmitReport"
                 android:layout_width="match_parent"
                 android:layout_height="55dp"
                 android:text="Submit Report"
+                android:textStyle="bold"
                 app:cornerRadius="8dp" />
 
         </LinearLayout>

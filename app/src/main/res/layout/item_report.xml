@@ -3,9 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="4dp">
+    android:layout_marginHorizontal="12dp"
+    android:layout_marginVertical="6dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="3dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -13,17 +14,36 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <TextView
-            android:id="@+id/tvSubject"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Subject"
-            android:textColor="@android:color/black"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-        <!-- Cari bahagian ini dalam item_report.xml dan tambah TextView tvReporter -->
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-        <!-- TAMBAH INI UNTUK NAMA PENGADU -->
+            <TextView
+                android:id="@+id/tvSubject"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Subject"
+                android:textColor="@android:color/black"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+            <!-- Status Indicator -->
+            <TextView
+                android:id="@+id/tvStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PENDING"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp"
+                android:textColor="@android:color/holo_red_dark" />
+        </LinearLayout>
+
+        <!-- Nama Pengadu -->
         <TextView
             android:id="@+id/tvReporter"
             android:layout_width="match_parent"
@@ -31,67 +51,77 @@
             android:layout_marginTop="2dp"
             android:text="By: Loading..."
             android:textColor="#757575"
-            android:textSize="13sp"
+            android:textSize="12sp"
             android:textStyle="italic" />
 
+        <!-- Nama Orang Yang Dilaporkan (TARGET) -->
+        <TextView
+            android:id="@+id/tvTarget"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Target: Loading..."
+            android:textColor="#E91E63"
+            android:textSize="12sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Description"
-            android:textColor="#444444" />
+            android:layout_marginTop="8dp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:text="Description goes here..."
+            android:textColor="#444444"
+            android:textSize="14sp" />
 
-        <!-- TAMBAHAN: ImageView untuk paparkan bukti gambar aduan -->
+        <!-- ImageView Bukti Gambar -->
         <ImageView
             android:id="@+id/ivReportImage"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginTop="8dp"
+            android:layout_height="180dp"
+            android:layout_marginTop="12dp"
             android:background="#F0F0F0"
             android:scaleType="centerCrop"
             android:visibility="gone" />
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:background="#EEEEEE" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="8dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/tvStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Status: Pending"
-                android:textColor="@color/design_default_color_primary"
-                android:textSize="12sp"
-                android:textStyle="italic" />
+                android:text="Click for details"
+                android:textColor="#9E9E9E"
+                android:textSize="11sp" />
 
             <View
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_weight="1" />
 
+            <!-- Butang Resolve (Disembunyikan dlm list, diguna dlm detail) -->
             <Button
                 android:id="@+id/btnResolve"
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Mark as Resolved"
-                android:textSize="12sp" />
+                android:text="Resolve"
+                android:textSize="12sp"
+                android:visibility="gone" />
 
-            <ImageButton
-                android:id="@+id/btnDelete"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginStart="8dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Delete Report"
-                android:padding="8dp"
-                android:src="@android:drawable/ic_menu_delete"
-                app:tint="@android:color/holo_red_dark" />
+
 
         </LinearLayout>
     </LinearLayout>

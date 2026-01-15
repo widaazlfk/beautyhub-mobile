@@ -1,9 +1,9 @@
 package com.example.beautyhub.adapters;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
@@ -19,9 +19,15 @@ import java.util.List;
 public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportViewHolder> {
 
     private List<Report> reportList;
+    private OnReportClickListener listener;
 
-    public ReportAdapter(List<Report> reportList) {
+    public interface OnReportClickListener {
+        void onReportClick(Report report);
+    }
+
+    public ReportAdapter(List<Report> reportList, OnReportClickListener listener) {
         this.reportList = reportList;
+        this.listener = listener;
     }
 
     @NonNull
@@ -35,49 +41,42 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
     public void onBindViewHolder(@NonNull ReportViewHolder holder, int position) {
         Report report = reportList.get(position);
 
-        // Set data asas
-        holder.binding.tvSubject.setText(report.getTitle());
+        // 1. Set Data Asas
+        holder.binding.tvSubject.setText(report.getReason());
         holder.binding.tvDescription.setText(report.getDescription());
-        holder.binding.tvStatus.setText("Status: " + report.getStatus());
 
-        // --- LOGIK AMBIL NAMA PENGGUNA ---
-        String reporterUid = report.getUserId();
-        if (reporterUid != null && !reporterUid.isEmpty()) {
-            // Set teks sementara sementara menunggu data dari Firebase
-            holder.binding.tvReporter.setText("By: Loading...");
+        // 2. Paparan Status & Indikasi Visual (DITAMBAH UNTUK KEJELASAN)
+        String status = report.getStatus() != null ? report.getStatus() : "PENDING";
 
-            FirebaseDatabase.getInstance().getReference("Users")
-                    .child(reporterUid)
-                    .addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        // Di dalam ReportAdapter.java bahagian onDataChange
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if (snapshot.exists()) {
-                                // AMBIL "username" kerana anda kata di database guna "username"
-                                String name = snapshot.child("username").getValue(String.class);
-
-                                if (name != null) {
-                                    holder.binding.tvReporter.setText("By: " + name);
-                                } else {
-                                    // Jika username pun null, kita cuba paparkan email atau tulis No Username
-                                    holder.binding.tvReporter.setText("By: No Username Found");
-                                }
-                            } else {
-                                holder.binding.tvReporter.setText("By: User Not Found");
-                            }
-                        }
-
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                            holder.binding.tvReporter.setText("By: Error loading name");
-                        }
-                    });
+        if ("RESOLVED".equals(status)) {
+            holder.binding.tvStatus.setText("Status: RESOLVED");
+            holder.binding.tvStatus.setTextColor(Color.parseColor("#4CAF50")); // Warna Hijau
+            holder.itemView.setAlpha(0.7f); // Nampak pudar sedikit jika sudah selesai
         } else {
-            holder.binding.tvReporter.setText("By: Anonymous");
+            holder.binding.tvStatus.setText("Status: PENDING");
+            holder.binding.tvStatus.setTextColor(Color.parseColor("#F44336")); // Warna Merah
+            holder.itemView.setAlpha(1.0f);
         }
 
-        // Paparkan imej bukti jika ada
+        // 3. Maklumat Tambahan (Target Name)
+        holder.binding.tvTarget.setText("Target: " + report.getTargetName()); // Pastikan ada tvTarget di XML, atau gunakan TextView sedia ada
+
+        // 4. Ambil Nama Pengadu (Reporter) secara Real-time
+        String reporterUid = report.getSenderId();
+        if (reporterUid != null) {
+            FirebaseDatabase.getInstance().getReference("Users").child(reporterUid)
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            String name = snapshot.child("username").getValue(String.class);
+                            if (name == null) name = snapshot.child("name").getValue(String.class);
+                            holder.binding.tvReporter.setText("By: " + (name != null ? name : "User"));
+                        }
+                        @Override public void onCancelled(@NonNull DatabaseError error) {}
+                    });
+        }
+
+        // 5. Gambar Bukti
         if (report.getImageUrl() != null && !report.getImageUrl().isEmpty()) {
             holder.binding.ivReportImage.setVisibility(View.VISIBLE);
             Glide.with(holder.itemView.getContext())
@@ -88,39 +87,25 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
             holder.binding.ivReportImage.setVisibility(View.GONE);
         }
 
-        // Logik butang Resolve
-        if ("RESOLVED".equalsIgnoreCase(report.getStatus())) {
-            holder.binding.btnResolve.setVisibility(View.GONE);
-        } else {
-            holder.binding.btnResolve.setVisibility(View.VISIBLE);
-        }
-
-        holder.binding.btnResolve.setOnClickListener(v -> {
-            FirebaseDatabase.getInstance().getReference("Reports")
-                    .child(report.getReportId())
-                    .child("status")
-                    .setValue("RESOLVED")
-                    .addOnSuccessListener(aVoid -> Toast.makeText(v.getContext(), "Report marked as Resolved", Toast.LENGTH_SHORT).show());
+        // 6. Klik Item & Butang
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) listener.onReportClick(report);
         });
 
-        holder.binding.btnDelete.setOnClickListener(v -> {
-            new androidx.appcompat.app.AlertDialog.Builder(v.getContext())
-                    .setTitle("Delete Report")
-                    .setMessage("Are you sure you want to delete this report?")
-                    .setPositiveButton("Yes", (dialog, which) -> {
-                        FirebaseDatabase.getInstance().getReference("Reports")
-                                .child(report.getReportId())
-                                .removeValue()
-                                .addOnSuccessListener(aVoid -> Toast.makeText(v.getContext(), "Deleted successfully", Toast.LENGTH_SHORT).show());
-                    })
-                    .setNegativeButton("No", null)
-                    .show();
-        });
+
+
+        // Sembunyikan butang resolve di senarai (tindakan dibuat di Details)
+        holder.binding.btnResolve.setVisibility(View.GONE);
     }
 
     @Override
     public int getItemCount() {
         return reportList == null ? 0 : reportList.size();
+    }
+
+    public void updateList(List<Report> newList) {
+        this.reportList = newList;
+        notifyDataSetChanged();
     }
 
     static class ReportViewHolder extends RecyclerView.ViewHolder {

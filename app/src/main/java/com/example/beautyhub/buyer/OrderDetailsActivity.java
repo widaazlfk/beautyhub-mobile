@@ -226,6 +226,20 @@ public class OrderDetailsActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        binding.btnReportSeller.setOnClickListener(v -> {
+            if (currentOrder != null) {
+                Intent intent = new Intent(OrderDetailsActivity.this, ReportProblemActivity.class);
+
+                // Masukkan data yang diperlukan oleh ReportProblemActivity
+                intent.putExtra("REPORT_TYPE", "BUYER_REPORT_SELLER");
+                intent.putExtra("TARGET_ID", currentOrder.getSellerId());
+                intent.putExtra("TARGET_NAME", currentOrder.getSellerName());
+
+                startActivity(intent);
+            } else {
+                Toast.makeText(this, "Order data not loaded yet.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void updateStatusBadgeStyle(String status) {

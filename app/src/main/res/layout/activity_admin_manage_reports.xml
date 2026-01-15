@@ -1,16 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="#F5F5F5">
 
+    <!-- 1. Toolbar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:title="Manage Reports" />
 
+    <!-- 2. Penapis Status (DITAMBAH) -->
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chipGroupFilter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"
+        app:singleSelection="true"
+        app:selectionRequired="true"
+        android:background="@color/white">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipPending"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pending"
+            android:checked="true"
+            app:chipIcon="@drawable/ic_pending"
+            app:chipIconVisible="true"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipResolved"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Resolved"
+            app:chipIcon="@drawable/ic_check_circle"
+            app:chipIconVisible="true"/>
+
+    </com.google.android.material.chip.ChipGroup>
+
+    <!-- 3. List Laporan -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -19,6 +56,7 @@
             android:id="@+id/recyclerViewReports"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:clipToPadding="false"
             android:padding="8dp" />
 
         <ProgressBar
@@ -34,6 +72,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="No reports found."
+            android:textSize="16sp"
             android:visibility="gone" />
     </FrameLayout>
+
 </LinearLayout>

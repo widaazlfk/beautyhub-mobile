@@ -164,43 +164,71 @@
                     tools:text="No. 123, Jalan Beauty, Taman Hub, 50000 Kuala Lumpur" />
             </LinearLayout>
 
-            <!-- STORE INFO -->
+            <!-- STORE INFO + REPORT BUTTON (Dah Cantik) -->
+
+            <!-- Items List -->
             <LinearLayout
-                android:id="@+id/layout_seller_profile"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:background="@color/white"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
                 android:gravity="center_vertical"
                 android:padding="16dp">
 
+                <!-- Icon Store -->
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/ic_store"
                     app:tint="?attr/colorPrimary" />
 
-                <TextView
-                    android:id="@+id/tv_detail_seller_name"
+                <!-- Nama Kedai (Boleh Klik ke Shop) -->
+                <LinearLayout
+                    android:id="@+id/layout_seller_profile"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:layout_weight="1"
-                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-                    android:textStyle="bold"
-                    tools:text="Beauty Glow Store" />
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_arrow_forward"
-                    app:tint="#888888" />
+                    <TextView
+                        android:id="@+id/tv_detail_seller_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+                        android:textStyle="bold"
+                        tools:text="Beauty Glow Store" />
+
+                    <ImageView
+                        android:layout_width="13dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="4dp"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="#888888" />
+                </LinearLayout>
+
+                <!-- Butang Report (Kecil & Kemas di sebelah kanan) -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_report_seller"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp"
+                    android:text="Report"
+                    android:textColor="#D63031"
+                    android:textSize="11sp"
+                    app:icon="@drawable/ic_report"
+                    app:iconSize="16dp"
+                    app:iconTint="#D63031" />
+
             </LinearLayout>
 
-            <!-- Items List -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_order_detail_items"
                 android:layout_width="match_parent"

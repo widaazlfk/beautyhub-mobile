@@ -147,6 +147,9 @@
             android:label="Favorites"
             android:parentActivityName=".buyer.BuyerActivity" />
         <activity
+            android:name=".buyer.CategoryProductsActivity"
+            android:exported="false" />
+        <activity
             android:name=".buyer.SearchActivity"
             android:exported="false"
             android:label="Search"
@@ -267,6 +270,11 @@
             android:exported="false"
             android:label="Statistics of Revenue Obtained"
             android:parentActivityName=".admin.AdminDashboardActivity" />
+        <activity
+            android:name=".admin.AdminOrdersActivity"
+            android:exported="false"
+            android:label="Admin Orders"
+            android:parentActivityName=".admin.RevenueStatisticsActivity" />
 
         <activity
             android:name=".admin.ManageUsersActivity"
@@ -308,6 +316,11 @@
             android:name=".admin.AdminManageReportsActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".admin.AdminReportDetailsActivity"
+            android:exported="false"
+            android:label="Admin Profile"
+            android:parentActivityName=".admin.AdminManageReportsActivity" />
 
         <!-- ================== INFO ACTIVITIES ================== -->
         <activity

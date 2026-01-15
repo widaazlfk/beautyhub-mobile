@@ -25,7 +25,8 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -33,18 +34,17 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <com.github.mikephil.charting.charts.PieChart
-                android:id="@+id/pie_chart_users"
-                android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:layout_marginBottom="24dp"/>
+            <!-- Chart Section -->
+
+            <!-- Summary Cards Section -->
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_total_users"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardElevation="4dp">
+                android:layout_marginBottom="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -54,130 +54,127 @@
                     android:gravity="center_vertical">
 
                     <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
                         android:src="@drawable/ic_group_users"
                         app:tint="?attr/colorPrimary"/>
 
-                    <View
-                        android:layout_width="16dp"
-                        android:layout_height="0dp"/>
+                    <View android:layout_width="16dp" android:layout_height="0dp"/>
 
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:orientation="vertical">
-
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Total Registered Users"
-                            android:textAppearance="?attr/textAppearanceTitleMedium"/>
-
+                            android:textSize="12sp"
+                            android:textColor="#636E72"/>
                         <TextView
                             android:id="@+id/tv_stats_total_users"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0"
-                            android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
                             android:textColor="?attr/colorPrimary"/>
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_total_buyers"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardElevation="4dp">
+                android:orientation="horizontal"
+                android:weightSum="2"
+                android:layout_marginBottom="24dp">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <!-- Buyer Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:padding="16dp">
-
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:src="@drawable/ic_user_add"
-                        app:tint="#4C4CAF"/>
-
-                    <View
-                        android:layout_width="16dp"
-                        android:layout_height="0dp" />
-
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    app:cardElevation="2dp"
+                    app:strokeWidth="0dp">
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
+                        android:orientation="vertical"
+                        android:padding="12dp">
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Total Buyer Accounts"
-                            android:textAppearance="?attr/textAppearanceTitleMedium" />
-
+                            android:text="Buyers"
+                            android:textSize="12sp" />
                         <TextView
                             android:id="@+id/tv_stats_total_buyers"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0"
-                            android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                            android:textColor="#4C4CAF" />
+                            android:textColor="#4C4CAF"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
                     </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                </com.google.android.material.card.MaterialCardView>
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_total_sellers"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardElevation="4dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <!-- Seller Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:padding="16dp">
-
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:src="@drawable/ic_store"
-                        app:tint="?attr/colorSecondary"/>
-
-                    <View
-                        android:layout_width="16dp"
-                        android:layout_height="0dp" />
-
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    app:cardElevation="2dp"
+                    app:strokeWidth="0dp">
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
+                        android:orientation="vertical"
+                        android:padding="12dp">
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Total Seller Accounts"
-                            android:textAppearance="?attr/textAppearanceTitleMedium" />
-
+                            android:text="Sellers"
+                            android:textSize="12sp" />
                         <TextView
                             android:id="@+id/tv_stats_total_sellers"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0"
-                            android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                            android:textColor="?attr/colorSecondary" />
+                            android:textColor="#8a2128"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
                     </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <!-- BAHAGIAN ASAL/ASAQ: USER LIST -->
+            <com.github.mikephil.charting.charts.PieChart
+                android:id="@+id/pie_chart_users"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:layout_marginBottom="24dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:text="User Directory"
+                android:textColor="#2D3436"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_users_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="32dp"/>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -26,6 +25,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.NumberFormat;
 import java.util.Locale;
+import java.util.HashMap;
+import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -35,7 +36,6 @@ public class AdminDashboardActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private DatabaseReference usersRef, productsRef, ordersRef;
 
-    // Listeners disimpan sebagai pembolehubah supaya boleh dibuang (remove) bila aktiviti berhenti
     private ValueEventListener usersListener, productsListener, ordersListener, profileListener;
 
     private TextView tvTotalUsers, tvTotalSellers, tvTotalProducts, tvTotalRevenue;
@@ -48,7 +48,6 @@ public class AdminDashboardActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-        // Inisialisasi Rujukan Database
         FirebaseDatabase db = FirebaseDatabase.getInstance();
         usersRef = db.getReference("Users");
         productsRef = db.getReference("Products");
@@ -62,6 +61,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
     private void initViews() {
         tvTotalUsers = findViewById(R.id.tv_total_users);
         tvTotalSellers = findViewById(R.id.tv_total_sellers);
+        // ID ini tetap tv_total_products tetapi di XML anda labelnya adalah "Market Performance"
         tvTotalProducts = findViewById(R.id.tv_total_products);
         tvTotalRevenue = findViewById(R.id.tv_total_revenue);
         ivAdminProfile = findViewById(R.id.iv_admin_profile);
@@ -76,16 +76,18 @@ public class AdminDashboardActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
-        // --- Profile Menu ---
         ivAdminProfile.setOnClickListener(this::showProfileMenu);
 
-        // --- Statistik Navigation ---
+        // Navigation ke statistik
         bindClickListener(R.id.card_total_users, v -> startActivity(new Intent(this, UsersStatisticsActivity.class)));
         bindClickListener(R.id.card_total_sellers, v -> startActivity(new Intent(this, SellersStatisticsActivity.class)));
+
+        // Klik Market Performance membawa ke Products Statistics
         bindClickListener(R.id.card_total_products, v -> startActivity(new Intent(this, ProductsStatisticsActivity.class)));
+
         bindClickListener(R.id.card_total_revenue, v -> startActivity(new Intent(this, RevenueStatisticsActivity.class)));
 
-        // --- Quick Actions ---
+        // Quick Actions
         bindClickListener(R.id.card_manage_users, v -> startActivity(new Intent(this, ManageUsersActivity.class)));
         bindClickListener(R.id.card_manage_products, v -> startActivity(new Intent(this, ManageProductsActivity.class)));
         bindClickListener(R.id.card_manage_reports, v -> startActivity(new Intent(this, AdminManageReportsActivity.class)));
@@ -111,92 +113,101 @@ public class AdminDashboardActivity extends AppCompatActivity {
         popupMenu.show();
     }
 
-    /**
-     * Mengambil data statistik masa-nyata dari Firebase.
-     */
-    /**
-     * Mengambil data statistik masa-nyata dari Firebase.
-     */
     private void loadPlatformStatistics() {
-        // 1. STATISTIK: TOTAL USERS & ACTIVE SELLERS
+        // 1. STATISTIK: TOTAL USERS & SELLERS
         usersListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 long sellersCount = 0;
-                long totalUsers = snapshot.getChildrenCount(); // Mengira semua nod di bawah "Users"
-
+                long totalUsers = snapshot.getChildrenCount();
                 for (DataSnapshot userSnap : snapshot.getChildren()) {
-                    // Pastikan nama child "userType" sepadan dengan yang ada di Firebase anda
-                    String userType = userSnap.child("userType").getValue(String.class);
-                    if ("Seller".equalsIgnoreCase(userType)) {
-                        sellersCount++;
-                    }
+                    String role = userSnap.child("ROLE").getValue(String.class);
+                    if (role == null) role = userSnap.child("userType").getValue(String.class);
+                    if ("SELLER".equalsIgnoreCase(role)) sellersCount++;
                 }
-
-                // Update UI dengan format ribuan (Contoh: 1,200)
                 tvTotalUsers.setText(String.format(Locale.US, "%,d", totalUsers));
                 tvTotalSellers.setText(String.format(Locale.US, "%,d", sellersCount));
             }
-
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG, "Users Stats Error: " + error.getMessage());
-            }
+            public void onCancelled(@NonNull DatabaseError error) {}
         };
         usersRef.addValueEventListener(usersListener);
 
-        // 2. STATISTIK: TOTAL PRODUCTS
+        // 2. STATISTIK: MARKET PERFORMANCE (Fetch Nama Produk Best Seller)
         productsListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                long prodCount = snapshot.getChildrenCount();
-                tvTotalProducts.setText(String.format(Locale.US, "%,d", prodCount));
+                ordersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot orderSnapshot) {
+                        Map<String, Integer> productCounts = new HashMap<>();
+
+                        for (DataSnapshot orderSnap : orderSnapshot.getChildren()) {
+                            String status = orderSnap.child("status").getValue(String.class);
+
+                            // Logik: Ikut ProductsStatisticsActivity (Hanya kira jika bukan Cancelled)
+                            if (!"Cancelled".equalsIgnoreCase(status)) {
+                                // Masuk ke dalam node orderItems
+                                DataSnapshot itemsSnapshot = orderSnap.child("orderItems");
+                                for (DataSnapshot itemSnapshot : itemsSnapshot.getChildren()) {
+                                    String productName = itemSnapshot.child("productName").getValue(String.class);
+                                    if (productName != null) {
+                                        productCounts.put(productName, productCounts.getOrDefault(productName, 0) + 1);
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!productCounts.isEmpty()) {
+                            // Cari produk yang paling banyak muncul dalam list
+                            String bestSeller = "No Sales Yet";
+                            int maxSales = 0;
+                            for (Map.Entry<String, Integer> entry : productCounts.entrySet()) {
+                                if (entry.getValue() > maxSales) {
+                                    maxSales = entry.getValue();
+                                    bestSeller = entry.getKey();
+                                }
+                            }
+                            // Set nama produk paling laku (Contoh: "Anas Lip Moist")
+                            tvTotalProducts.setText(bestSeller);
+                        } else {
+                            tvTotalProducts.setText("No Sales Yet");
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {}
+                });
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG, "Products Stats Error: " + error.getMessage());
-            }
+            public void onCancelled(@NonNull DatabaseError error) {}
         };
         productsRef.addValueEventListener(productsListener);
 
-        // 3. STATISTIK: TOTAL REVENUE (10% Admin Commission)
+        // 3. STATISTIK: TOTAL REVENUE (10% Admin Profit)
         ordersListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 double totalAdminProfit = 0.0;
-
                 for (DataSnapshot orderSnap : snapshot.getChildren()) {
-                    // LOGIK: Hanya kira revenue jika order sudah dibayar/selesai
-                    String status = orderSnap.child("orderStatus").getValue(String.class);
-
-                    // Anda boleh tapis: if ("Completed".equals(status) || "Shipped".equals(status))
-                    // Buat masa ni, kita kira semua yang ada 'totalPayment'
-                    Double totalPayment = orderSnap.child("totalPayment").getValue(Double.class);
-
-                    if (totalPayment != null) {
-                        // Admin Dashboard biasanya memaparkan keuntungan platform (Commission)
-                        // Contoh: Jualan RM100, Admin untung RM10 (10%)
-                        totalAdminProfit += (totalPayment * 0.10);
+                    String status = orderSnap.child("status").getValue(String.class);
+                    if ("Completed".equalsIgnoreCase(status)) {
+                        Object amtObj = orderSnap.child("totalAmount").getValue();
+                        double totalAmount = 0.0;
+                        if (amtObj instanceof Double) totalAmount = (Double) amtObj;
+                        else if (amtObj instanceof Long) totalAmount = ((Long) amtObj).doubleValue();
+                        totalAdminProfit += (totalAmount * 0.10);
                     }
                 }
-
-                // Format mata wang Malaysia (RM)
                 NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("ms", "MY"));
                 tvTotalRevenue.setText(currencyFormat.format(totalAdminProfit));
             }
-
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG, "Revenue Stats Error: " + error.getMessage());
-            }
+            public void onCancelled(@NonNull DatabaseError error) {}
         };
         ordersRef.addValueEventListener(ordersListener);
     }
-
-    /**
-     * Memuatkan imej profil Admin yang sedang log masuk.
-     */
     private void loadAdminProfileImage() {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) return;
@@ -209,13 +220,12 @@ public class AdminDashboardActivity extends AppCompatActivity {
                     if (imageUrl != null && !imageUrl.isEmpty()) {
                         Glide.with(AdminDashboardActivity.this)
                                 .load(imageUrl)
-                                .placeholder(R.drawable.ic_admin) // Ikon default
+                                .placeholder(R.drawable.ic_admin)
                                 .error(R.drawable.ic_admin)
                                 .into(ivAdminProfile);
                     }
                 }
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Log.e(TAG, "Profile Image Error: " + error.getMessage());
@@ -227,7 +237,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
     private void showLogoutDialog() {
         new AlertDialog.Builder(this)
                 .setTitle("Logout")
-                .setMessage("Are you want to log out?")
+                .setMessage("Are you sure you want to log out?")
                 .setPositiveButton("Yes", (dialog, which) -> logoutAdmin())
                 .setNegativeButton("No", null)
                 .show();
@@ -249,7 +259,6 @@ public class AdminDashboardActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        // Mula ambil data bila aktiviti bermula
         loadPlatformStatistics();
         loadAdminProfileImage();
     }
@@ -257,7 +266,6 @@ public class AdminDashboardActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        // Buang listener untuk jimat memori & data Firebase bila aktiviti tak aktif
         if (usersRef != null && usersListener != null) usersRef.removeEventListener(usersListener);
         if (productsRef != null && productsListener != null) productsRef.removeEventListener(productsListener);
         if (ordersRef != null && ordersListener != null) ordersRef.removeEventListener(ordersListener);

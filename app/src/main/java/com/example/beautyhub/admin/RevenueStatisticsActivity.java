@@ -2,14 +2,17 @@ package com.example.beautyhub.admin;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.MenuItem;
-import android.widget.Toast;
-
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.beautyhub.R;
+import com.example.beautyhub.models.Order;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.Entry;
@@ -23,8 +26,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -33,114 +38,106 @@ import java.util.TreeMap;
 
 public class RevenueStatisticsActivity extends AppCompatActivity {
 
-    private static final String TAG = "RevenueStatistics";
     private LineChart lineChart;
     private DatabaseReference ordersRef;
+    private TextView tvSummaryTotalRevenue, tvSummaryAdminProfit, tvSummaryOrderCount;
+    private RecyclerView recyclerView;
+    private OrderAdapter adapter;
+    private List<Order> orderList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_revenue_statistics);
 
+        initViews();
         setupToolbar();
-
-        lineChart = findViewById(R.id.revenue_line_chart);
         setupLineChart();
 
-        // Inisialisasi rujukan Firebase ke nod "Orders"
         ordersRef = FirebaseDatabase.getInstance().getReference("Orders");
         fetchRevenueData();
     }
 
+    private void initViews() {
+        lineChart = findViewById(R.id.revenue_line_chart);
+        tvSummaryTotalRevenue = findViewById(R.id.tv_summary_total_revenue);
+        tvSummaryAdminProfit = findViewById(R.id.tv_summary_admin_profit);
+        tvSummaryOrderCount = findViewById(R.id.tv_summary_order_count);
+
+        // Setup RecyclerView untuk senarai di bawah graf
+        recyclerView = findViewById(R.id.rv_recent_orders);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        orderList = new ArrayList<>();
+        adapter = new OrderAdapter(orderList);
+        recyclerView.setAdapter(adapter);
+    }
+
     private void setupToolbar() {
         MaterialToolbar toolbar = findViewById(R.id.toolbar_revenue_statistics);
-        if (toolbar != null) {
-            setSupportActionBar(toolbar);
-            if (getSupportActionBar() != null) {
-                getSupportActionBar().setTitle("Platform Revenue Analytics");
-                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                getSupportActionBar().setDisplayShowHomeEnabled(true);
-            }
-
-            toolbar.setNavigationOnClickListener(v -> onBackPressed());
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+        toolbar.setNavigationOnClickListener(v -> finish());
     }
 
     private void setupLineChart() {
         lineChart.getDescription().setEnabled(false);
-        lineChart.setTouchEnabled(true);
-        lineChart.setDragEnabled(true);
-        lineChart.setScaleEnabled(true);
-        lineChart.setPinchZoom(true);
-        lineChart.setExtraOffsets(10, 10, 10, 20);
-
-        XAxis xAxis = lineChart.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setGranularity(1f);
-        xAxis.setGranularityEnabled(true);
-        xAxis.setDrawGridLines(false);
-        xAxis.setLabelRotationAngle(-45);
-
+        lineChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
         lineChart.getAxisRight().setEnabled(false);
-        lineChart.getAxisLeft().setAxisMinimum(0f);
-        lineChart.getAxisLeft().setGridColor(Color.LTGRAY);
+        lineChart.getXAxis().setGranularity(1f);
     }
 
     private void fetchRevenueData() {
-        ordersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        ordersRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (!dataSnapshot.exists()) {
-                    Toast.makeText(RevenueStatisticsActivity.this, "No order data found", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                // TreeMap memastikan bulan disusun mengikut urutan masa
                 Map<String, Float> monthlyRevenue = new TreeMap<>();
+                double totalGrossRevenue = 0;
+                int orderCount = 0;
+                orderList.clear();
 
                 for (DataSnapshot orderSnapshot : dataSnapshot.getChildren()) {
-                    // --- PERUBAHAN DI SINI: Guna totalAmount dan orderDate ---
-                    Object amountObj = orderSnapshot.child("totalAmount").getValue();
-                    Long timestamp = orderSnapshot.child("orderDate").getValue(Long.class);
+                    Order order = orderSnapshot.getValue(Order.class);
+                    String status = orderSnapshot.child("status").getValue(String.class);
 
-                    if (amountObj != null && timestamp != null) {
-                        float amountValue = 0f;
+                    // Hanya ambil order yang "Completed"
+                    if ("Completed".equalsIgnoreCase(status) && order != null) {
+                        orderList.add(order);
 
-                        // Handle jika Firebase simpan sebagai Long atau Double
-                        if (amountObj instanceof Long) {
-                            amountValue = ((Long) amountObj).floatValue();
-                        } else if (amountObj instanceof Double) {
-                            amountValue = ((Double) amountObj).floatValue();
-                        } else if (amountObj instanceof Float) {
-                            amountValue = (Float) amountObj;
+                        double amountValue = order.getTotalAmount();
+                        totalGrossRevenue += amountValue;
+                        orderCount++;
+
+                        // Ambil tarikh untuk graf
+                        Long timestamp = orderSnapshot.child("orderDate").getValue(Long.class);
+                        if (timestamp != null) {
+                            SimpleDateFormat sdf = new SimpleDateFormat("MMM yyyy", Locale.getDefault());
+                            String monthKey = sdf.format(new Date(timestamp));
+                            float currentTotal = monthlyRevenue.getOrDefault(monthKey, 0f);
+                            // Untung admin 10%
+                            monthlyRevenue.put(monthKey, currentTotal + (float)(amountValue * 0.10));
                         }
-
-                        // Admin Commission 10%
-                        float adminCommission = amountValue * 0.10f;
-
-                        // Format tarikh ke bulan (Contoh: Jan 2024)
-                        SimpleDateFormat sdf = new SimpleDateFormat("MMM yyyy", Locale.getDefault());
-                        String monthKey = sdf.format(new Date(timestamp));
-
-                        // Tambah hasil ke dalam map
-                        float currentTotal = monthlyRevenue.containsKey(monthKey) ? monthlyRevenue.get(monthKey) : 0f;
-                        monthlyRevenue.put(monthKey, currentTotal + adminCommission);
                     }
                 }
 
-                if (monthlyRevenue.isEmpty()) {
-                    Toast.makeText(RevenueStatisticsActivity.this, "No valid revenue data found", Toast.LENGTH_SHORT).show();
-                } else {
-                    loadLineChartData(monthlyRevenue);
-                }
+                // Susun order terbaru di atas sekali
+                Collections.reverse(orderList);
+                adapter.notifyDataSetChanged();
+
+                updateSummaryCards(totalGrossRevenue, orderCount);
+                loadLineChartData(monthlyRevenue);
             }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.e(TAG, "Failed to fetch order data: ", databaseError.toException());
-                Toast.makeText(RevenueStatisticsActivity.this, "Failed to load statistics", Toast.LENGTH_SHORT).show();
-            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
+    }
+
+    private void updateSummaryCards(double totalGross, int count) {
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("ms", "MY"));
+        tvSummaryTotalRevenue.setText(currencyFormat.format(totalGross));
+        tvSummaryAdminProfit.setText(currencyFormat.format(totalGross * 0.10));
+        tvSummaryOrderCount.setText(String.valueOf(count));
     }
 
     private void loadLineChartData(Map<String, Float> monthlyRevenue) {
@@ -155,33 +152,68 @@ public class RevenueStatisticsActivity extends AppCompatActivity {
         }
 
         lineChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
-
-        LineDataSet dataSet = new LineDataSet(entries, "Admin Earnings (10% Comm)");
+        LineDataSet dataSet = new LineDataSet(entries, "Monthly Admin Profit (10%)");
         dataSet.setColor(Color.parseColor("#8a2128"));
+        dataSet.setLineWidth(2.5f);
         dataSet.setCircleColor(Color.parseColor("#8a2128"));
-        dataSet.setLineWidth(3f);
-        dataSet.setCircleRadius(5f);
-        dataSet.setDrawCircleHole(true);
-        dataSet.setCircleHoleColor(Color.WHITE);
-        dataSet.setValueTextSize(11f);
         dataSet.setDrawFilled(true);
-        dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
-
+        dataSet.setFillAlpha(40);
         dataSet.setFillColor(Color.parseColor("#8a2128"));
-        dataSet.setFillAlpha(50);
 
-        LineData lineData = new LineData(dataSet);
-        lineChart.setData(lineData);
-        lineChart.animateX(1200);
+        lineChart.setData(new LineData(dataSet));
+        lineChart.animateX(1000);
         lineChart.invalidate();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
-            return true;
+    // --- ADAPTER UNTUK SENARAI DI BAWAH GRAF ---
+    private class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHolder> {
+        private List<Order> list;
+        public OrderAdapter(List<Order> list) { this.list = list; }
+
+        @NonNull
+        @Override
+        public OrderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_admin_order, parent, false);
+            return new OrderViewHolder(v);
         }
-        return super.onOptionsItemSelected(item);
+
+        @Override
+        public void onBindViewHolder(@NonNull OrderViewHolder holder, int position) {
+            Order order = list.get(position);
+            double total = order.getTotalAmount();
+
+            // 1. PAPAR ORDER ID PENUH (Jangan guna substring supaya Admin senang cari)
+            holder.tvId.setText("#" + order.getOrderId().toUpperCase());
+
+            holder.tvStatus.setText(order.getStatus());
+            holder.tvStatus.setTextColor(Color.BLACK);
+
+            // 2. AMBIL NAMA BUYER DARI SHIPPING ADDRESS (Sebab data buyer ada di sini)
+            String buyerName = "Guest User";
+            if (order.getShippingAddress() != null && order.getShippingAddress().getRecipientName() != null) {
+                buyerName = order.getShippingAddress().getRecipientName();
+            } else if (order.getUsername() != null) {
+                buyerName = order.getUsername();
+            }
+
+            holder.tvCustomer.setText("Buyer: " + buyerName);
+
+            holder.tvAmount.setText(String.format("RM %.2f", total));
+            holder.tvCommission.setText(String.format("RM %.2f", total * 0.10));
+        }
+
+        @Override public int getItemCount() { return list.size(); }
+
+        class OrderViewHolder extends RecyclerView.ViewHolder {
+            TextView tvId, tvStatus, tvCustomer, tvAmount, tvCommission;
+            public OrderViewHolder(@NonNull View itemView) {
+                super(itemView);
+                tvId = itemView.findViewById(R.id.tv_order_id);
+                tvStatus = itemView.findViewById(R.id.tv_order_status);
+                tvCustomer = itemView.findViewById(R.id.tv_order_customer);
+                tvAmount = itemView.findViewById(R.id.tv_order_amount);
+                tvCommission = itemView.findViewById(R.id.tv_admin_commission);
+            }
+        }
     }
 }

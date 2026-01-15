@@ -2,36 +2,58 @@ package com.example.beautyhub.models;
 
 public class Report {
     private String reportId;
-    private String userId;
-    private String title;      // Ditukar dari subject supaya sepadan dengan Activity
+    private String senderId;     // Pengadu (Buyer atau Seller)
+    private String reportType;   // BUYER_REPORT_SELLER atau SELLER_REPORT_BUYER
+    private String targetId;     // Orang yang dilaporkan
+    private String targetName;   // Nama orang yang dilaporkan
+    private String reason;       // Dahulu 'title' atau 'subject'
     private String description;
-    private String imageUrl;   // Tambah field imej (Cloudinary url)
+    private String imageUrl;
     private long timestamp;
-    private String status;     // "PENDING" atau "RESOLVED"
+    private String status;       // "PENDING" atau "RESOLVED"
 
     public Report() {
         // Diperlukan untuk Firebase Realtime Database
     }
 
-    public Report(String reportId, String userId, String title, String description, String imageUrl, long timestamp) {
+    public Report(String reportId, String senderId, String reportType, String targetId,
+                  String targetName, String reason, String description,
+                  String imageUrl, long timestamp) {
         this.reportId = reportId;
-        this.userId = userId;
-        this.title = title;
+        this.senderId = senderId;
+        this.reportType = reportType;
+        this.targetId = targetId;
+        this.targetName = targetName;
+        this.reason = reason;
         this.description = description;
         this.imageUrl = imageUrl;
         this.timestamp = timestamp;
-        this.status = "PENDING"; // Default status
+        this.status = "PENDING";
     }
 
-    // Getter dan Setter
-    public String getReportId() { return reportId; }
-    public void setReportId(String reportId) { this.reportId = reportId; }
+    // TAMBAHKAN GETTER DAN SETTER UNTUK reportId DI SINI
+    public String getReportId() {
+        return reportId;
+    }
 
-    public String getUserId() { return userId; }
-    public void setUserId(String userId) { this.userId = userId; }
+    public void setReportId(String reportId) {
+        this.reportId = reportId;
+    }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public String getSenderId() { return senderId; }
+    public void setSenderId(String senderId) { this.senderId = senderId; }
+
+    public String getReportType() { return reportType; }
+    public void setReportType(String reportType) { this.reportType = reportType; }
+
+    public String getTargetId() { return targetId; }
+    public void setTargetId(String targetId) { this.targetId = targetId; }
+
+    public String getTargetName() { return targetName; }
+    public void setTargetName(String targetName) { this.targetName = targetName; }
+
+    public String getReason() { return reason; }
+    public void setReason(String reason) { this.reason = reason; }
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }

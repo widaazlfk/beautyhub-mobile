@@ -81,11 +81,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:columnCount="2"
                 android:alignmentMode="alignMargins"
+                android:columnCount="2"
                 android:columnOrderPreserved="false">
 
-                <!-- Stats Cards (Revenue, Sellers, Users, Products) - Kekal seperti sedia ada -->
+                <!-- 1. Total Revenue -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_total_revenue"
                     android:layout_width="0dp"
@@ -94,16 +94,19 @@
                     android:layout_margin="8dp"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp">
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:padding="16dp">
+
                         <ImageView
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:src="@drawable/ic_revenue"
-                            app:tint="#4CAF50"/>
+                            app:tint="#4CAF50" />
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -111,6 +114,7 @@
                             android:text="Total Revenue"
                             android:textColor="#636E72"
                             android:textSize="12sp" />
+
                         <TextView
                             android:id="@+id/tv_total_revenue"
                             android:layout_width="wrap_content"
@@ -122,6 +126,7 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
+                <!-- 2. Active Sellers -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_total_sellers"
                     android:layout_width="0dp"
@@ -130,16 +135,19 @@
                     android:layout_margin="8dp"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp">
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:padding="16dp">
+
                         <ImageView
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:src="@drawable/ic_sellers"
-                            app:tint="#2196F3"/>
+                            app:tint="#2196F3" />
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -147,6 +155,7 @@
                             android:text="Active Sellers"
                             android:textColor="#636E72"
                             android:textSize="12sp" />
+
                         <TextView
                             android:id="@+id/tv_total_sellers"
                             android:layout_width="wrap_content"
@@ -158,6 +167,7 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
+                <!-- 3. Total Customers -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_total_users"
                     android:layout_width="0dp"
@@ -166,16 +176,19 @@
                     android:layout_margin="8dp"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp">
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:padding="16dp">
+
                         <ImageView
                             android:layout_width="24dp"
                             android:layout_height="24dp"
-                            android:src="@drawable/ic_users"
-                            app:tint="#9C27B0"/>
+                            android:src="@drawable/ic_user_add"
+                            app:tint="#9C27B0" />
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -183,6 +196,7 @@
                             android:text="Total Customers"
                             android:textColor="#636E72"
                             android:textSize="12sp" />
+
                         <TextView
                             android:id="@+id/tv_total_users"
                             android:layout_width="wrap_content"
@@ -194,6 +208,7 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
+                <!-- 4. Market Performance -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_total_products"
                     android:layout_width="0dp"
@@ -202,23 +217,27 @@
                     android:layout_margin="8dp"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp">
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:padding="16dp">
+
                         <ImageView
                             android:layout_width="24dp"
                             android:layout_height="24dp"
-                            android:src="@drawable/ic_products"
-                            app:tint="#FF9800"/>
+                            android:src="@drawable/ic_trending_up"
+                            app:tint="#FF9800" />
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="12dp"
-                            android:text="Total Products"
+                            android:text="Market Performance"
                             android:textColor="#636E72"
                             android:textSize="12sp" />
+
                         <TextView
                             android:id="@+id/tv_total_products"
                             android:layout_width="wrap_content"
