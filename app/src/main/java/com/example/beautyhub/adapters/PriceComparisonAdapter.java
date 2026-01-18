@@ -64,12 +64,18 @@ public class PriceComparisonAdapter extends RecyclerView.Adapter<PriceComparison
             holder.binding.tvIngredientCount.setVisibility(View.GONE);
         }
 
-        // 4. Navigasi ke Product Detail
+      // 4. Navigasi ke Product Detail
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(v.getContext(), ProductDetailActivity.class);
-            // PENTING: Gunakan key yang sama dengan ComparisonActivity ("productId")
-            intent.putExtra("productId", p.getProductId());
-            v.getContext().startActivity(intent);
+            if (p.getProductId() != null) {
+                Intent intent = new Intent(v.getContext(), ProductDetailActivity.class);
+
+                // TUKAR "productId" KEPADA "PRODUCT_ID" supaya sama dengan ProductDetailActivity
+                intent.putExtra("PRODUCT_ID", p.getProductId());
+
+                v.getContext().startActivity(intent);
+            } else {
+                android.widget.Toast.makeText(v.getContext(), "Product ID is missing in database", android.widget.Toast.LENGTH_SHORT).show();
+            }
         });
     }
 

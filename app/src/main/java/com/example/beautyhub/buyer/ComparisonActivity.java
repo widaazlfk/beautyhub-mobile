@@ -21,6 +21,7 @@ import com.google.firebase.database.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class ComparisonActivity extends AppCompatActivity {
 
@@ -129,29 +130,37 @@ public class ComparisonActivity extends AppCompatActivity {
         binding.tvPriceGuardian.setText("RM 0.00");
 
         if (w != null) {
-            binding.tvPriceWatsons.setText("RM " + String.format("%.2f", w.getPrice()));
+            // Gunakan String.format yang lebih selamat
+            binding.tvPriceWatsons.setText(String.format(Locale.US, "RM %.2f", w.getPrice()));
             if (w.getImageUrls() != null && !w.getImageUrls().isEmpty()) {
                 Glide.with(this).load(w.getImageUrls().get(0)).into(binding.ivWatsons);
             }
             binding.layoutWatsons.setOnClickListener(v -> {
-                Intent intent = new Intent(this, ProductDetailActivity.class);
-                intent.putExtra("productId", w.getProductId());
-                startActivity(intent);
+                if (w.getProductId() != null) {
+                    Intent intent = new Intent(this, ProductDetailActivity.class);
+                    // DITUKAR: "productId" -> "PRODUCT_ID"
+                    intent.putExtra("PRODUCT_ID", w.getProductId());
+                    startActivity(intent);
+                }
             });
         }
 
         if (g != null) {
-            binding.tvPriceGuardian.setText("RM " + String.format("%.2f", g.getPrice()));
+            binding.tvPriceGuardian.setText(String.format(Locale.US, "RM %.2f", g.getPrice()));
             if (g.getImageUrls() != null && !g.getImageUrls().isEmpty()) {
                 Glide.with(this).load(g.getImageUrls().get(0)).into(binding.ivGuardian);
             }
             binding.layoutGuardian.setOnClickListener(v -> {
-                Intent intent = new Intent(this, ProductDetailActivity.class);
-                intent.putExtra("productId", g.getProductId());
-                startActivity(intent);
+                if (g.getProductId() != null) {
+                    Intent intent = new Intent(this, ProductDetailActivity.class);
+                    // DITUKAR: "productId" -> "PRODUCT_ID"
+                    intent.putExtra("PRODUCT_ID", g.getProductId());
+                    startActivity(intent);
+                }
             });
         }
 
+        // Bandingkan harga hanya jika kedua-duanya wujud
         if (w != null && g != null && w.getPrice() > 0 && g.getPrice() > 0) {
             if (w.getPrice() < g.getPrice()) {
                 binding.badgeWatsonsWinner.setVisibility(View.VISIBLE);

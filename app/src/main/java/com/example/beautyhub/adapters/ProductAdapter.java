@@ -5,6 +5,7 @@ import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
@@ -37,7 +38,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         void onAddToCartClick(Product product);
         void onBuyNowClick(Product product);
         void onSellerClick(String sellerId);
-        void onWishlistClick(Product product); // Kept naming as onWishlistClick to match activity implementation, but icon is 'icFavourite'
+        void onWishlistClick(Product product);
         void onEditClick(Product product);
         void onDeleteClick(Product product);
     }
@@ -96,29 +97,31 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             displayProductImages(product);
             displayStockStatus(product);
             setupClickListeners(product, listener);
-            handleViewBasedOnRole(product, listener);
+            handleViewBasedOnRole();
         }
 
-        private void handleViewBasedOnRole(final Product product, final OnProductClickListener listener) {
+        private void handleViewBasedOnRole() {
             if (isSellerView) {
+                // Seller View Actions
                 binding.btnAddToCart.setVisibility(View.GONE);
                 binding.btnBuyNow.setVisibility(View.GONE);
-                binding.layoutSellerInfo.setVisibility(View.GONE);
                 binding.icFavourite.setVisibility(View.GONE);
-                binding.layoutSellerActions.setVisibility(View.VISIBLE);
+                binding.layoutSellerInfo.setVisibility(View.GONE); // Hide own info
+                binding.layoutSellerActions.setVisibility(View.VISIBLE); // Show Edit/Delete
             } else {
+                // Buyer View Actions
                 binding.btnAddToCart.setVisibility(View.VISIBLE);
                 binding.btnBuyNow.setVisibility(View.VISIBLE);
-                binding.layoutSellerInfo.setVisibility(View.VISIBLE);
                 binding.icFavourite.setVisibility(View.VISIBLE);
-                binding.layoutSellerActions.setVisibility(View.GONE);
+                binding.layoutSellerInfo.setVisibility(View.VISIBLE); // Show shop info
+                binding.layoutSellerActions.setVisibility(View.GONE); // Hide Edit/Delete
             }
         }
 
         private void checkIfFavourite(Product product) {
             String uid = FirebaseAuth.getInstance().getUid();
-            if (uid == null) {
-                binding.icFavourite.setImageResource(R.drawable.ic_favourite); // Ikon kosong
+            if (uid == null || product.getProductId() == null) {
+                binding.icFavourite.setImageResource(R.drawable.ic_favourite);
                 return;
             }
 
@@ -130,20 +133,15 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     if (snapshot.exists()) {
-                        // Jika produk ada dalam kegemaran, tukar warna/ikon
-                        binding.icFavourite.setImageResource(R.drawable.ic_favourite_filled); // Guna ikon hitam/penuh
-                        binding.icFavourite.setColorFilter(context.getResources().getColor(R.color.black)); // Paksa jadi hitam
+                        binding.icFavourite.setImageResource(R.drawable.ic_favourite_filled);
                     } else {
-                        // Jika tiada
                         binding.icFavourite.setImageResource(R.drawable.ic_favourite);
-                        binding.icFavourite.clearColorFilter();
                     }
                 }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {}
+                @Override public void onCancelled(@NonNull DatabaseError error) {}
             });
         }
+
         private void displayPrice(Product product) {
             if (product.hasDiscount()) {
                 binding.tvProductDiscountPrice.setVisibility(View.VISIBLE);
@@ -163,29 +161,28 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
             binding.tvSoldCount.setVisibility(product.getSoldCount() > 0 ? View.VISIBLE : View.GONE);
             if (product.getSoldCount() > 0) {
-                binding.tvSoldCount.setText(String.format(Locale.getDefault(), "(%s sold)", formatSoldCount(product.getSoldCount())));
+                binding.tvSoldCount.setText(String.format(Locale.getDefault(), "(%d sold)", product.getSoldCount()));
             }
         }
 
-        private String formatSoldCount(int count) {
-            if (count >= 1000) return (count / 1000) + "." + ((count % 1000) / 100) + "k";
-            return String.valueOf(count);
-        }
-
         private void displaySellerInfo(Product product) {
-            if (product.getSellerName() != null) {
+            // Only show if not in Seller View and info exists
+            if (!isSellerView && product.getSellerName() != null) {
+                binding.layoutSellerInfo.setVisibility(View.VISIBLE);
                 binding.tvSellerName.setText(product.getSellerName());
-                Glide.with(itemView.getContext())
+                Glide.with(context)
                         .load(product.getSellerProfileImageUrl())
                         .placeholder(R.drawable.ic_profile)
                         .into(binding.ivSellerProfile);
+            } else {
+                binding.layoutSellerInfo.setVisibility(View.GONE);
             }
         }
 
         private void displayProductImages(Product product) {
             if (product.getImageUrls() != null && !product.getImageUrls().isEmpty()) {
                 binding.rvProductImages.setVisibility(View.VISIBLE);
-                ProductImageAdapter imageAdapter = new ProductImageAdapter(itemView.getContext(), product.getImageUrls());
+                ProductImageAdapter imageAdapter = new ProductImageAdapter(context, product.getImageUrls());
                 binding.rvProductImages.setAdapter(imageAdapter);
             } else {
                 binding.rvProductImages.setVisibility(View.GONE);
@@ -193,15 +190,17 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         }
 
         private void displayStockStatus(Product product) {
-            boolean isOutOfStock = !product.hasStock();
-            binding.btnAddToCart.setEnabled(!isOutOfStock);
-            binding.btnBuyNow.setEnabled(!isOutOfStock);
-            binding.tvStockStatus.setVisibility(isOutOfStock ? View.VISIBLE : View.GONE);
+            boolean outOfStock = product.getStock() <= 0;
+            binding.tvStockStatus.setVisibility(outOfStock ? View.VISIBLE : View.GONE);
+            if (!isSellerView) {
+                binding.btnAddToCart.setEnabled(!outOfStock);
+                binding.btnBuyNow.setEnabled(!outOfStock);
+            }
         }
 
         private void setupClickListeners(final Product product, final OnProductClickListener listener) {
-            itemView.setOnClickListener(v -> listener.onProductClick(product));
-            binding.icFavourite.setOnClickListener(v -> listener.onWishlistClick(product)); // Maps to toggleFavourite in Activity
+            binding.getRoot().setOnClickListener(v -> listener.onProductClick(product));
+            binding.icFavourite.setOnClickListener(v -> listener.onWishlistClick(product));
             binding.btnAddToCart.setOnClickListener(v -> listener.onAddToCartClick(product));
             binding.btnBuyNow.setOnClickListener(v -> listener.onBuyNowClick(product));
             binding.btnEditProduct.setOnClickListener(v -> listener.onEditClick(product));
@@ -223,13 +222,11 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
         @Override public int getOldListSize() { return oldList.size(); }
         @Override public int getNewListSize() { return newList.size(); }
-
-        @Override public boolean areItemsTheSame(int oldPos, int newPos) {
-            return oldList.get(oldPos).getProductId().equals(newList.get(newPos).getProductId());
+        @Override public boolean areItemsTheSame(int o, int n) {
+            return oldList.get(o).getProductId().equals(newList.get(n).getProductId());
         }
-
-        @Override public boolean areContentsTheSame(int oldPos, int newPos) {
-            return oldList.get(oldPos).equals(newList.get(newPos));
+        @Override public boolean areContentsTheSame(int o, int n) {
+            return oldList.get(o).equals(newList.get(n));
         }
     }
 }

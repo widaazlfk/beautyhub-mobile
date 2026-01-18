@@ -30,40 +30,17 @@
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:listitem="@layout/item_product_image" />
 
-            <!-- Status Badge (Hanya untuk Seller) -->
+            <!-- Status Badge (Guna MaterialCard supaya tak perlu fail drawable asing) -->
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cv_status_badge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
-                android:visibility="gone"
                 app:cardBackgroundColor="#4CAF50"
                 app:cardCornerRadius="4dp"
                 app:cardElevation="0dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
-                <TextView
-                    android:id="@+id/tv_product_status"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingHorizontal="6dp"
-                    android:paddingVertical="2dp"
-                    android:text="LIVE"
-                    android:textColor="@android:color/white"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
-            </com.google.android.material.card.MaterialCardView>
+                app:layout_constraintTop_toTopOf="parent"/>
 
-            <ImageView
-                android:id="@+id/ic_favourite"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_margin="8dp"
-                android:padding="6dp"
-                android:src="@drawable/ic_favorite_border"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:tint="#757575" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!-- Info Section -->
@@ -83,8 +60,9 @@
                 android:textColor="#333333"
                 android:textSize="13sp"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:text="Product Name Here..." />
+                tools:text="Product Name Seller View..." />
 
+            <!-- Price Layout (Sama logic dengan Buyer) -->
             <LinearLayout
                 android:id="@+id/price_layout"
                 android:layout_width="match_parent"
@@ -94,6 +72,7 @@
                 android:orientation="horizontal"
                 app:layout_constraintTop_toBottomOf="@id/tv_product_name">
 
+                <!-- Harga Diskaun / Harga Utama -->
                 <TextView
                     android:id="@+id/tv_product_discount_price"
                     android:layout_width="wrap_content"
@@ -103,6 +82,7 @@
                     android:textStyle="bold"
                     tools:text="RM 39.90" />
 
+                <!-- Harga Normal (Akan dipotong guna Java code) -->
                 <TextView
                     android:id="@+id/tv_product_price"
                     android:layout_width="wrap_content"
@@ -110,146 +90,93 @@
                     android:layout_marginStart="6dp"
                     android:textColor="#BDBDBD"
                     android:textSize="11sp"
+                    android:visibility="visible"
                     tools:text="RM 49.90" />
             </LinearLayout>
 
-            <!-- Stats (Rating & Sold for Buyer, Stock for Seller) -->
+            <!-- Stats Row (Stok & Jualan) -->
             <LinearLayout
-                android:id="@+id/rating_layout"
+                android:id="@+id/stats_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:gravity="center_vertical"
                 android:orientation="horizontal"
                 app:layout_constraintTop_toBottomOf="@id/price_layout">
 
-                <RatingBar
-                    android:id="@+id/rb_product_rating"
-                    style="?android:attr/ratingBarStyleSmall"
+                <TextView
+                    android:id="@+id/tv_stock_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:numStars="5"
-                    android:progressTint="#FFC107" />
+                    android:textColor="#757575"
+                    android:textSize="11sp"
+                    tools:text="Stock: 120" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="4dp"
+                    android:text="|"
+                    android:textColor="#BDBDBD" />
 
                 <TextView
                     android:id="@+id/tv_sold_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:textColor="#9E9E9E"
-                    android:textSize="10sp"
-                    tools:text="(2.1k sold)" />
-
-                <TextView
-                    android:id="@+id/tv_stock_status"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
                     android:textColor="#757575"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    android:visibility="gone"
-                    tools:text="Stock: 120" />
+                    android:textSize="11sp"
+                    tools:text="Sold: 45" />
             </LinearLayout>
 
-            <!-- SELLER INFO (Buyer View Only) -->
+            <!-- SELLER ACTIONS (EDIT & DELETE) -->
             <LinearLayout
-                android:id="@+id/layout_seller_info"
+                android:id="@+id/seller_actions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:gravity="center_vertical"
-                app:layout_constraintTop_toBottomOf="@id/rating_layout">
-
-                <de.hdodenhof.circleimageview.CircleImageView
-                    android:id="@+id/iv_seller_profile"
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:src="@drawable/ic_profile" />
-
-                <TextView
-                    android:id="@+id/tv_seller_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:textColor="#757575"
-                    android:textSize="10sp"
-                    tools:text="Shop Name" />
-            </LinearLayout>
-
-            <!-- BUYER ACTIONS -->
-            <LinearLayout
-                android:id="@+id/layout_buyer_actions"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="12dp"
                 android:gravity="end"
-                app:layout_constraintTop_toBottomOf="@id/layout_seller_info">
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@id/stats_layout">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_add_to_cart"
-                    style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
-                    android:layout_width="42dp"
-                    android:layout_height="42dp"
-                    android:insetLeft="0dp"
-                    android:insetTop="0dp"
-                    android:insetRight="0dp"
-                    android:insetBottom="0dp"
-                    app:icon="@drawable/cart_icon"
-                    app:iconSize="20dp"
-                    app:iconTint="#424242"
-                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_buy_now"
-                    style="@style/Widget.Material3.Button.IconButton.Filled"
-                    android:layout_width="42dp"
-                    android:layout_height="42dp"
-                    android:layout_marginStart="10dp"
-                    android:insetLeft="0dp"
-                    android:insetTop="0dp"
-                    android:insetRight="0dp"
-                    android:insetBottom="0dp"
-                    app:backgroundTint="#212121"
-                    app:icon="@drawable/ic_flash"
-                    app:iconSize="20dp"
-                    app:iconTint="@android:color/white"
-                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full" />
-            </LinearLayout>
-
-            <!-- SELLER ACTIONS (Edit & Delete) -->
-            <LinearLayout
-                android:id="@+id/layout_seller_actions"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:gravity="end"
-                android:visibility="gone"
-                app:layout_constraintTop_toBottomOf="@id/layout_seller_info">
-
+                <!-- Delete Button -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_delete_product"
                     style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:layout_marginEnd="8dp"
+                    android:insetLeft="0dp"
+                    android:insetTop="0dp"
+                    android:insetRight="0dp"
+                    android:insetBottom="0dp"
+                    android:padding="0dp"
                     app:backgroundTint="#FFEBEE"
                     app:icon="@drawable/ic_delete"
-                    app:iconSize="18dp"
+                    app:iconGravity="textStart"
+                    app:iconPadding="0dp"
+                    app:iconSize="22dp"
                     app:iconTint="#E53935"
                     app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full" />
 
+                <!-- Edit Button -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_edit_product"
                     style="@style/Widget.Material3.Button.IconButton.Filled"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_marginStart="6dp"
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:insetLeft="0dp"
+                    android:insetTop="0dp"
+                    android:insetRight="0dp"
+                    android:insetBottom="0dp"
+                    android:padding="0dp"
                     app:backgroundTint="#212121"
                     app:icon="@drawable/ic_edit"
-                    app:iconSize="18dp"
+                    app:iconGravity="textStart"
+                    app:iconPadding="0dp"
+                    app:iconSize="22dp"
+                    app:iconTint="@android:color/white"
                     app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full" />
-            </LinearLayout>
 
+            </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <!-- Semi-transparent white (80% opacity) -->
+    <solid android:color="#CCFFFFFF" />
+
+    <!-- Optional: Add a very light border to help visibility on pure white images -->
+    <stroke
+        android:width="0.5dp"
+        android:color="#1A000000" />
+</shape>

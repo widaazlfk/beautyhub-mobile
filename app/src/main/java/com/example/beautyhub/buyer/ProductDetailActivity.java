@@ -131,41 +131,73 @@ public class ProductDetailActivity extends AppCompatActivity {
     }
 
     private void displayProductDetails(Product product) {
-        // Basic Info
-        binding.tvDetailProductName.setText(product.getName());
-        binding.tvDetailProductDescription.setText(product.getDescription());
-        binding.tvProductIngredients.setText(product.getIngredients() != null ? product.getIngredients() : "No ingredients listed.");
-
-        // Price Logic
-        if (product.hasDiscount()) {
-            binding.tvProductPrice.setPaintFlags(binding.tvProductPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
-            binding.tvProductPrice.setText(String.format(Locale.US, "RM%.2f", product.getPrice()));
-            binding.tvProductDiscountPrice.setText(String.format(Locale.US, "RM%.2f", product.getDiscountPrice()));
-            binding.tvProductDiscountPrice.setVisibility(View.VISIBLE);
-        } else {
-            binding.tvProductPrice.setText(String.format(Locale.US, "RM%.2f", product.getFinalPrice()));
-            binding.tvProductDiscountPrice.setVisibility(View.GONE);
+        if (product == null) {
+            Log.e("ProductDetail", "Attempted to display a null product object.");
+            return;
         }
 
-        // Seller Card
-        if (product.getSellerId() != null) {
-            binding.sellerInfoCard.setVisibility(View.VISIBLE);
-            binding.tvSellerName.setText(product.getSellerName());
-            Glide.with(this).load(product.getSellerProfileImageUrl())
-                    .placeholder(R.drawable.ic_profile_placeholder)
-                    .into(binding.ivSellerProfile);
+        try {
+            // 1. Maklumat Asas (Basic Info)
+            binding.tvDetailProductName.setText(product.getName() != null ? product.getName() : "No Name Available");
+            binding.tvDetailProductDescription.setText(product.getDescription() != null ? product.getDescription() : "No description provided.");
+            binding.tvProductIngredients.setText(product.getIngredients() != null ? product.getIngredients() : "No ingredients listed.");
 
-            binding.sellerInfoCard.setOnClickListener(v -> {
-                Intent intent = new Intent(this, ShopViewActivity.class);
-                intent.putExtra("SELLER_ID", product.getSellerId());
-                startActivity(intent);
-            });
-        }
+            // 2. Logik Harga (Price Logic) - Mengelakkan formatting error jika harga null
+            try {
+                double originalPrice = product.getPrice();
+                double discountPrice = product.getDiscountPrice();
+                double finalPrice = product.getFinalPrice();
 
-        // Image Slider
-        if (product.getImageUrls() != null && !product.getImageUrls().isEmpty()) {
-            ImageSliderAdapter imageAdapter = new ImageSliderAdapter(this, product.getImageUrls());
-            binding.vpProductImages.setAdapter(imageAdapter);
+                if (product.hasDiscount() && discountPrice > 0) {
+                    binding.tvProductPrice.setPaintFlags(binding.tvProductPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
+                    binding.tvProductPrice.setText(String.format(Locale.US, "RM%.2f", originalPrice));
+                    binding.tvProductDiscountPrice.setText(String.format(Locale.US, "RM%.2f", discountPrice));
+                    binding.tvProductDiscountPrice.setVisibility(View.VISIBLE);
+                } else {
+                    binding.tvProductPrice.setPaintFlags(binding.tvProductPrice.getPaintFlags() & (~android.graphics.Paint.STRIKE_THRU_TEXT_FLAG));
+                    binding.tvProductPrice.setText(String.format(Locale.US, "RM%.2f", finalPrice));
+                    binding.tvProductDiscountPrice.setVisibility(View.GONE);
+                }
+            } catch (Exception e) {
+                binding.tvProductPrice.setText("RM0.00");
+                Log.e("ProductDetail", "Error formatting price: " + e.getMessage());
+            }
+
+            // 3. Kad Penjual (Seller Card)
+            if (product.getSellerId() != null) {
+                binding.sellerInfoCard.setVisibility(View.VISIBLE);
+                binding.tvSellerName.setText(product.getSellerName() != null ? product.getSellerName() : "Unknown Seller");
+
+                Glide.with(this)
+                        .load(product.getSellerProfileImageUrl())
+                        .placeholder(R.drawable.ic_profile) // Pastikan drawable ini wujud atau guna ic_profile_placeholder
+                        .error(R.drawable.ic_profile)
+                        .into(binding.ivSellerProfile);
+
+                binding.sellerInfoCard.setOnClickListener(v -> {
+                    Intent intent = new Intent(this, ShopViewActivity.class);
+                    intent.putExtra("SELLER_ID", product.getSellerId());
+                    startActivity(intent);
+                });
+            } else {
+                binding.sellerInfoCard.setVisibility(View.GONE);
+            }
+
+            // 4. Slider Gambar (Image Slider)
+            List<String> images = product.getImageUrls();
+            if (images != null && !images.isEmpty()) {
+                binding.vpProductImages.setVisibility(View.VISIBLE);
+                ImageSliderAdapter imageAdapter = new ImageSliderAdapter(this, images);
+                binding.vpProductImages.setAdapter(imageAdapter);
+            } else {
+                // Sembunyikan jika tiada gambar untuk elak ruang kosong/crash
+                binding.vpProductImages.setVisibility(View.GONE);
+                Log.d("ProductDetail", "No images available for this product.");
+            }
+
+        } catch (Exception e) {
+            Log.e("ProductDetail", "General error in displayProductDetails: " + e.getMessage());
+            Toast.makeText(this, "Error loading product details", Toast.LENGTH_SHORT).show();
         }
     }
 

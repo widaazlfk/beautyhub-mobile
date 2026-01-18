@@ -5,6 +5,7 @@ import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -132,18 +133,23 @@ public class BuyerProductAdapter extends RecyclerView.Adapter<BuyerProductAdapte
                 }
             });
 
-            binding.layoutSellerInfo.setOnClickListener(v -> {
-                if (listener != null && product.getSellerId() != null && !product.getSellerId().isEmpty()) {
-                    // Semak jika produk adalah 'preloaded'
+            binding.tvSellerName.setOnClickListener(v -> {
+                if (listener == null) return; // Keselamatan: Pastikan listener wujud
+
+                String sellerId = product.getSellerId();
+
+                // Semak jika sellerId sah
+                if (sellerId != null && !sellerId.isEmpty()) {
                     if (product.isPreloaded()) {
-                        // Dapatkan nama penjual, jika tiada, guna "BeautyHub" sebagai lalai
-                        String sellerName = product.getSellerName() != null ? product.getSellerName() : "BeautyHub";
-                        // Paparkan mesej yang lebih spesifik
-                        Toast.makeText(itemView.getContext(), "Official Product from " + sellerName, Toast.LENGTH_SHORT).show();
+                        // Jika produk rasmi BeautyHub
+                        String sellerName = product.getSellerName() != null ? product.getSellerName() : "BeautyHub Official";
+                        Toast.makeText(context, "Official Store: " + sellerName, Toast.LENGTH_SHORT).show();
                     } else {
-                        // Jika bukan produk preloaded, benarkan navigasi ke profil penjual
-                        listener.onSellerClick(product.getSellerId());
+                        // Jika penjual komuniti, navigasi ke profil
+                        listener.onSellerClick(sellerId);
                     }
+                } else {
+                    Toast.makeText(context, "Seller info unavailable", Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -176,26 +182,26 @@ public class BuyerProductAdapter extends RecyclerView.Adapter<BuyerProductAdapte
 
         private void setupPriceDisplay(Product product) {
             boolean hasDiscount = product.hasDiscount();
+
+            // 1. Handle Visibility
             binding.tvProductDiscountPrice.setVisibility(hasDiscount ? View.VISIBLE : View.GONE);
 
             if (hasDiscount) {
+                // 2. Setup Discount Price
                 binding.tvProductDiscountPrice.setText(String.format(Locale.US, "RM%.2f", product.getDiscountPrice()));
+
+                // 3. Setup Original Price (Strikethrough)
                 binding.tvProductPrice.setText(String.format(Locale.US, "RM%.2f", product.getPrice()));
                 binding.tvProductPrice.setPaintFlags(binding.tvProductPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
                 binding.tvProductPrice.setTextColor(ContextCompat.getColor(context, android.R.color.darker_gray));
 
-                ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) binding.tvProductPrice.getLayoutParams();
-                params.startToEnd = binding.tvProductDiscountPrice.getId();
-                binding.tvProductPrice.setLayoutParams(params);
             } else {
+                // 4. Setup Normal Price (No Strikethrough)
                 binding.tvProductPrice.setText(String.format(Locale.US, "RM%.2f", product.getPrice()));
                 binding.tvProductPrice.setPaintFlags(binding.tvProductPrice.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
                 binding.tvProductPrice.setTextColor(ContextCompat.getColor(context, R.color.purple_700));
-
-                ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) binding.tvProductPrice.getLayoutParams();
-                params.startToStart = ConstraintLayout.LayoutParams.PARENT_ID;
-                binding.tvProductPrice.setLayoutParams(params);
             }
+
         }
 
         private void updateFavouriteIcon(Product product) {
@@ -219,7 +225,7 @@ public class BuyerProductAdapter extends RecyclerView.Adapter<BuyerProductAdapte
         private void setupSellerInfo(Product product) {
             if (product.getSellerName() != null && !product.getSellerName().isEmpty()) {
                 binding.tvSellerName.setText(product.getSellerName());
-                binding.layoutSellerInfo.setVisibility(View.VISIBLE);
+                binding.tvSellerName.setVisibility(View.VISIBLE);
 
                 Glide.with(context)
                         .load(product.getSellerProfileImageUrl())
@@ -227,7 +233,7 @@ public class BuyerProductAdapter extends RecyclerView.Adapter<BuyerProductAdapte
                         .error(R.drawable.ic_profile)
                         .into(binding.ivSellerProfile);
             } else {
-                binding.layoutSellerInfo.setVisibility(View.GONE);
+                binding.tvSellerName.setVisibility(View.GONE);
             }
         }
 
