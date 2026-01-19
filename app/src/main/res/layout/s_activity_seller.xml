@@ -23,56 +23,57 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize">
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+            </com.google.android.material.appbar.MaterialToolbar>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/icon_menu_seller"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/ic_menu"
+                    app:tint="@color/black" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="Seller Centre"
+                    android:textColor="@color/black"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <FrameLayout
+                    android:id="@+id/btn_notifications_seller"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="12dp">
 
                     <ImageView
-                        android:id="@+id/icon_menu_seller"
+                        android:id="@+id/iv_notification_icon"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:layout_centerVertical="true"
-                        android:src="@drawable/ic_menu"
-                        app:tint="@color/black" />
+                        android:layout_gravity="center"
+                        android:src="@drawable/notification_icon" />
 
                     <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerInParent="true"
-                        android:text="Seller Centre"
-                        android:textColor="@color/black"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-
-                    <FrameLayout
-                        android:id="@+id/btn_notifications_seller"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginEnd="12dp">
-
-                        <ImageView
-                            android:id="@+id/iv_notification_icon"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_gravity="center"
-                            android:src="@drawable/notification_icon" />
-
-                        <TextView
-                            android:id="@+id/tv_notification_badge"
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:layout_gravity="top|end"
-                            android:background="@drawable/bg_notification_badge"
-                            android:gravity="center"
-                            android:text="0"
-                            android:textColor="@android:color/white"
-                            android:textSize="9sp"
-                            android:visibility="gone" />
-                    </FrameLayout>
-                </RelativeLayout>
-            </com.google.android.material.appbar.MaterialToolbar>
+                        android:id="@+id/tv_notification_badge"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="top|end"
+                        android:background="@drawable/bg_notification_badge"
+                        android:gravity="center"
+                        android:text="0"
+                        android:textColor="@android:color/white"
+                        android:textSize="9sp"
+                        android:visibility="gone" />
+                </FrameLayout>
+            </RelativeLayout>
         </com.google.android.material.appbar.AppBarLayout>
 
         <androidx.core.widget.NestedScrollView
@@ -86,6 +87,7 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
+                <!-- Section: Business Insights -->
                 <!-- Section: Business Insights -->
                 <TextView
                     android:layout_width="wrap_content"
@@ -109,7 +111,7 @@
                         android:padding="16dp"
                         android:weightSum="3">
 
-                        <!-- Sales Today -->
+                        <!-- Sales Month -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -122,18 +124,19 @@
                                 android:layout_height="wrap_content"
                                 android:text="RM 0.00"
                                 android:textColor="#8a2128"
-                                android:textSize="16sp"
+                                android:textSize="14sp"
                                 android:textStyle="bold" />
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Sales Today"
-                                android:textSize="11sp" />
+                                android:text="Sales Month"
+                                android:textSize="10sp"
+                                android:gravity="center" />
                         </LinearLayout>
 
                         <View android:layout_width="1dp" android:layout_height="30dp" android:background="#EEEEEE" android:layout_gravity="center"/>
 
-                        <!-- New Orders -->
+                        <!-- Total Orders -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -146,18 +149,19 @@
                                 android:layout_height="wrap_content"
                                 android:text="0"
                                 android:textColor="@color/black"
-                                android:textSize="16sp"
+                                android:textSize="14sp"
                                 android:textStyle="bold" />
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="New Orders"
-                                android:textSize="11sp" />
+                                android:text="Total Orders"
+                                android:textSize="10sp"
+                                android:gravity="center" />
                         </LinearLayout>
 
                         <View android:layout_width="1dp" android:layout_height="30dp" android:background="#EEEEEE" android:layout_gravity="center"/>
 
-                        <!-- Visitors -->
+                        <!-- New Orders (To Ship) -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -165,19 +169,25 @@
                             android:gravity="center"
                             android:orientation="vertical">
                             <TextView
-                                android:id="@+id/tv_today_visitors"
+                                android:id="@+id/tv_new_orders_count"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="0"
-                                android:textColor="@color/black"
-                                android:textSize="16sp"
+                                android:textColor="#2196F3"
+                                android:textSize="14sp"
                                 android:textStyle="bold" />
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Visitors"
-                                android:textSize="11sp" />
+                                android:text="New Orders"
+                                android:textSize="10sp"
+                                android:gravity="center" />
                         </LinearLayout>
+                  >
+
+                        <View android:layout_width="1dp" android:layout_height="30dp" android:background="#EEEEEE" android:layout_gravity="center"/>
+
+
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -344,12 +354,18 @@
                         </LinearLayout>
 
                         <LinearLayout
+                            android:id="@+id/card_finance"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_columnWeight="1"
                             android:gravity="center"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:foreground="?android:attr/selectableItemBackground"
                             android:orientation="vertical"
                             android:padding="8dp">
+
+
                             <ImageView
                                 android:layout_width="32dp"
                                 android:layout_height="32dp"

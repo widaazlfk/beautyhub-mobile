@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.beautyhub.R;
 import com.example.beautyhub.models.NotificationModel;
-import com.example.beautyhub.buyer.OrderDetailsActivity; // Pastikan path ini betul
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -42,9 +41,31 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     public void onBindViewHolder(@NonNull HolderNotification holder, int position) {
         NotificationModel model = notificationList.get(position);
 
-        // 1. Set Teks
-        holder.titleTv.setText(model.getTitle());
+        // --- 1. SET TITLE WITH SHORTENED ORDER ID (FIRST 8 CHARS) ---
+        String originalTitle = model.getTitle();
+        String processedTitle = originalTitle;
 
+        if (originalTitle != null && originalTitle.contains("#")) {
+            try {
+                int hashIndex = originalTitle.indexOf("#");
+                // Text before '#' (e.g., "New Order ")
+                String prefix = originalTitle.substring(0, hashIndex + 1);
+                // Text after '#' (The long ID)
+                String idPart = originalTitle.substring(hashIndex + 1).trim();
+
+                if (!idPart.isEmpty()) {
+                    // Remove '-' and take first 8 characters
+                    String cleanId = idPart.replace("-", "");
+                    String shortId = cleanId.substring(0, Math.min(cleanId.length(), 8)).toUpperCase();
+                    processedTitle = prefix + " " + shortId;
+                }
+            } catch (Exception e) {
+                processedTitle = originalTitle; // Fallback to original if error occurs
+            }
+        }
+        holder.titleTv.setText(processedTitle);
+
+        // --- PRODUCT & SELLER NAMES ---
         if (model.getProductName() != null && !model.getProductName().isEmpty()) {
             holder.productNameTv.setVisibility(View.VISIBLE);
             holder.productNameTv.setText(model.getProductName());
@@ -60,7 +81,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             holder.sellerNameTv.setVisibility(View.GONE);
         }
 
-        // 2. Glide Gambar
+        // --- 2. GLIDE IMAGE ---
         Glide.with(context)
                 .load(model.getProductImageUrl())
                 .placeholder(R.drawable.product_placeholder)
@@ -68,12 +89,12 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
                 .centerCrop()
                 .into(holder.productImageIv);
 
-        // 3. Format Masa
+        // --- 3. FORMAT TIME ---
         long time = model.getTimestamp();
         CharSequence timeAgo = DateUtils.getRelativeTimeSpanString(time, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS);
         holder.timeTv.setText(timeAgo);
 
-        // 4. Logik Unread UI
+        // --- 4. UNREAD UI LOGIC ---
         if (model.isUnread()) {
             holder.itemView.setBackgroundColor(Color.parseColor("#FFF0F0"));
             holder.unreadIndicator.setVisibility(View.VISIBLE);
@@ -82,10 +103,9 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             holder.unreadIndicator.setVisibility(View.GONE);
         }
 
-        // 5. LOGIK KLIK (Navigasi ke Order Details)
-        // 5. LOGIK KLIK (Navigasi Berbeza untuk Buyer & Seller)
+        // --- 5. CLICK LOGIC (NAVIGATION) ---
         holder.itemView.setOnClickListener(v -> {
-            // A. Mark as Read di Firebase
+            // Mark as Read in Firebase
             if (model.isUnread()) {
                 String uid = FirebaseAuth.getInstance().getUid();
                 if (uid != null) {
@@ -98,16 +118,17 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
                 notifyItemChanged(position);
             }
 
-            // B. Tentukan Halaman Navigasi
+            // Determine Navigation Destination
             Intent intent;
             if ("NewOrder".equals(model.getType())) {
-                // Jika notifikasi jenis NewOrder, hantar ke SellerOrderDetailsActivity
+                // If type is NewOrder, go to Seller Details
                 intent = new Intent(context, com.example.beautyhub.seller.SellerOrderDetailActivity.class);
             } else {
-                // Selain itu (Contoh: "Order"), hantar ke Buyer OrderDetailsActivity
+                // Otherwise, go to Buyer Details
                 intent = new Intent(context, com.example.beautyhub.buyer.OrderDetailsActivity.class);
             }
 
+            // Always pass the FULL ORIGINAL Order ID for database reference
             intent.putExtra("ORDER_ID", model.getOrderId());
             context.startActivity(intent);
         });

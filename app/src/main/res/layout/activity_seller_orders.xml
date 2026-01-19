@@ -21,6 +21,82 @@
             app:title="Manage Orders"
             app:titleTextColor="@color/white" />
 
+        <HorizontalScrollView
+            android:id="@+id/status_filter_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:scrollbars="none">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chip_group_seller_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="12dp"
+                app:singleLine="true"
+                app:singleSelection="true">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_seller_all"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="All" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_seller_pending"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pending" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_seller_processing"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Processing" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_seller_shipped"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Shipped" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_seller_completed"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Completed" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_seller_cancelled"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cancelled" />
+            </com.google.android.material.chip.ChipGroup>
+        </HorizontalScrollView>
+
+        <!-- ▼ TAMBAH DI SINI: TextView Info Filter ▼ -->
+        <TextView
+            android:id="@+id/tv_filter_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FFF9C4"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
+            android:text="Showing all orders"
+            android:textColor="#5D4037"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            android:visibility="gone"
+            tools:visibility="visible" />
+        <!-- ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ -->
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout
@@ -47,7 +123,6 @@
             android:visibility="gone"
             tools:visibility="visible" />
 
-        <!-- ▼▼▼ PERUBAHAN UTAMA: Gantikan TextView dengan LinearLayout yang lebih informatif ▼▼▼ -->
         <LinearLayout
             android:id="@+id/layout_no_orders"
             android:layout_width="wrap_content"
@@ -56,8 +131,7 @@
             android:gravity="center"
             android:orientation="vertical"
             android:padding="32dp"
-            android:visibility="gone"
-            tools:visibility="gone">
+            android:visibility="gone">
 
             <ImageView
                 android:layout_width="90dp"
@@ -89,9 +163,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:text="Go to Dashboard" />
-
         </LinearLayout>
-        <!-- ▲▲▲ AKHIR PERUBAHAN ▲▲▲ -->
 
     </FrameLayout>
 

@@ -171,8 +171,14 @@ public class SellerOrderDetailActivity extends AppCompatActivity {
     }
 
     private void displayGeneralInfo(Order order, String key) {
-        String shortId = key.substring(Math.max(0, key.length() - 7)).toUpperCase();
-        tvOrderId.setText("Order #" + shortId);
+        // Logik memendekkan ID: Buang tanda '-' dan ambil 8 aksara TERAWAL
+        String displayOrderId = "N/A";
+        if (key != null && !key.isEmpty()) {
+            String cleanId = key.replace("-", "");
+            displayOrderId = cleanId.substring(0, Math.min(cleanId.length(), 8)).toUpperCase();
+        }
+        tvOrderId.setText("Order #" + displayOrderId);
+
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault());
         tvOrderDate.setText("Placed on: " + sdf.format(new Date(order.getOrderDate())));
         tvPaymentMethod.setText(order.getPaymentMethod() != null ? order.getPaymentMethod().toUpperCase() : "N/A");
@@ -254,7 +260,8 @@ public class SellerOrderDetailActivity extends AppCompatActivity {
 
             if (buyerId != null) {
                 DatabaseReference notifRef = FirebaseDatabase.getInstance().getReference("Notifications").child(buyerId).push();
-                String shortOrderId = orderId.substring(Math.max(0, orderId.length() - 7)).toUpperCase();
+                String cleanId = orderId.replace("-", "");
+                String shortOrderId = cleanId.substring(0, Math.min(cleanId.length(), 8)).toUpperCase();
 
                 HashMap<String, Object> notifData = new HashMap<>();
                 notifData.put("id", notifRef.getKey());

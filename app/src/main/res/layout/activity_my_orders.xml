@@ -19,13 +19,17 @@
         app:titleTextColor="@color/white" />
 
     <!-- ▼▼▼ PERUBAHAN DI SINI: Tambah ChipGroup untuk penapis status ▼▼▼ -->
+    <!-- ▲▲▲ AKHIR PERUBAHAN ▲▲▲ -->
+
+
     <HorizontalScrollView
         android:id="@+id/status_filter_scroll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/white"
         android:scrollbars="none"
-        app:layout_constraintTop_toBottomOf="@id/toolbar_my_orders">
+        app:layout_constraintTop_toBottomOf="@id/toolbar_my_orders"
+        tools:layout_editor_absoluteX="0dp">
 
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/chip_group_status"
@@ -40,8 +44,8 @@
                 style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="All"
-                android:checked="true" />
+                android:checked="true"
+                android:text="All" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_pending"
@@ -49,6 +53,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Pending" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_processing"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Processing" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_shipped"
@@ -64,10 +75,15 @@
                 android:layout_height="wrap_content"
                 android:text="Completed" />
 
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_cancelled"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cancelled" />
+
         </com.google.android.material.chip.ChipGroup>
     </HorizontalScrollView>
-    <!-- ▲▲▲ AKHIR PERUBAHAN ▲▲▲ -->
-
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_orders"

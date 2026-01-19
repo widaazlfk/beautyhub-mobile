@@ -142,6 +142,33 @@ public class ProductDetailActivity extends AppCompatActivity {
             binding.tvDetailProductDescription.setText(product.getDescription() != null ? product.getDescription() : "No description provided.");
             binding.tvProductIngredients.setText(product.getIngredients() != null ? product.getIngredients() : "No ingredients listed.");
 
+            // Gantikan bahagian selection anda dengan ini:
+            if (binding.tvProductBrand != null) {
+                if (product.getBrand() != null && !product.getBrand().isEmpty()) {
+                    binding.tvProductBrand.setText(product.getBrand());
+                    binding.tvProductBrand.setVisibility(View.VISIBLE);
+                } else {
+                    binding.tvProductBrand.setVisibility(View.GONE);
+                }
+            }
+
+            if (binding.tvProductCategory != null) {
+                if (product.getCategory() != null && !product.getCategory().isEmpty()) {
+                    binding.tvProductCategory.setText(product.getCategory());
+                    binding.tvProductCategory.setVisibility(View.VISIBLE);
+                } else {
+                    binding.tvProductCategory.setVisibility(View.GONE);
+                }
+            }
+
+            if (binding.tvProductSkinType != null) {
+                if (product.getSkinType() != null && !product.getSkinType().isEmpty()) {
+                    binding.tvProductSkinType.setText( product.getSkinType());
+                    binding.tvProductSkinType.setVisibility(View.VISIBLE);
+                } else {
+                    binding.tvProductSkinType.setVisibility(View.GONE);
+                }
+            }
             // 2. Logik Harga (Price Logic) - Mengelakkan formatting error jika harga null
             try {
                 double originalPrice = product.getPrice();

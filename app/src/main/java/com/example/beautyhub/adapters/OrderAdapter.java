@@ -39,7 +39,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
     @NonNull
     @Override
     public OrderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Gunakan layout item_order anda
         View view = LayoutInflater.from(context).inflate(R.layout.item_order, parent, false);
         return new OrderViewHolder(view);
     }
@@ -67,36 +66,30 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             tvOrderDate = itemView.findViewById(R.id.tv_order_date);
             tvOrderItemsPreview = itemView.findViewById(R.id.tv_order_items_preview);
             tvOrderTotal = itemView.findViewById(R.id.tv_order_total);
-            // Pastikan anda ada TextView untuk nama seller di layout item_order.xml
             tvSellerName = itemView.findViewById(R.id.tv_seller_name_order);
         }
 
         void bind(final Order order, final OnOrderItemClickListener clickListener) {
-            // 1. Papar ID dan Status
             tvOrderId.setText(String.format("Order #%s", getShortOrderId(order.getOrderId())));
             tvOrderStatus.setText(order.getStatus());
             updateStatusBackground(order.getStatus());
 
-            // 2. Papar Nama Seller (PENTING untuk Split Order)
             if (tvSellerName != null) {
                 tvSellerName.setText(order.getSellerName() != null ? order.getSellerName() : "Unknown Store");
             }
 
-            // 3. Papar Tarikh
             SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault());
             tvOrderDate.setText(sdf.format(new Date(order.getOrderDate() > 0 ? order.getOrderDate() : order.getTimestamp())));
 
-            // 4. Papar Total
             tvOrderTotal.setText(String.format(Locale.US, "RM %.2f", order.getTotalAmount()));
 
-            // 5. Pratonton Item (Direct dari orderItems, bukan subOrders)
             StringBuilder itemsPreview = new StringBuilder();
             List<OrderItem> items = order.getOrderItems();
 
             if (items != null && !items.isEmpty()) {
                 int count = 0;
                 for (OrderItem item : items) {
-                    if (count < 2) { // Tunjuk 2 item pertama sahaja
+                    if (count < 2) {
                         itemsPreview.append(String.format("%dx %s\n", item.getQuantity(), item.getProductName()));
                     }
                     count++;
@@ -134,11 +127,14 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             }
         }
 
+        // KOD YANG TELAH DIPERBETULKAN (8 TERAWAL)
         private String getShortOrderId(String orderId) {
-            if (orderId != null && orderId.length() > 7) {
-                return orderId.substring(orderId.length() - 7).toUpperCase();
+            if (orderId != null && !orderId.isEmpty()) {
+                // Buang tanda '-' dan ambil 8 aksara pertama
+                String cleanId = orderId.replace("-", "");
+                return cleanId.substring(0, Math.min(cleanId.length(), 8)).toUpperCase();
             }
-            return orderId != null ? orderId.toUpperCase() : "";
+            return "";
         }
     }
 }

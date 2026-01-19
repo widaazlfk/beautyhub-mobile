@@ -2,7 +2,6 @@ package com.example.beautyhub.buyer;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -41,28 +40,23 @@ public class MyOrdersActivity extends AppCompatActivity implements OrderAdapter.
 
     private DatabaseReference databaseReference;
     private FirebaseUser currentUser;
-    private View chipGroupStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_orders);
 
-        // Inisialisasi Firebase
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         databaseReference = FirebaseDatabase.getInstance().getReference("Orders");
 
-        // Persediaan UI
         setupToolbar();
         initViews();
         setupRecyclerView();
 
-        // Muat data segera
         if (currentUser != null) {
             loadOrders(currentUser.getUid());
         } else {
             Toast.makeText(this, "You must be logged in to view orders.", Toast.LENGTH_LONG).show();
-            showEmptyState();
             finish();
         }
     }
@@ -70,7 +64,6 @@ public class MyOrdersActivity extends AppCompatActivity implements OrderAdapter.
     @Override
     protected void onResume() {
         super.onResume();
-        // Refresh data apabila kembali
         if (currentUser != null) {
             loadOrders(currentUser.getUid());
         }
@@ -91,18 +84,15 @@ public class MyOrdersActivity extends AppCompatActivity implements OrderAdapter.
         progressBar = findViewById(R.id.progress_bar_orders);
         layoutNoOrders = findViewById(R.id.layout_no_orders);
 
-        // Aktifkan ChipGroup
         com.google.android.material.chip.ChipGroup chipGroup = findViewById(R.id.chip_group_status);
         if (chipGroup != null) {
-            chipGroup.setVisibility(View.VISIBLE); // Pastikan Visible
             chipGroup.setOnCheckedChangeListener((group, checkedId) -> {
                 if (currentUser != null) {
-                    loadOrders(currentUser.getUid()); // Muat semula data dengan penapis
+                    loadOrders(currentUser.getUid());
                 }
             });
         }
 
-        // Listener butang Start Shopping tetap sama...
         Button btnStartShopping = findViewById(R.id.btn_start_shopping_from_orders);
         if (btnStartShopping != null) {
             btnStartShopping.setOnClickListener(v -> {
@@ -114,25 +104,24 @@ public class MyOrdersActivity extends AppCompatActivity implements OrderAdapter.
         }
     }
 
-
     private void setupRecyclerView() {
         orderList = new ArrayList<>();
         orderAdapter = new OrderAdapter(this, orderList, this);
         rvOrders.setLayoutManager(new LinearLayoutManager(this));
         rvOrders.setAdapter(orderAdapter);
-        rvOrders.setItemAnimator(null);
     }
 
     private void loadOrders(String userId) {
         showLoadingState();
 
-        // Dapatkan status penapis daripada ChipGroup
         com.google.android.material.chip.ChipGroup chipGroup = findViewById(R.id.chip_group_status);
         int checkedId = (chipGroup != null) ? chipGroup.getCheckedChipId() : R.id.chip_all;
 
+        // Query tetap sama
         Query userOrdersQuery = databaseReference.orderByChild("userId").equalTo(userId);
 
-        userOrdersQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+        // TUKAR DISINI: Guna addValueEventListener untuk update automatik (Real-time)
+        userOrdersQuery.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 orderList.clear();
@@ -141,24 +130,30 @@ public class MyOrdersActivity extends AppCompatActivity implements OrderAdapter.
                     for (DataSnapshot orderSnapshot : snapshot.getChildren()) {
                         Order order = orderSnapshot.getValue(Order.class);
                         if (order != null) {
+                            // Set ID Penuh dari Firebase Key
                             order.setOrderId(orderSnapshot.getKey());
 
-                            // LOGIK PENAPIS (FILTER)
                             String status = order.getStatus();
+
+                            // Filter mengikut Chip yang dipilih
                             if (checkedId == R.id.chip_all) {
                                 orderList.add(order);
                             } else if (checkedId == R.id.chip_pending && "Pending".equalsIgnoreCase(status)) {
                                 orderList.add(order);
+                            } else if (checkedId == R.id.chip_processing && "Processing".equalsIgnoreCase(status)) {
+                                orderList.add(order);
                             } else if (checkedId == R.id.chip_shipped && "Shipped".equalsIgnoreCase(status)) {
                                 orderList.add(order);
                             } else if (checkedId == R.id.chip_completed && "Completed".equalsIgnoreCase(status)) {
+                                orderList.add(order);
+                            } else if (checkedId == R.id.chip_cancelled && "Cancelled".equalsIgnoreCase(status)) {
                                 orderList.add(order);
                             }
                         }
                     }
 
                     if (!orderList.isEmpty()) {
-                        // Susun mengikut tarikh terbaru
+                        // Susun yang terbaru di atas
                         Collections.sort(orderList, (o1, o2) -> Long.compare(o2.getOrderDate(), o1.getOrderDate()));
                         showDataState();
                     } else {
@@ -167,21 +162,26 @@ public class MyOrdersActivity extends AppCompatActivity implements OrderAdapter.
                 } else {
                     showEmptyState();
                 }
+                // Adapter akan refresh secara automatik bila data berubah
                 orderAdapter.notifyDataSetChanged();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                showEmptyState();
-                Toast.makeText(MyOrdersActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                if (progressBar != null) progressBar.setVisibility(View.GONE);
             }
         });
     }
-
+    /**
+     * PENTING: Apabila klik, kita hantar ID ASLI (PENUH) supaya
+     * OrderDetailsActivity boleh cari data dalam Firebase.
+     * Logik pemotongan 8 huruf hanya berlaku di dalam ADAPTER untuk paparan sahaja.
+     */
     @Override
     public void onOrderItemClick(Order order) {
         if (order != null && order.getOrderId() != null) {
             Intent intent = new Intent(this, OrderDetailsActivity.class);
+            // Hantar ID Penuh (contoh: -NklX23847abc...)
             intent.putExtra("ORDER_ID", order.getOrderId());
             startActivity(intent);
         } else {

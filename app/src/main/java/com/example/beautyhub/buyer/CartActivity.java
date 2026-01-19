@@ -11,7 +11,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog; // ▼▼▼ Import AlertDialog ▼▼▼
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,7 +22,6 @@ import com.example.beautyhub.adapters.CartParentAdapter;
 import com.example.beautyhub.models.CartItem;
 import com.example.beautyhub.models.CartSeller;
 import com.example.beautyhub.models.Product;
-import com.example.beautyhub.models.User;
 import com.example.beautyhub.seller.SellerProfileActivity;
 import com.example.beautyhub.ui.ProductViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -39,7 +38,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class CartActivity extends AppCompatActivity implements CartParentAdapter.ParentCartListener {
 
@@ -51,8 +49,8 @@ public class CartActivity extends AppCompatActivity implements CartParentAdapter
     private CheckBox checkboxSelectAll;
     private ProgressBar progressBar;
     private View bottomCheckoutBar;
-    private TextView btnEditCart; // ▼▼▼ Tambah rujukan untuk butang Edit ▼▼▼
-    private Button btnDeleteSelected; // ▼▼▼ Butang baru untuk mod suntingan ▼▼▼
+    private TextView btnEditCart;
+    private Button btnDeleteSelected;
 
     // Firebase & Data
     private CartParentAdapter parentAdapter;
@@ -65,8 +63,11 @@ public class CartActivity extends AppCompatActivity implements CartParentAdapter
     private ProductViewModel productViewModel;
     private Map<String, Product> productCache;
 
-    // ▼▼▼ Flag untuk mod suntingan ▼▼▼
+    // Flag untuk mod suntingan
     private boolean isInEditMode = false;
+
+    // ▼▼▼ Tambah static flag untuk tracking order completion ▼▼▼
+    private static boolean isOrderCompleted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +93,30 @@ public class CartActivity extends AppCompatActivity implements CartParentAdapter
         loadAllProductsFirst();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // ▼▼▼ Clear cart jika order telah selesai ▼▼▼
+        if (isOrderCompleted) {
+            clearCartAfterOrder();
+            isOrderCompleted = false;
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        // ▼▼▼ Handle intent dari CheckoutActivity ▼▼▼
+        if (intent != null && intent.hasExtra("ORDER_COMPLETED")) {
+            isOrderCompleted = intent.getBooleanExtra("ORDER_COMPLETED", false);
+            if (isOrderCompleted) {
+                clearCartAfterOrder();
+            }
+        }
+    }
+
     private void initViews() {
         rvCartParent = findViewById(R.id.rv_cart_parent);
         tvTotalPrice = findViewById(R.id.tv_total_price);
@@ -101,9 +126,7 @@ public class CartActivity extends AppCompatActivity implements CartParentAdapter
         checkboxSelectAll = findViewById(R.id.checkbox_select_all_items);
         progressBar = findViewById(R.id.progress_bar_cart);
         bottomCheckoutBar = findViewById(R.id.bottom_checkout_bar);
-        btnEditCart = findViewById(R.id.btn_edit_cart); // ▼▼▼ Inisialisasi butang Edit ▼▼▼
-
-        // ▼▼▼ Inisialisasi butang Delete (re-use butang Checkout) ▼▼▼
+        btnEditCart = findViewById(R.id.btn_edit_cart);
         btnDeleteSelected = findViewById(R.id.btn_checkout);
     }
 
@@ -116,7 +139,6 @@ public class CartActivity extends AppCompatActivity implements CartParentAdapter
         }
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        // ▼▼▼ Listener untuk butang Edit/Done ▼▼▼
         btnEditCart.setOnClickListener(v -> toggleEditMode());
     }
 
@@ -130,13 +152,10 @@ public class CartActivity extends AppCompatActivity implements CartParentAdapter
     }
 
     private void setupListeners() {
-        // Listener ini kini dikawal oleh mod suntingan
         btnCheckout.setOnClickListener(v -> {
             if (isInEditMode) {
-                // Dalam mod suntingan, butang ini berfungsi sebagai "Delete"
                 confirmDeleteSelectedItems();
             } else {
-                // Dalam mod biasa, butang ini berfungsi sebagai "Checkout"
                 proceedToCheckout();
             }
         });
@@ -148,11 +167,49 @@ public class CartActivity extends AppCompatActivity implements CartParentAdapter
         });
     }
 
-    // ▼▼▼ Kaedah untuk mengawal mod suntingan ▼▼▼
+    // ▼▼▼ Kaedah untuk clear cart selepas order ▼▼▼
+    private void clearCartAfterOrder() {
+        if (currentUser == null) return;
+
+        DatabaseReference userCartRef = database.getReference("Carts").child(currentUser.getUid());
+
+        // Hapus hanya item yang telah dipesan (yang checked)
+        ArrayList<CartItem> selectedItems = getSelectedItems();
+        if (!selectedItems.isEmpty()) {
+            Map<String, Object> updates = new HashMap<>();
+            for (CartItem item : selectedItems) {
+                updates.put("/" + item.getSellerId() + "/" + item.getCartItemId(), null);
+            }
+
+            userCartRef.updateChildren(updates)
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d("CartActivity", "Ordered items removed from cart");
+                        // Reset semua selection
+                        resetAllSelections();
+                        Toast.makeText(this, "Order placed successfully!", Toast.LENGTH_SHORT).show();
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("CartActivity", "Failed to remove ordered items", e);
+                    });
+        }
+    }
+
+    // ▼▼▼ Kaedah untuk reset semua selection ▼▼▼
+    private void resetAllSelections() {
+        for (CartSeller seller : sellerList) {
+            seller.setSelected(false);
+            for (CartItem item : seller.getCartItems()) {
+                item.setSelected(false);
+            }
+        }
+        checkboxSelectAll.setChecked(false);
+        parentAdapter.notifyDataSetChanged();
+        updateTotalPrice();
+    }
+
     private void toggleEditMode() {
         isInEditMode = !isInEditMode;
-        parentAdapter
-                .setEditMode(isInEditMode); // Beritahu adapter tentang perubahan mod
+        parentAdapter.setEditMode(isInEditMode);
 
         if (isInEditMode) {
             btnEditCart.setText("Done");
@@ -164,8 +221,9 @@ public class CartActivity extends AppCompatActivity implements CartParentAdapter
             btnEditCart.setText("Edit");
             tvTotalPrice.setVisibility(View.VISIBLE);
             tvTotalItemsCount.setVisibility(View.VISIBLE);
-            btnDeleteSelected.setBackgroundColor(getResources().getColor(R.color.md_theme_primary)); // Kembali ke warna asal
-            updateTotalPrice(); // Kemas kini UI untuk mod biasa
+            btnDeleteSelected.setText("Checkout");
+            btnDeleteSelected.setBackgroundColor(getResources().getColor(R.color.md_theme_primary));
+            updateTotalPrice();
         }
     }
 
@@ -182,13 +240,25 @@ public class CartActivity extends AppCompatActivity implements CartParentAdapter
             return;
         }
 
+        // ▼▼▼ Simpan state selection untuk digunakan semasa clear cart ▼▼▼
+        saveSelectedItemsForOrder(itemsForCheckout);
+
         Intent intent = new Intent(this, CheckoutActivity.class);
         intent.putExtra("SOURCE", "CART");
         intent.putParcelableArrayListExtra("CHECKOUT_ITEMS", itemsForCheckout);
+
+        // ▼▼▼ Set flag untuk clear cart selepas order ▼▼▼
+        intent.putExtra("CLEAR_CART_AFTER_ORDER", true);
+
         startActivity(intent);
     }
 
-    // ▼▼▼ Kaedah untuk mengesahkan dan memadam item terpilih ▼▼▼
+    // ▼▼▼ Simpan item yang dipilih untuk order ▼▼▼
+    private void saveSelectedItemsForOrder(ArrayList<CartItem> selectedItems) {
+        // Anda boleh simpan di SharedPreferences atau variable static jika perlu
+        // Untuk sekarang, kita akan guna static flag
+    }
+
     private void confirmDeleteSelectedItems() {
         ArrayList<CartItem> itemsToDelete = getSelectedItems();
         if (itemsToDelete.isEmpty()) {
@@ -207,14 +277,12 @@ public class CartActivity extends AppCompatActivity implements CartParentAdapter
     private void deleteSelectedItems(ArrayList<CartItem> itemsToDelete) {
         Map<String, Object> updates = new HashMap<>();
         for (CartItem item : itemsToDelete) {
-            // Laluan untuk memadam: /Carts/{userId}/{sellerId}/{cartItemId}
             updates.put("/" + item.getSellerId() + "/" + item.getCartItemId(), null);
         }
 
         cartRef.updateChildren(updates).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 Toast.makeText(this, "Selected items removed.", Toast.LENGTH_SHORT).show();
-                // Keluar dari mod suntingan secara automatik selepas memadam
                 if (isInEditMode) {
                     toggleEditMode();
                 }
@@ -237,7 +305,6 @@ public class CartActivity extends AppCompatActivity implements CartParentAdapter
             if (error != null && !error.isEmpty()) {
                 Log.e("CartActivity", "Failed to load products: " + error);
             }
-            // Teruskan muat troli walaupun data produk gagal dimuat
             if (productCache.isEmpty()) {
                 loadCartItems();
             }
@@ -262,30 +329,26 @@ public class CartActivity extends AppCompatActivity implements CartParentAdapter
 
                     List<CartItem> sellerItems = new ArrayList<>();
                     for (DataSnapshot itemSnapshot : sellerSnapshot.getChildren()) {
-                        // ▼▼▼ FIX: Add robust deserialization ▼▼▼
                         try {
-                            // Check if the snapshot contains a valid object (Map) before deserializing
                             if (itemSnapshot.getValue() instanceof Map) {
                                 CartItem cartItem = itemSnapshot.getValue(CartItem.class);
 
-                                // Ensure the deserialized object is valid and has a product ID
                                 if (cartItem != null && cartItem.getProductId() != null) {
                                     cartItem.setCartItemId(itemSnapshot.getKey());
                                     cartItem.setSellerId(sellerId);
+                                    // ▼▼▼ Pastikan selection tidak auto true ▼▼▼
+                                    cartItem.setSelected(false);
                                     enhanceCartItemWithProductInfo(cartItem);
                                     sellerItems.add(cartItem);
                                 } else {
                                     Log.w("CartActivity", "Skipping null or invalid cart item: " + itemSnapshot.getKey());
                                 }
                             } else {
-                                // Log unexpected data types (like Boolean) to help with debugging
-                                Log.w("CartActivity", "Skipping unexpected data type at: " + itemSnapshot.getKey() + " | Type: " + (itemSnapshot.getValue() != null ? itemSnapshot.getValue().getClass().getSimpleName() : "null"));
+                                Log.w("CartActivity", "Skipping unexpected data type at: " + itemSnapshot.getKey());
                             }
                         } catch (Exception e) {
-                            // Catch any other exceptions during parsing
                             Log.e("CartActivity", "Failed to parse cart item " + itemSnapshot.getKey(), e);
                         }
-                        // ▲▲▲ END FIX ▲▲▲
                     }
 
                     if (!sellerItems.isEmpty()) {
@@ -303,22 +366,16 @@ public class CartActivity extends AppCompatActivity implements CartParentAdapter
         });
     }
 
-
-
     private void groupItemsBySeller(Map<String, List<CartItem>> itemsBySeller) {
-        // Kosongkan senarai lama sebelum mengisi yang baru
         sellerList.clear();
 
         if (itemsBySeller.isEmpty()) {
-            // Jika tiada item, panggil completeCartLoading dengan senarai kosong
             completeCartLoading(new ArrayList<>());
             return;
         }
 
-        // Gunakan senarai baru untuk mengelakkan masalah serentak (concurrency issues)
         List<CartSeller> newSellerList = new ArrayList<>();
 
-        // Ulang melalui setiap entri (setiap penjual) dalam Map
         for (Map.Entry<String, List<CartItem>> entry : itemsBySeller.entrySet()) {
             String sellerId = entry.getKey();
             List<CartItem> items = entry.getValue();
@@ -326,24 +383,21 @@ public class CartActivity extends AppCompatActivity implements CartParentAdapter
             String sellerName = "Unknown Seller";
             String sellerProfileImageUrl = null;
 
-            // Pastikan senarai item untuk penjual ini tidak kosong
             if (!items.isEmpty()) {
-                // Ambil productId dari item pertama dalam senarai untuk mendapatkan maklumat penjual
                 CartItem firstItem = items.get(0);
                 Product productInfo = productCache.get(firstItem.getProductId());
 
                 if (productInfo != null) {
-                    // Jika maklumat produk ditemui dalam cache, ambil nama dan URL gambar profil penjual
                     sellerName = productInfo.getSellerName();
                     sellerProfileImageUrl = productInfo.getSellerProfileImageUrl();
                 }
             }
 
-            // Cipta objek CartSeller baru dengan maklumat yang betul dan tambahkannya ke senarai baru
-            newSellerList.add(new CartSeller(sellerId, sellerName, sellerProfileImageUrl, items, false));
+            // ▼▼▼ Pastikan seller selection tidak auto true ▼▼▼
+            CartSeller cartSeller = new CartSeller(sellerId, sellerName, sellerProfileImageUrl, items, false);
+            newSellerList.add(cartSeller);
         }
 
-        // Panggil kaedah untuk melengkapkan proses pemuatan
         completeCartLoading(newSellerList);
     }
 
@@ -353,7 +407,10 @@ public class CartActivity extends AppCompatActivity implements CartParentAdapter
         sellerList.addAll(newSellerList);
         parentAdapter.notifyDataSetChanged();
         updateUIForEmptyCart(sellerList.isEmpty());
-        updateTotalPrice();
+
+        // ▼▼▼ Reset total price dan update UI ▼▼▼
+        resetAllSelections();
+
         setLoading(false);
         showUnavailableProductsWarning();
     }
@@ -393,10 +450,13 @@ public class CartActivity extends AppCompatActivity implements CartParentAdapter
 
     private void toggleSelectAll(boolean isChecked) {
         for (CartSeller seller : sellerList) {
-            seller.setSelected(isChecked); // Pilih/nyahpilih penjual
+            seller.setSelected(isChecked);
             for (CartItem item : seller.getCartItems()) {
-                if (item.isAvailable() || isInEditMode) { // Benarkan pemilihan item tidak tersedia semasa mod suntingan
+                // ▼▼▼ Dalam mod biasa, hanya item tersedia boleh dipilih ▼▼▼
+                if (isInEditMode || item.isAvailable()) {
                     item.setSelected(isChecked);
+                } else {
+                    item.setSelected(false);
                 }
             }
         }
@@ -409,53 +469,64 @@ public class CartActivity extends AppCompatActivity implements CartParentAdapter
         int selectedCount = 0;
         boolean allAvailableItemsSelected = !sellerList.isEmpty();
         int availableItemCount = 0;
+        int totalSelectableItems = 0;
 
         for (CartSeller seller : sellerList) {
-            int selectedItemsInSeller = 0;
-            for (CartItem item : seller.getCartItems()) {
-                if (item.isAvailable()) {
-                    availableItemCount++;
-                    if (item.isSelected()) {
-                        total += item.getPrice() * item.getQuantity();
-                        selectedCount++;
-                        selectedItemsInSeller++;
+            boolean allSellerItemsSelected = !seller.getCartItems().isEmpty();
+
+            for(CartItem item : seller.getCartItems()) {
+                if(isInEditMode || item.isAvailable()) {
+                    totalSelectableItems++;
+
+                    if(isInEditMode) {
+                        // Dalam mod edit, semua item boleh dipilih
+                        if(item.isSelected()) {
+                            total += item.getPrice() * item.getQuantity();
+                            selectedCount++;
+                        } else {
+                            allSellerItemsSelected = false;
+                        }
                     } else {
-                        allAvailableItemsSelected = false;
+                        // Dalam mod biasa, hanya item tersedia diambil kira
+                        if(item.isAvailable()) {
+                            availableItemCount++;
+                            if(item.isSelected()) {
+                                total += item.getPrice() * item.getQuantity();
+                                selectedCount++;
+                            } else {
+                                allSellerItemsSelected = false;
+                                allAvailableItemsSelected = false;
+                            }
+                        }
                     }
                 } else {
-                    // Dalam mod biasa, pastikan item tidak tersedia tidak dipilih
-                    if (!isInEditMode) {
-                        item.setSelected(false);
-                    }
-                }
-            }
-            // Tentukan sama ada header penjual patut dipilih
-            boolean allSellerItemsSelected = !seller.getCartItems().isEmpty();
-            for(CartItem item : seller.getCartItems()) {
-                if(isInEditMode) { // Dalam mod edit, semua item boleh dipilih
-                    if(!item.isSelected()) allSellerItemsSelected = false;
-                } else { // Dalam mod biasa, hanya item yang tersedia diambil kira
-                    if(item.isAvailable() && !item.isSelected()) allSellerItemsSelected = false;
+                    // Item tidak tersedia sentiasa tidak dipilih dalam mod biasa
+                    item.setSelected(false);
+                    allSellerItemsSelected = false;
                 }
             }
             seller.setSelected(allSellerItemsSelected);
         }
-        if (availableItemCount == 0 && !isInEditMode) allAvailableItemsSelected = false;
+
+        if (availableItemCount == 0 && !isInEditMode) {
+            allAvailableItemsSelected = false;
+        }
 
         tvTotalPrice.setText(String.format(Locale.US, "RM%.2f", total));
         tvTotalItemsCount.setText(String.format("Total (%d)", selectedCount));
 
         if (isInEditMode) {
             btnDeleteSelected.setEnabled(selectedCount > 0);
-            btnDeleteSelected.setText(String.format("Delete (%d)", selectedCount));
+            btnDeleteSelected.setText(selectedCount > 0 ?
+                    String.format("Delete (%d)", selectedCount) : "Delete");
         } else {
             btnCheckout.setEnabled(selectedCount > 0);
-            btnCheckout.setText(String.format("Checkout (%d)", selectedCount));
+            btnCheckout.setText(selectedCount > 0 ?
+                    String.format("Checkout (%d)", selectedCount) : "Checkout");
         }
 
-        // Kemas kini checkbox "Select All" tanpa mencetuskan listenernya
         checkboxSelectAll.setOnCheckedChangeListener(null);
-        checkboxSelectAll.setChecked(allAvailableItemsSelected);
+        checkboxSelectAll.setChecked(allAvailableItemsSelected && totalSelectableItems > 0);
         checkboxSelectAll.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (buttonView.isPressed()) toggleSelectAll(isChecked);
         });
@@ -496,8 +567,7 @@ public class CartActivity extends AppCompatActivity implements CartParentAdapter
             }
         }
         if (unavailableCount > 0) {
-            // Anda boleh memaparkan Toast atau Snackbar di sini jika perlu
-            // Contoh: Toast.makeText(this, unavailableCount + " product(s) are unavailable.", Toast.LENGTH_SHORT).show();
+            // Anda boleh tampilkan warning jika perlu
         }
     }
 
@@ -513,30 +583,25 @@ public class CartActivity extends AppCompatActivity implements CartParentAdapter
     @Override
     public void onQuantityChanged(String sellerId, String cartItemId, int newQuantity) {
         if (newQuantity <= 0) {
-            // Jika kuantiti 0 atau kurang, padam item tersebut
             CartItem itemToDelete = findCartItem(sellerId, cartItemId);
             if (itemToDelete != null) {
                 ArrayList<CartItem> items = new ArrayList<>();
                 items.add(itemToDelete);
-                // Tunjuk dialog pengesahan sebelum memadam
                 new AlertDialog.Builder(this)
                         .setTitle("Remove Item")
                         .setMessage("Do you want to remove '" + itemToDelete.getName() + "' from your cart?")
                         .setPositiveButton("Remove", (dialog, which) -> deleteSelectedItems(items))
                         .setNegativeButton("Cancel", (dialog, which) -> {
-                            // Jika batal, set semula kuantiti kepada 1 dalam UI
                             parentAdapter.notifyDataSetChanged();
                         })
                         .show();
             }
         } else {
-            // Kemas kini kuantiti dalam Firebase
             cartRef.child(sellerId).child(cartItemId).child("quantity").setValue(newQuantity)
                     .addOnFailureListener(e -> Toast.makeText(CartActivity.this, "Failed to update quantity.", Toast.LENGTH_SHORT).show());
         }
     }
 
-    // Kaedah bantuan untuk mencari item dalam senarai
     private CartItem findCartItem(String sellerId, String cartItemId) {
         for (CartSeller seller : sellerList) {
             if (seller.getSellerId().equals(sellerId)) {
@@ -550,11 +615,8 @@ public class CartActivity extends AppCompatActivity implements CartParentAdapter
         return null;
     }
 
-
     @Override
     public void onItemDeleted(String sellerId, String cartItemId) {
-        // Kaedah ini mungkin tidak lagi digunakan jika anda membuang butang delete individu,
-        // tetapi adalah baik untuk menyimpannya jika diperlukan pada masa hadapan.
         cartRef.child(sellerId).child(cartItemId).removeValue()
                 .addOnSuccessListener(aVoid -> Toast.makeText(CartActivity.this, "Item removed", Toast.LENGTH_SHORT).show())
                 .addOnFailureListener(e -> Toast.makeText(CartActivity.this, "Failed to remove item", Toast.LENGTH_SHORT).show());

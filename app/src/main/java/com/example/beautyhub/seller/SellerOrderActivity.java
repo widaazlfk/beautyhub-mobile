@@ -9,8 +9,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -29,7 +27,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -40,10 +40,10 @@ public class SellerOrderActivity extends AppCompatActivity {
     private SellerOrderAdapter adapter;
     private List<Order> orderList;
     private ProgressBar progressBar;
-    private TextView tvNoOrders;
+    private TextView tvNoOrders, tvFilterInfo; // Tambah tvFilterInfo
     private DatabaseReference ordersRef;
     private FirebaseUser currentUser;
-    private Query sellerQuery; // Gunakan Query untuk filter
+    private Query sellerQuery;
     private ValueEventListener ordersListener;
     private TextView tvTotalAmount;
 
@@ -92,6 +92,17 @@ public class SellerOrderActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progress_bar_seller_orders);
         tvNoOrders = findViewById(R.id.tv_no_orders);
         tvTotalAmount = findViewById(R.id.tv_detail_total_amount);
+        tvFilterInfo = findViewById(R.id.tv_filter_info); // Inisialisasi TextView Info
+
+        com.google.android.material.chip.ChipGroup chipGroup = findViewById(R.id.chip_group_seller_status);
+        if (chipGroup != null) {
+            chipGroup.setOnCheckedChangeListener((group, checkedId) -> {
+                // Apabila chip ditekan, kita buang filter bulan dari intent supaya data tidak clash
+                getIntent().removeExtra("filter_month");
+                getIntent().removeExtra("filter_status");
+                fetchOrders();
+            });
+        }
 
         Button btnGoToDashboard = findViewById(R.id.btn_go_to_dashboard);
         if (btnGoToDashboard != null) {
@@ -114,8 +125,24 @@ public class SellerOrderActivity extends AppCompatActivity {
         showLoadingState(true);
         ordersRef = FirebaseDatabase.getInstance().getReference("Orders");
 
-        // --- PEMBETULAN DI SINI ---
-        // Kita cari semua order yang field 'sellerId' nya sama dengan UID seller sekarang
+        // 1. Ambil data filter daripada Intent (jika diklik dari Graf)
+        String filterMonth = getIntent().getStringExtra("filter_month");
+        String filterStatus = getIntent().getStringExtra("filter_status");
+
+        // 2. Kemaskini teks info filter
+        if (tvFilterInfo != null) {
+            if (filterMonth != null) {
+                tvFilterInfo.setText("Showing Completed orders for " + filterMonth);
+                tvFilterInfo.setVisibility(View.VISIBLE);
+            } else {
+                tvFilterInfo.setVisibility(View.GONE);
+            }
+        }
+
+        // 3. Dapatkan status penapis daripada ChipGroup
+        com.google.android.material.chip.ChipGroup chipGroup = findViewById(R.id.chip_group_seller_status);
+        int checkedId = (chipGroup != null) ? chipGroup.getCheckedChipId() : R.id.chip_seller_all;
+
         sellerQuery = ordersRef.orderByChild("sellerId").equalTo(currentUser.getUid());
 
         ordersListener = new ValueEventListener() {
@@ -128,14 +155,46 @@ public class SellerOrderActivity extends AppCompatActivity {
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         Order order = snapshot.getValue(Order.class);
                         if (order != null) {
-                            // Masukkan ID dari key Firebase jika field orderId kosong
                             if (order.getOrderId() == null) order.setOrderId(snapshot.getKey());
 
-                            orderList.add(order);
-                            grandTotal += order.getTotalAmount();
+                            String status = order.getStatus();
+                            long timestamp = order.getOrderDate();
+
+                            Calendar cal = Calendar.getInstance();
+                            cal.setTimeInMillis(timestamp);
+                            String orderMonth = new SimpleDateFormat("MMM", Locale.US).format(cal.getTime());
+
+                            boolean matchesFilter = false;
+
+                            // LOGIK DRILL-DOWN DARI GRAF (Prioriti Utama)
+                            if (filterMonth != null && filterStatus != null) {
+                                if (filterMonth.equalsIgnoreCase(orderMonth) && filterStatus.equalsIgnoreCase(status)) {
+                                    matchesFilter = true;
+                                }
+                            }
+                            // LOGIK PENAPIS BIASA (CHIP GROUP)
+                            else {
+                                if (checkedId == R.id.chip_seller_all || checkedId == View.NO_ID) {
+                                    matchesFilter = true;
+                                } else if (checkedId == R.id.chip_seller_pending && "Pending".equalsIgnoreCase(status)) {
+                                    matchesFilter = true;
+                                } else if (checkedId == R.id.chip_seller_processing && "Processing".equalsIgnoreCase(status)) {
+                                    matchesFilter = true;
+                                } else if (checkedId == R.id.chip_seller_shipped && "Shipped".equalsIgnoreCase(status)) {
+                                    matchesFilter = true;
+                                } else if (checkedId == R.id.chip_seller_completed && "Completed".equalsIgnoreCase(status)) {
+                                    matchesFilter = true;
+                                } else if (checkedId == R.id.chip_seller_cancelled && "Cancelled".equalsIgnoreCase(status)) {
+                                    matchesFilter = true;
+                                }
+                            }
+
+                            if (matchesFilter) {
+                                orderList.add(order);
+                                grandTotal += order.getTotalAmount();
+                            }
                         }
                     }
-                    // Susun ikut tarikh terbaru
                     Collections.sort(orderList, (o1, o2) -> Long.compare(o2.getOrderDate(), o1.getOrderDate()));
                 }
 
@@ -150,7 +209,6 @@ public class SellerOrderActivity extends AppCompatActivity {
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 showLoadingState(false);
-                Log.e("DATABASE_ERROR", databaseError.getMessage());
             }
         };
         sellerQuery.addValueEventListener(ordersListener);

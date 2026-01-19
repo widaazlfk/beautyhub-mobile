@@ -32,7 +32,7 @@ public class OrderSuccessActivity extends AppCompatActivity {
 
         // 3. Logik Status Bayaran
         if ("Online Banking".equalsIgnoreCase(paymentMethod)) {
-            tvPaymentStatus.setText("Paid & Processing");
+            tvPaymentStatus.setText("Paid");
             tvPaymentStatus.setTextColor(ContextCompat.getColor(this, R.color.green_success));
         } else if ("Cash on Delivery".equalsIgnoreCase(paymentMethod)) {
             tvPaymentStatus.setText("Pending (Cash on Delivery)");
@@ -41,21 +41,28 @@ public class OrderSuccessActivity extends AppCompatActivity {
             tvPaymentStatus.setText("Processing");
         }
 
-        // 4. Logik Paparan Order ID (Single vs Multiple Sellers)
+        // 4. Logik Paparan Order ID (Single vs Multiple Sellers) - DIKEMASKINI KE 8 HURUF TERAWAL
         if (orderIds != null && !orderIds.isEmpty()) {
             if (orderIds.size() > 1) {
                 // Kes Multiple Sellers: Tunjuk jumlah order
                 tvOrderId.setText(orderIds.size() + " Orders (Multi-Seller)");
             } else {
-                // Kes Single Seller: Tunjuk ID penuh (Contoh: -OJz123...)
-                // Kita ambil ID pertama dari senarai
-                String singleId = orderIds.get(0);
-                tvOrderId.setText(singleId);
+                // Kes Single Seller: Ambil ID pertama, buang '-' dan ambil 8 huruf terawal
+                String fullId = orderIds.get(0);
+                String cleanId = fullId.replace("-", "");
+                String shortId = cleanId.substring(0, Math.min(cleanId.length(), 8)).toUpperCase();
+                tvOrderId.setText("Order #" + shortId);
             }
         } else {
-            // Fallback jika ArrayList kosong, cuba ambil rujukan string biasa
+            // Fallback jika ArrayList kosong
             String backupId = getIntent().getStringExtra("ORDER_ID");
-            tvOrderId.setText(backupId != null ? backupId : "N/A");
+            if (backupId != null) {
+                String cleanId = backupId.replace("-", "");
+                String shortId = cleanId.substring(0, Math.min(cleanId.length(), 8)).toUpperCase();
+                tvOrderId.setText("Order #" + shortId);
+            } else {
+                tvOrderId.setText("Order #N/A");
+            }
         }
 
         // 5. Listener Track Order

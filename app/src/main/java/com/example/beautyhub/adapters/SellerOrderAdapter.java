@@ -71,8 +71,16 @@ public class SellerOrderAdapter extends RecyclerView.Adapter<SellerOrderAdapter.
         }
 
         void bind(final Order order, final OnOrderItemClickListener listener) {
-            // 1. Set Order ID
-            tvOrderId.setText(String.format("Order #%s", order.getOrderId() != null ? order.getOrderId() : "N/A"));
+            // 1. Set Order ID (Shortened)
+            String fullOrderId = order.getOrderId();
+            String displayOrderId = "N/A";
+
+            if (fullOrderId != null && !fullOrderId.isEmpty()) {
+                // Logik memendekkan ID: Ambil 8 aksara pertama dan buang simbol '-'
+                String cleanId = fullOrderId.replace("-", "");
+                displayOrderId = cleanId.substring(0, Math.min(cleanId.length(), 8)).toUpperCase();
+            }
+            tvOrderId.setText(String.format("Order #%s", displayOrderId));
 
             // 2. Set Date
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault());
@@ -84,9 +92,9 @@ public class SellerOrderAdapter extends RecyclerView.Adapter<SellerOrderAdapter.
             // 4. Set Items Preview Text
             tvOrderItemsPreview.setText(generateItemsPreview(order.getOrderItems()));
 
-            // 5. Load Image (DIBAIKI: Isytihar firstItem terlebih dahulu)
+            // 5. Load Image
             if (order.getOrderItems() != null && !order.getOrderItems().isEmpty()) {
-                OrderItem firstItem = order.getOrderItems().get(0); // Isytihar di sini
+                OrderItem firstItem = order.getOrderItems().get(0);
                 String imageUrl = firstItem.getImageUrls();
 
                 Glide.with(context)
@@ -107,7 +115,7 @@ public class SellerOrderAdapter extends RecyclerView.Adapter<SellerOrderAdapter.
             // 7. Click Listener
             itemView.setOnClickListener(v -> {
                 if (listener != null) {
-                    listener.onOrderItemClick(order);
+                    listener.onOrderItemClick(order); // Tetap hantar object 'order' dengan ID penuh
                 }
             });
         }

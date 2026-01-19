@@ -187,7 +187,7 @@ public class ManageProductsActivity extends AppCompatActivity implements SellerP
     @Override
     public void onProductClick(Product product) {
         // Navigate to product details
-        Intent intent = new Intent(this, ProductDetailActivity.class);
+        Intent intent = new Intent(this, SellerProductDetailActivity.class);
         intent.putExtra("PRODUCT_ID", product.getProductId());
         startActivity(intent);
     }

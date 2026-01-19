@@ -9,10 +9,10 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -21,6 +21,7 @@ import com.example.beautyhub.buyer.NotificationActivity;
 import com.example.beautyhub.buyer.ReportProblemActivity;
 import com.example.beautyhub.info.AboutUsActivity;
 import com.example.beautyhub.info.ContactUsActivity;
+import com.example.beautyhub.auth.LoginActivity;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
@@ -35,7 +36,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -49,18 +49,15 @@ public class SellerActivity extends AppCompatActivity {
     private NavigationView navigationView;
     private BottomNavigationView bottomNavigationView;
 
-    // Notification Elements
     private FrameLayout btnNotifications;
     private TextView tvNotificationBadge;
 
-    // Dashboard Stats (Business Insight)
-    private TextView tvTotalSales, tvTotalOrders, tvMiniLowStock, tvTodayVisitors;
+    // tvTodayVisitors telah dibuang
+    private TextView tvTotalSales, tvTotalOrders, tvMiniLowStock,  tvNewOrdersCount;
     private BarChart barChartStatistics;
 
-    // Quick Action Containers
-    private LinearLayout cardAddProduct, cardManageProducts, cardViewOrders;
+    private LinearLayout cardAddProduct, cardManageProducts, cardViewOrders, cardFinance;
 
-    // To-Do List Cards & Badges
     private MaterialCardView cardToShip, cardLowStockMini;
     private TextView tvToShipCount, tvLowStockBadge;
 
@@ -76,6 +73,7 @@ public class SellerActivity extends AppCompatActivity {
         currentSellerId = mAuth.getUid();
 
         if (currentSellerId == null) {
+            startActivity(new Intent(this, LoginActivity.class));
             finish();
             return;
         }
@@ -91,7 +89,6 @@ public class SellerActivity extends AppCompatActivity {
         iconMenu = findViewById(R.id.icon_menu_seller);
         navigationView = findViewById(R.id.nav_view_seller);
 
-        // Notifications
         btnNotifications = findViewById(R.id.btn_notifications_seller);
         ImageView ivNotificationIcon = findViewById(R.id.iv_notification_icon);
         if (ivNotificationIcon != null) {
@@ -99,27 +96,23 @@ public class SellerActivity extends AppCompatActivity {
         }
         tvNotificationBadge = findViewById(R.id.tv_notification_badge);
 
-        // Stats (Business Insight)
         tvTotalSales = findViewById(R.id.tv_total_sales);
         tvTotalOrders = findViewById(R.id.tv_total_orders);
         tvMiniLowStock = findViewById(R.id.tv_mini_low_stock);
-        tvTodayVisitors = findViewById(R.id.tv_today_visitors); // Ensure this ID exists in XML
+        // tvTodayVisitors initialization dibuang
 
-        // To-Do List Badges (Update these IDs based on your XML)
         tvToShipCount = findViewById(R.id.tv_to_ship_count);
         tvLowStockBadge = findViewById(R.id.tv_mini_low_stock);
 
-        // To-Do List Cards
         cardToShip = findViewById(R.id.card_to_ship);
         cardLowStockMini = findViewById(R.id.low_stock_card_mini);
 
-        // Chart
         barChartStatistics = findViewById(R.id.bar_chart_statistics);
 
-        // Quick Actions
         cardAddProduct = findViewById(R.id.card_add_product);
         cardManageProducts = findViewById(R.id.card_manage_products);
         cardViewOrders = findViewById(R.id.card_view_orders);
+        cardFinance = findViewById(R.id.card_finance);
 
         bottomNavigationView = findViewById(R.id.bottom_navigation_bar);
     }
@@ -131,33 +124,31 @@ public class SellerActivity extends AppCompatActivity {
 
         navigationView.setNavigationItemSelectedListener(menuItem -> {
             int itemId = menuItem.getItemId();
-
             if (itemId == R.id.nav_seller_home) {
-                // Berada di Dashboard, cuma tutup drawer
                 drawerLayout.closeDrawers();
             } else if (itemId == R.id.nav_about_us) {
-                // Pergi ke halaman Manage Products
                 startActivity(new Intent(this, AboutUsActivity.class));
             } else if (itemId == R.id.nav_contact_us) {
-                // Pergi ke halaman Seller Orders
                 startActivity(new Intent(this, ContactUsActivity.class));
             } else if (itemId == R.id.nav_report) {
-                // Pergi ke Report Problem
                 Intent intent = new Intent(this, ReportProblemActivity.class);
                 intent.putExtra("userRole", "Seller");
                 startActivity(intent);
             } else if (itemId == R.id.nav_logout) {
-                // Panggil fungsi logout
                 logoutUser();
             }
-
-            // Mesti tutup drawer selepas klik mana-mana item
             drawerLayout.closeDrawers();
             return true;
         });
+
         cardAddProduct.setOnClickListener(v -> startActivity(new Intent(this, AddProductActivity.class)));
         cardManageProducts.setOnClickListener(v -> startActivity(new Intent(this, ManageProductsActivity.class)));
         cardViewOrders.setOnClickListener(v -> startActivity(new Intent(this, SellerOrderActivity.class)));
+        cardFinance.setOnClickListener(v -> {
+            // Ganti FinanceActivity.class dengan nama activity kewangan anda
+            Intent intent = new Intent(SellerActivity.this, SellerFinanceActivity.class);
+            startActivity(intent);
+        });
 
         cardToShip.setOnClickListener(v -> {
             Intent intent = new Intent(this, SellerOrderActivity.class);
@@ -186,81 +177,76 @@ public class SellerActivity extends AppCompatActivity {
         });
     }
 
-    private void loadDashboardData() {
+        private void loadDashboardData() {
         DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
 
-        // 1. Fetch Orders (Sales & To-Ship Count)
+        // Dapatkan bulan semasa untuk filter Sales Month
+        Calendar calNow = Calendar.getInstance();
+        int currentMonth = calNow.get(Calendar.MONTH);
+        int currentYear = calNow.get(Calendar.YEAR);
+
         rootRef.child("Orders").orderByChild("sellerId").equalTo(currentSellerId)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        double totalSales = 0;
-                        int totalOrders = 0;
-                        int toShipCount = 0;
+                        double monthlyNetSales = 0;
+                        int totalOrdersCount = 0;
+                        int newOrdersCount = 0;
+                        int toShipBadgeCount = 0;
+
+                        Calendar orderCal = Calendar.getInstance();
 
                         for (DataSnapshot ds : snapshot.getChildren()) {
                             String status = ds.child("status").getValue(String.class);
                             Double amount = ds.child("totalAmount").getValue(Double.class);
+                            Long timestamp = ds.child("orderDate").getValue(Long.class);
 
-                            if (amount != null && !"Cancelled".equalsIgnoreCase(status)) {
-                                totalSales += amount;
+                            // 1. Kira JUALAN BULAN SEMASA (Status Completed & 10% Fee)
+                            if (amount != null && timestamp != null && "Completed".equalsIgnoreCase(status)) {
+                                orderCal.setTimeInMillis(timestamp);
+                                if (orderCal.get(Calendar.MONTH) == currentMonth &&
+                                        orderCal.get(Calendar.YEAR) == currentYear) {
+
+                                    double netAmount = amount * 0.90; // Tolak 10%
+                                    monthlyNetSales += netAmount;
+                                }
                             }
 
-                            totalOrders++;
+                            // 2. Kira TOTAL ORDERS (Semua order milik seller)
+                            totalOrdersCount++;
 
-                            // To-Do List logic: Parallel with "Pending" or "Processing" status
+                            // 3. Kira NEW ORDERS (Pending atau Processing)
                             if ("Pending".equalsIgnoreCase(status) || "Processing".equalsIgnoreCase(status)) {
-                                toShipCount++;
+                                newOrdersCount++;
+                                toShipBadgeCount++;
                             }
                         }
 
-                        tvTotalSales.setText(String.format(Locale.US, "RM %.2f", totalSales));
-                        tvTotalOrders.setText(String.valueOf(totalOrders));
-                        if (tvToShipCount != null) tvToShipCount.setText(String.valueOf(toShipCount));
+                        // Kemaskini UI
+                        tvTotalSales.setText(String.format(Locale.US, "RM %.2f", monthlyNetSales));
+                        tvTotalOrders.setText(String.valueOf(totalOrdersCount));
 
-                        // Update the chart whenever order data changes
+                        // tv_new_orders_count adalah ID di dalam Business Insights
+                        if (findViewById(R.id.tv_new_orders_count) != null) {
+                            ((TextView)findViewById(R.id.tv_new_orders_count)).setText(String.valueOf(newOrdersCount));
+                        }
+
+                        // tv_to_ship_count adalah ID di dalam To-Do List (biasanya sama dengan New Orders)
+                        if (tvToShipCount != null) {
+                            tvToShipCount.setText(String.valueOf(toShipBadgeCount));
+                        }
+
+                        // Kemaskini Carta
                         setupStatisticsChart(snapshot);
                     }
 
-                    @Override public void onCancelled(@NonNull DatabaseError error) {}
-                });
-
-        // 2. Fetch Low Stock Products
-        rootRef.child("Products").orderByChild("sellerId").equalTo(currentSellerId)
-                .addValueEventListener(new ValueEventListener() {
                     @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        int lowStockCount = 0;
-                        for (DataSnapshot ds : snapshot.getChildren()) {
-                            Integer stock = ds.child("stock").getValue(Integer.class);
-                            if (stock != null && stock <= 5) { // Threshold for low stock
-                                lowStockCount++;
-                            }
-                        }
-                        tvMiniLowStock.setText(String.valueOf(lowStockCount));
-                        if (tvLowStockBadge != null) tvLowStockBadge.setText(String.valueOf(lowStockCount));
-                    }
-
-                    @Override public void onCancelled(@NonNull DatabaseError error) {}
-                });
-
-        // 3. Fetch Visitors (Total views from Seller Profile)
-        rootRef.child("SellerProfiles").child(currentSellerId).child("views")
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        Long views = snapshot.getValue(Long.class);
-                        if (tvTodayVisitors != null) {
-                            tvTodayVisitors.setText(views != null ? String.valueOf(views) : "0");
-                        }
-                    }
-
-                    @Override public void onCancelled(@NonNull DatabaseError error) {}
+                    public void onCancelled(@NonNull DatabaseError error) {}
                 });
     }
-
     private void setupStatisticsChart(DataSnapshot ordersSnapshot) {
-        float[] monthlySales = new float[4]; // Oct, Nov, Dec, Jan
+        float[] monthlyNetSales = new float[4];
+        String[] labels = {"Oct", "Nov", "Dec", "Jan"};
         Calendar cal = Calendar.getInstance();
 
         for (DataSnapshot ds : ordersSnapshot.getChildren()) {
@@ -268,77 +254,88 @@ public class SellerActivity extends AppCompatActivity {
             Long timestamp = ds.child("orderDate").getValue(Long.class);
             String status = ds.child("status").getValue(String.class);
 
-            if (amount != null && timestamp != null && !"Cancelled".equalsIgnoreCase(status)) {
+            if (amount != null && timestamp != null && "Completed".equalsIgnoreCase(status)) {
                 cal.setTimeInMillis(timestamp);
-                int month = cal.get(Calendar.MONTH); // 0=Jan, 9=Oct, 10=Nov, 11=Dec
+                int month = cal.get(Calendar.MONTH);
+                double netAmount = amount * 0.90;
 
-                if (month == Calendar.OCTOBER) monthlySales[0] += amount;
-                else if (month == Calendar.NOVEMBER) monthlySales[1] += amount;
-                else if (month == Calendar.DECEMBER) monthlySales[2] += amount;
-                else if (month == Calendar.JANUARY) monthlySales[3] += amount;
+                if (month == Calendar.OCTOBER) monthlyNetSales[0] += (float) netAmount;
+                else if (month == Calendar.NOVEMBER) monthlyNetSales[1] += (float) netAmount;
+                else if (month == Calendar.DECEMBER) monthlyNetSales[2] += (float) netAmount;
+                else if (month == Calendar.JANUARY) monthlyNetSales[3] += (float) netAmount;
             }
         }
 
         ArrayList<BarEntry> entries = new ArrayList<>();
-        for (int i = 0; i < monthlySales.length; i++) {
-            entries.add(new BarEntry(i, monthlySales[i]));
+        for (int i = 0; i < monthlyNetSales.length; i++) {
+            entries.add(new BarEntry(i, monthlyNetSales[i]));
         }
 
-        BarDataSet dataSet = new BarDataSet(entries, "Monthly Sales");
-        dataSet.setColor(ContextCompat.getColor(this, R.color.seed));
+        BarDataSet dataSet = new BarDataSet(entries, "Net Sales (After 10% Fee)");
+        dataSet.setColor(Color.parseColor("#FF69B4"));
         dataSet.setValueTextColor(Color.BLACK);
         dataSet.setValueTextSize(10f);
 
-        BarData barData = new BarData(dataSet);
-        barData.setBarWidth(0.5f);
+        BarData data = new BarData(dataSet);
+        barChartStatistics.setData(data);
 
         XAxis xAxis = barChartStatistics.getXAxis();
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setDrawGridLines(false);
         xAxis.setGranularity(1f);
-        final String[] months = {"Oct", "Nov", "Dec", "Jan"};
-        xAxis.setValueFormatter(new IndexAxisValueFormatter(months));
+        xAxis.setDrawGridLines(false);
+
+        // --- TAMBAH LOGIK CLICK DI SINI ---
+        barChartStatistics.setOnChartValueSelectedListener(new com.github.mikephil.charting.listener.OnChartValueSelectedListener() {
+            @Override
+            public void onValueSelected(com.github.mikephil.charting.data.Entry e, com.github.mikephil.charting.highlight.Highlight h) {
+                int index = (int) e.getX();
+                if (index >= 0 && index < labels.length) {
+                    String selectedMonth = labels[index];
+
+                    // Buka SellerOrderActivity dan hantar filter bulan & status Completed
+                    Intent intent = new Intent(SellerActivity.this, SellerOrderActivity.class);
+                    intent.putExtra("filter_status", "Completed");
+                    intent.putExtra("filter_month", selectedMonth);
+                    startActivity(intent);
+                }
+            }
+
+            @Override
+            public void onNothingSelected() {}
+        });
 
         barChartStatistics.getDescription().setEnabled(false);
-        barChartStatistics.getLegend().setEnabled(false);
-        barChartStatistics.getAxisRight().setEnabled(false);
-        barChartStatistics.getAxisLeft().setAxisMinimum(0f);
-        barChartStatistics.setData(barData);
-        barChartStatistics.invalidate();
         barChartStatistics.animateY(1000);
+        barChartStatistics.invalidate();
     }
-
     private void updateNotificationBadge() {
         DatabaseReference notifRef = FirebaseDatabase.getInstance().getReference("Notifications").child(currentSellerId);
-        Query unreadQuery = notifRef.orderByChild("unread").equalTo(true);
-
-        unreadQuery.addValueEventListener(new ValueEventListener() {
+        notifRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                long count = snapshot.getChildrenCount();
-                if (count > 0) {
-                    tvNotificationBadge.setText(String.valueOf(count));
+                long unreadCount = 0;
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    Boolean read = ds.child("read").getValue(Boolean.class);
+                    if (read != null && !read) unreadCount++;
+                }
+
+                if (unreadCount > 0) {
                     tvNotificationBadge.setVisibility(View.VISIBLE);
+                    tvNotificationBadge.setText(unreadCount > 9 ? "9+" : String.valueOf(unreadCount));
                 } else {
                     tvNotificationBadge.setVisibility(View.GONE);
                 }
             }
-
             @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
 
     private void logoutUser() {
-        FirebaseAuth.getInstance().signOut();
+        mAuth.signOut();
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
         finish();
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
     }
 }

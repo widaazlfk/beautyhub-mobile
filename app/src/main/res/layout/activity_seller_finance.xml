@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F8F9FA">
+
+    <!-- Header Toolbar -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar_finance"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@android:color/white"
+        app:title="My Finance"
+        app:titleTextColor="@color/black"
+        app:navigationIcon="@drawable/ic_arrow_back"
+        app:navigationIconTint="@color/black" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Kad Utama: Wallet Balance (Duit yang dah boleh withdraw) -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#8a2128">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Available Balance (After 10% Fee)"
+                        android:textColor="#E0E0E0"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/tv_wallet_balance"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="RM 0.00"
+                        android:textColor="@android:color/white"
+                        android:textSize="32sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="4dp" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Kad Info Tambahan: Pending Revenue -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:weightSum="2">
+
+                    <!-- Pending Section -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Pending Release"
+                            android:textSize="11sp" />
+                        <TextView
+                            android:id="@+id/tv_pending_balance"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="RM 0.00"
+                            android:textColor="#FF9800"
+                            android:textStyle="bold"
+                            android:textSize="16sp" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="match_parent"
+                        android:background="#EEEEEE"
+                        android:layout_marginHorizontal="8dp"/>
+
+                    <!-- Admin Fee Info -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Platform Fee"
+                            android:textSize="11sp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="10% Fixed"
+                            android:textColor="#757575"
+                            android:textStyle="bold"
+                            android:textSize="16sp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Section: Sejarah Transaksi -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Order Revenue History"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="12dp"
+                android:textColor="@color/black" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_transactions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false" />
+
+            <!-- Paparan jika tiada rekod -->
+            <LinearLayout
+                android:id="@+id/layout_no_transactions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_marginTop="40dp"
+                android:visibility="gone">
+                <ImageView
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@drawable/ic_wallet"
+                    app:tint="#BDBDBD" />
+                <TextView
+                    android:id="@+id/tv_no_transactions"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="No completed orders found."
+                    android:textColor="#9E9E9E"
+                    android:layout_marginTop="8dp"/>
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

@@ -45,6 +45,15 @@
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@color/primary_color" />
+        <TextView
+            android:id="@+id/tv_product_discount_price"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:visibility="gone" />
 
         <!-- Stock Status -->
         <TextView

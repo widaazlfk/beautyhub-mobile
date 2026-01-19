@@ -90,8 +90,14 @@ public class OrderDetailsActivity extends AppCompatActivity {
     }
 
     private void displayOrderData(Order order) {
-        // 1. Info Pesanan & Tarikh
-        binding.tvDetailOrderId.setText("Order #" + order.getOrderId().substring(Math.max(0, order.getOrderId().length() - 7)).toUpperCase());
+        String fullId = order.getOrderId();
+        String displayId = "N/A";
+        if (fullId != null && !fullId.isEmpty()) {
+            // Buang tanda '-' dan ambil 8 aksara terawal
+            String cleanId = fullId.replace("-", "");
+            displayId = cleanId.substring(0, Math.min(cleanId.length(), 8)).toUpperCase();
+        }
+        binding.tvDetailOrderId.setText("Order #" + displayId);
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault());
         binding.tvDetailOrderDate.setText("Placed on: " + sdf.format(new Date(order.getOrderDate())));
 

@@ -240,6 +240,16 @@
             android:exported="false"
             android:label="My Profile"
             android:parentActivityName=".seller.SellerActivity" />
+        <activity
+            android:name=".seller.SellerFinanceActivity"
+            android:exported="false"
+            android:label="Finance"
+            android:parentActivityName=".seller.SellerActivity" />
+        <activity
+            android:name=".seller.SellerProductDetailActivity"
+            android:exported="false"
+            android:label="Finance"
+            android:parentActivityName=".seller.ManageProductsActivity" />
 
         <!-- ================== ADMIN ACTIVITIES ================== -->
         <activity

@@ -3,6 +3,7 @@ package com.example.beautyhub.buyer;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -12,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.example.beautyhub.R;
 import com.example.beautyhub.adapters.CheckoutItemsAdapter;
 import com.example.beautyhub.databinding.ActivityCheckoutBinding;
 import com.example.beautyhub.models.CartItem;
@@ -50,20 +52,24 @@ public class CheckoutActivity extends AppCompatActivity implements CheckoutItems
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
     private DatabaseReference userRef;
+    private DatabaseReference cartsRef;
 
     private ProductViewModel productViewModel;
     private ArrayList<CartItem> selectedItems = new ArrayList<>();
     private List<Reward> availableRewards = new ArrayList<>();
     private int currentUserPoints = 0;
     private ShippingAddress userShippingAddress;
+
     private double subtotal = 0.0;
     private double discountAmount = 0.0;
     private double totalPayment = 0.0;
     private static final double SHIPPING_FEE_WEST_MY = 5.00;
     private static final double SHIPPING_FEE_EAST_MY = 10.00;
     private static final int PAYMENT_REQUEST_CODE = 2002;
+    private static final int ADDRESS_SELECTION_REQUEST_CODE = 1001;
 
     private boolean isFromBuyNow = false;
+    private boolean shouldClearCartAfterOrder = false;
     private Map<String, Product> productCache = new HashMap<>();
     private ProgressDialog progressDialog;
 
@@ -88,6 +94,7 @@ public class CheckoutActivity extends AppCompatActivity implements CheckoutItems
         Intent intent = getIntent();
         isFromBuyNow = "BUY_NOW".equals(intent.getStringExtra("SOURCE"));
         selectedItems = intent.getParcelableArrayListExtra("CHECKOUT_ITEMS");
+        shouldClearCartAfterOrder = intent.getBooleanExtra("CLEAR_CART_AFTER_ORDER", false);
 
         if (selectedItems == null || selectedItems.isEmpty()) {
             Toast.makeText(this, "Error: No items selected.", Toast.LENGTH_SHORT).show();
@@ -101,7 +108,7 @@ public class CheckoutActivity extends AppCompatActivity implements CheckoutItems
 
     private void initializeActivity() {
         userRef = database.getReference("Users").child(currentUser.getUid());
-
+        cartsRef = database.getReference("Carts").child(currentUser.getUid());
         setupToolbar();
         setupListeners();
         setupAddMoreItems();
@@ -114,6 +121,8 @@ public class CheckoutActivity extends AppCompatActivity implements CheckoutItems
             getSupportActionBar().setTitle("Checkout");
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+
+        binding.toolbarCheckout.setNavigationOnClickListener(v -> onBackPressed());
     }
 
     private void setupListeners() {
@@ -123,14 +132,17 @@ public class CheckoutActivity extends AppCompatActivity implements CheckoutItems
         progressDialog.setCancelable(false);
 
         binding.btnPlaceOrder.setOnClickListener(v -> initiateOrderProcess());
+
+        // Address section click listeners
         binding.layoutAddressDetails.setOnClickListener(v -> openAddressSelection());
         binding.layoutNoAddress.setOnClickListener(v -> openAddressSelection());
+        binding.layoutChangeAddress.setOnClickListener(v -> openAddressSelection());
 
         binding.rgPaymentMethod.setOnCheckedChangeListener((group, checkedId) -> displayOrderSummary());
 
         binding.chipGroupDiscounts.setOnCheckedChangeListener((group, checkedId) -> {
             Chip selectedChip = group.findViewById(checkedId);
-            if (selectedChip == null || "No Discount".equals(selectedChip.getText().toString())) {
+            if (selectedChip == null || selectedChip.getId() == R.id.chip_no_discount) {
                 discountAmount = 0.0;
             } else {
                 Reward selectedReward = (Reward) selectedChip.getTag();
@@ -145,12 +157,14 @@ public class CheckoutActivity extends AppCompatActivity implements CheckoutItems
     private void openAddressSelection() {
         Intent intent = new Intent(this, ShippingAddressListActivity.class);
         intent.putExtra("SELECT_MODE", true);
-        startActivityForResult(intent, 1001);
+        intent.putExtra("CURRENT_ADDRESS", userShippingAddress);
+        startActivityForResult(intent, ADDRESS_SELECTION_REQUEST_CODE);
     }
 
     private void initiateOrderProcess() {
         if (userShippingAddress == null) {
             Toast.makeText(this, "Please select a shipping address.", Toast.LENGTH_SHORT).show();
+            openAddressSelection();
             return;
         }
 
@@ -168,10 +182,20 @@ public class CheckoutActivity extends AppCompatActivity implements CheckoutItems
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1001 && resultCode == RESULT_OK && data != null) {
-            userShippingAddress = data.getParcelableExtra("SELECTED_ADDRESS");
-            updateShippingAddressUI();
-            displayOrderSummary();
+
+        if (requestCode == ADDRESS_SELECTION_REQUEST_CODE) {
+            if (resultCode == RESULT_OK && data != null) {
+                userShippingAddress = data.getParcelableExtra("SELECTED_ADDRESS");
+                if (userShippingAddress != null) {
+                    updateShippingAddressUI();
+                    displayOrderSummary();
+                    Toast.makeText(this, "Shipping address updated", Toast.LENGTH_SHORT).show();
+                }
+            } else if (resultCode == RESULT_CANCELED) {
+                if (userShippingAddress == null) {
+                    Toast.makeText(this, "Please select a shipping address to continue.", Toast.LENGTH_SHORT).show();
+                }
+            }
         } else if (requestCode == PAYMENT_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 placeOrder("Online Banking");
@@ -184,41 +208,117 @@ public class CheckoutActivity extends AppCompatActivity implements CheckoutItems
     private void placeOrder(String paymentMethod) {
         validateStockForAllItems();
         if (!binding.btnPlaceOrder.isEnabled()) {
-            Toast.makeText(this, "Some items are out of stock.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Some items are out of stock or unavailable.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (userShippingAddress == null) {
+            Toast.makeText(this, "Please select a shipping address.", Toast.LENGTH_SHORT).show();
+            openAddressSelection();
             return;
         }
 
         progressDialog.show();
-        updateStockForItems().addOnCompleteListener(stockTask -> {
-            if (stockTask.isSuccessful()) {
-                saveOrderToFirebase(paymentMethod);
-            } else {
+        progressDialog.setMessage("Validating stock...");
+
+        validateRealTimeStock().addOnCompleteListener(validationTask -> {
+            if (!validationTask.isSuccessful() || !validationTask.getResult()) {
                 progressDialog.dismiss();
-                Toast.makeText(this, "Failed to update stock.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Stock validation failed. Some items are out of stock.", Toast.LENGTH_LONG).show();
+                return;
             }
+
+            progressDialog.setMessage("Updating stock...");
+            updateStockForItems().addOnCompleteListener(stockTask -> {
+                if (stockTask.isSuccessful()) {
+                    saveOrderToFirebase(paymentMethod);
+                } else {
+                    progressDialog.dismiss();
+                    Log.e("CheckoutActivity", "Stock update failed: " + stockTask.getException());
+                    Toast.makeText(this, "Failed to update stock. Please try again.", Toast.LENGTH_LONG).show();
+                }
+            });
         });
+    }
+
+    private Task<Boolean> validateRealTimeStock() {
+        List<Task<Boolean>> validationTasks = new ArrayList<>();
+
+        for (CartItem item : selectedItems) {
+            TaskCompletionSource<Boolean> tcs = new TaskCompletionSource<>();
+
+            database.getReference("Products").child(item.getProductId())
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            Product product = snapshot.getValue(Product.class);
+                            if (product == null) {
+                                tcs.setResult(false);
+                                return;
+                            }
+                            // Check if stock is sufficient
+                            tcs.setResult(product.getStock() >= item.getQuantity());
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            tcs.setResult(false);
+                        }
+                    });
+
+            validationTasks.add(tcs.getTask());
+        }
+
+        return Tasks.whenAllSuccess(validationTasks)
+                .continueWith(task -> {
+                    if (!task.isSuccessful()) {
+                        return false;
+                    }
+
+                    // Tasks.whenAllSuccess returns List<Object>, so we iterate and cast
+                    List<Object> results = task.getResult();
+                    for (Object result : results) {
+                        if (result instanceof Boolean && !((Boolean) result)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                });
     }
 
     private Task<Void> updateStockForItems() {
         List<Task<Void>> stockUpdateTasks = new ArrayList<>();
+
         for (CartItem item : selectedItems) {
             TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
-            database.getReference("Products").child(item.getProductId()).runTransaction(new Transaction.Handler() {
+            DatabaseReference productRef = database.getReference("Products").child(item.getProductId());
+
+            productRef.runTransaction(new Transaction.Handler() {
                 @NonNull
                 @Override
-                public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
-                    Product product = mutableData.getValue(Product.class);
-                    if (product == null || product.getStock() < item.getQuantity())
+                public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+                    Product product = currentData.getValue(Product.class);
+                    if (product == null) {
                         return Transaction.abort();
-                    mutableData.child("stock").setValue(product.getStock() - item.getQuantity());
-                    return Transaction.success(mutableData);
+                    }
+
+                    if (product.getStock() < item.getQuantity()) {
+                        return Transaction.abort(); // Stok tidak cukup saat akhir
+                    }
+
+                    // Tolak stok
+                    product.setStock(product.getStock() - item.getQuantity());
+                    currentData.setValue(product);
+                    return Transaction.success(currentData);
                 }
 
                 @Override
                 public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {
-                    if (error != null) tcs.trySetException(error.toException());
-                    else if (!committed) tcs.trySetException(new Exception("Stock update failed."));
-                    else tcs.setResult(null);
+                    if (committed && error == null) {
+                        tcs.setResult(null);
+                    } else {
+                        tcs.setException(error != null ? error.toException() : new Exception("Stock transaction failed"));
+                    }
                 }
             });
             stockUpdateTasks.add(tcs.getTask());
@@ -227,109 +327,129 @@ public class CheckoutActivity extends AppCompatActivity implements CheckoutItems
     }
 
     private void saveOrderToFirebase(String paymentMethod) {
-        DatabaseReference ordersRef = database.getReference("Orders");
+        progressDialog.setMessage("Finalizing order...");
+        String orderId = database.getReference("Orders").push().getKey();
+        if (orderId == null) return;
+
+        long timestamp = System.currentTimeMillis();
+
+        // Group items by seller (untuk split order mengikut kedai)
         Map<String, List<CartItem>> itemsBySeller = selectedItems.stream()
                 .collect(Collectors.groupingBy(CartItem::getSellerId));
 
-        double shippingFeePerSeller = binding.rbCashOnDelivery.isChecked() ? 0.0 :
-                ("East Malaysia".equalsIgnoreCase(userShippingAddress.getZone()) ? SHIPPING_FEE_EAST_MY : SHIPPING_FEE_WEST_MY);
-
         List<Task<Void>> allTasks = new ArrayList<>();
-        ArrayList<String> newOrderIds = new ArrayList<>();
+        ArrayList<String> subOrderIds = new ArrayList<>();
 
         for (Map.Entry<String, List<CartItem>> entry : itemsBySeller.entrySet()) {
             String sellerId = entry.getKey();
             List<CartItem> sellerItems = entry.getValue();
-            String subOrderId = ordersRef.push().getKey();
-            if (subOrderId == null) continue;
+            String subOrderId = orderId + "_" + sellerId;
+            subOrderIds.add(subOrderId);
 
-            newOrderIds.add(subOrderId);
-            double sellerSubtotal = 0;
+            // Ringkaskan ID untuk paparan (6 aksara terakhir)
+            String shortId = subOrderId.substring(Math.max(0, subOrderId.length() - 6)).toUpperCase();
+
+            Order order = new Order();
+            order.setOrderId(subOrderId);
+            order.setUserId(currentUser.getUid());
+            order.setSellerId(sellerId);
+
+            // PEMBETULAN 1: Map CartItem ke OrderItem secara manual (elak ralat Protected Access)
             List<OrderItem> orderItems = new ArrayList<>();
-
             for (CartItem item : sellerItems) {
-                sellerSubtotal += (item.getPrice() * item.getQuantity());
-                orderItems.add(new OrderItem(
-                        item.getProductId(), item.getName(), item.getQuantity(),
-                        item.getPrice(), item.getImageUrls(), item.getSellerProfileImageUrl(),
-                        item.getSellerId(), item.getSellerName()
-                ));
+                OrderItem oi = new OrderItem();
+                oi.setProductId(item.getProductId());
+                oi.setProductName(item.getName());
+                oi.setQuantity(item.getQuantity());
+                oi.setPrice(item.getPrice());
+
+                // Gunakan imageUrls terus daripada CartItem (buang rujukan productImage)
+                oi.setImageUrls(item.getImageUrls());
+                orderItems.add(oi);
             }
+            order.setOrderItems(orderItems);
 
-            Order splitOrder = new Order(
-                    subOrderId, currentUser.getUid(), currentUser.getDisplayName(),
-                    userShippingAddress, (sellerSubtotal + shippingFeePerSeller) - discountAmount,
-                    "Pending", System.currentTimeMillis(), paymentMethod, discountAmount
-            );
-            splitOrder.setOrderItems(orderItems);
-            splitOrder.setSellerId(sellerId);
-            splitOrder.setSellerName(sellerItems.get(0).getSellerName());
-            splitOrder.setOrderSource(isFromBuyNow ? "buy_now" : "cart");
+            order.setOrderDate(timestamp);
+            order.setPaymentMethod(paymentMethod);
+            order.setStatus("Pending");
+            order.setShippingAddress(userShippingAddress);
+            order.setTotalAmount(calculateSellerSubtotal(sellerItems));
 
-            // --- 1. NOTIFICATION DATA ---
-            String firstProductName = sellerItems.get(0).getName();
-            String productSummary = (sellerItems.size() > 1)
-                    ? firstProductName + " and " + (sellerItems.size() - 1) + " others"
-                    : firstProductName;
+            // Simpan ke node Orders
+            allTasks.add(database.getReference("Orders").child(subOrderId).setValue(order));
 
-            String sellerNameForNotif = (sellerItems.get(0).getSellerName() != null)
-                    ? sellerItems.get(0).getSellerName() : "BeautyHub Seller";
+            // Hantar Notifikasi kepada Seller
+            String notifId = database.getReference("Notifications").child(sellerId).push().getKey();
+            if (notifId != null) {
+                // Ambil thumbUrl secara selamat
+                String thumbUrl = "";
+                if (!sellerItems.isEmpty()) {
+                    Object imgObj = sellerItems.get(0).getImageUrls();
+                    if (imgObj instanceof List && !((List<?>) imgObj).isEmpty()) {
+                        thumbUrl = String.valueOf(((List<?>) imgObj).get(0));
+                    } else {
+                        thumbUrl = String.valueOf(imgObj);
+                    }
+                }
 
-            String productImgForNotif = (sellerItems.get(0).getImageUrls() != null)
-                    ? sellerItems.get(0).getImageUrls() : "";
+                // PEMBETULAN 2: Guna subOrderId/shortId (elak ralat currentOrder undefined)
+                NotificationModel sellerNotif = new NotificationModel(
+                        notifId,
+                        "New Order #" + shortId,
+                        "You received a new order from " + (currentUser.getDisplayName() != null ? currentUser.getDisplayName() : "a buyer"),
+                        timestamp, // long
+                        "NewOrder",
+                        subOrderId,
+                        thumbUrl,
+                        sellerItems.get(0).getName(),
+                        currentUser.getDisplayName(),
+                        true
+                );
 
-            // --- 2. BUYER NOTIFICATION ---
-            DatabaseReference buyerNotifRef = database.getReference("Notifications").child(currentUser.getUid());
-            String buyerNotifId = buyerNotifRef.push().getKey();
-            if (buyerNotifId != null) {
-                NotificationModel buyerNotif = new NotificationModel(buyerNotifId, "Order Placed Successfully", "",
-                        System.currentTimeMillis(), "Order", productSummary, sellerNameForNotif, productImgForNotif, subOrderId, true);
-                allTasks.add(buyerNotifRef.child(buyerNotifId).setValue(buyerNotif));
+                // PEMBETULAN 3: Guna pembolehubah 'sellerNotif' (bukan 'notification')
+                allTasks.add(database.getReference("Notifications").child(sellerId).child(notifId).setValue(sellerNotif));
             }
-
-            // --- 3. SELLER NOTIFICATION ---
-            DatabaseReference sellerNotifRef = database.getReference("Notifications").child(sellerId);
-            String sellerNotifId = sellerNotifRef.push().getKey();
-            if (sellerNotifId != null) {
-                String buyerName = (userShippingAddress != null) ? userShippingAddress.getRecipientName() : "A Customer";
-                NotificationModel sellerNotif = new NotificationModel(sellerNotifId, "New Order Received!", "",
-                        System.currentTimeMillis(), "NewOrder", productSummary, buyerName, productImgForNotif, subOrderId, true);
-                allTasks.add(sellerNotifRef.child(sellerNotifId).setValue(sellerNotif));
-            }
-
-            // --- 4. SAVE ORDER ---
-            allTasks.add(ordersRef.child(subOrderId).setValue(splitOrder));
         }
 
-        Tasks.whenAll(allTasks).addOnCompleteListener(task -> {
+        // Padam item dari Cart jika bukan "Buy Now"
+        if (!isFromBuyNow) {
+            for (CartItem item : selectedItems) {
+                allTasks.add(cartsRef.child(item.getSellerId()).child(item.getCartItemId()).removeValue());
+            }
+        }
+
+        Tasks.whenAllComplete(allTasks).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                handlePostOrderCleanup(newOrderIds, paymentMethod);
+                // Berjaya: Jalankan proses pasca-order (Points, Success UI, etc)
+                handlePostOrderCleanup(subOrderIds, paymentMethod);
             } else {
                 progressDialog.dismiss();
-                Toast.makeText(this, "Failed to place orders.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Failed to save order details.", Toast.LENGTH_SHORT).show();
+                // Opsional: Rollback stok jika simpan order gagal
+                rollbackStockUpdates(new ArrayList<>(selectedItems));
             }
         });
     }
 
+    private double calculateSellerSubtotal(List<CartItem> items) {
+        double sub = 0;
+        for (CartItem item : items) sub += (item.getPrice() * item.getQuantity());
+        return sub;
+    }
     private void handlePostOrderCleanup(ArrayList<String> orderIds, String paymentMethod) {
-        // 1. Remove from Cart
-        if (!isFromBuyNow) {
-            for (CartItem item : selectedItems) {
-                database.getReference("Cart").child(currentUser.getUid()).child(item.getCartItemId()).removeValue();
-            }
+        if (!isFromBuyNow && shouldClearCartAfterOrder) {
+            removeOrderedItemsFromCart();
         }
 
-        // 2. Remove used Reward
         int checkedId = binding.chipGroupDiscounts.getCheckedChipId();
         if (checkedId != View.NO_ID) {
-            Chip chip = findViewById(checkedId);
+            Chip chip = binding.chipGroupDiscounts.findViewById(checkedId);
             if (chip != null && chip.getTag() instanceof Reward) {
                 Reward usedReward = (Reward) chip.getTag();
                 userRef.child("redeemedRewards").child(usedReward.getRewardId()).removeValue();
             }
         }
 
-        // 3. Add Points Transaction
         userRef.child("points").runTransaction(new Transaction.Handler() {
             @NonNull
             @Override
@@ -342,15 +462,65 @@ public class CheckoutActivity extends AppCompatActivity implements CheckoutItems
             @Override public void onComplete(@Nullable DatabaseError e, boolean c, @Nullable DataSnapshot d) {}
         });
 
-        // 4. Final Redirect
         if (progressDialog.isShowing()) progressDialog.dismiss();
+
         Intent intent = new Intent(this, OrderSuccessActivity.class);
         intent.putStringArrayListExtra("ORDER_IDS", orderIds);
-        intent.putExtra("ORDER_COUNT", orderIds.size());
         intent.putExtra("PAYMENT_METHOD", paymentMethod);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra("ORDER_COMPLETED", true);
+        intent.putExtra("SHOULD_CLEAR_CART", shouldClearCartAfterOrder);
+
+        setResult(RESULT_OK, intent);
+
         startActivity(intent);
         finish();
+    }
+
+    private void removeOrderedItemsFromCart() {
+        if (cartsRef == null || selectedItems.isEmpty()) return;
+
+        Map<String, Object> updates = new HashMap<>();
+        for (CartItem item : selectedItems) {
+            if (item.getSellerId() != null && item.getCartItemId() != null) {
+                updates.put("/" + item.getSellerId() + "/" + item.getCartItemId(), null);
+            }
+        }
+
+        if (!updates.isEmpty()) {
+            cartsRef.updateChildren(updates)
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d("CheckoutActivity", "Successfully removed ordered items from cart");
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("CheckoutActivity", "Failed to remove ordered items from cart", e);
+                    });
+        }
+    }
+
+    private void rollbackStockUpdates(ArrayList<CartItem> items) {
+        for (CartItem item : items) {
+            database.getReference("Products").child(item.getProductId())
+                    .runTransaction(new Transaction.Handler() {
+                        @NonNull
+                        @Override
+                        public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                            Product product = mutableData.getValue(Product.class);
+                            if (product != null) {
+                                int newStock = product.getStock() + item.getQuantity();
+                                mutableData.child("stock").setValue(newStock);
+                                Log.d("StockRollback", "Rolled back stock for: " + item.getName());
+                            }
+                            return Transaction.success(mutableData);
+                        }
+
+                        @Override
+                        public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {
+                            if (error != null) {
+                                Log.e("StockRollback", "Failed to rollback: " + error.getMessage());
+                            }
+                        }
+                    });
+        }
     }
 
     private void loadProductsData() {
@@ -358,6 +528,7 @@ public class CheckoutActivity extends AppCompatActivity implements CheckoutItems
             this.productCache = map;
             enhanceItems();
             setupRecyclerView();
+            displayOrderSummary();
         });
         productViewModel.loadAllProducts();
     }
@@ -379,14 +550,18 @@ public class CheckoutActivity extends AppCompatActivity implements CheckoutItems
     private void setupRecyclerView() {
         CheckoutItemsAdapter adapter = new CheckoutItemsAdapter(this, selectedItems, this);
         adapter.setProductCache(productCache);
-        if (userShippingAddress != null) adapter.setUserZone(userShippingAddress.getZone());
         binding.rvCheckoutItems.setLayoutManager(new LinearLayoutManager(this));
         binding.rvCheckoutItems.setAdapter(adapter);
-        displayOrderSummary();
+        binding.rvCheckoutItems.setNestedScrollingEnabled(false);
     }
 
     @Override
     public void onQuantityChanged(int position, int newQuantity) {
+        if (newQuantity < 1) {
+            Toast.makeText(this, "Quantity must be at least 1", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         selectedItems.get(position).setQuantity(newQuantity);
         displayOrderSummary();
         validateStockForAllItems();
@@ -406,6 +581,7 @@ public class CheckoutActivity extends AppCompatActivity implements CheckoutItems
 
         totalPayment = Math.max(0, subtotal + totalShipping - discountAmount);
 
+        // Update UI
         binding.tvSubtotal.setText(String.format(Locale.US, "RM %.2f", subtotal));
         binding.tvShippingFee.setText(String.format(Locale.US, "RM %.2f", totalShipping));
         binding.tvTotalPayment.setText(String.format(Locale.US, "RM %.2f", totalPayment));
@@ -418,9 +594,9 @@ public class CheckoutActivity extends AppCompatActivity implements CheckoutItems
             binding.layoutDiscount.setVisibility(View.GONE);
         }
 
-        if (binding.rvCheckoutItems.getAdapter() instanceof CheckoutItemsAdapter) {
-            ((CheckoutItemsAdapter) binding.rvCheckoutItems.getAdapter()).setShippingEnabled(!binding.rbCashOnDelivery.isChecked());
-        }
+        // Update button text dengan jumlah item
+        int totalItems = selectedItems.stream().mapToInt(CartItem::getQuantity).sum();
+        binding.btnPlaceOrder.setText(String.format("Place Order (%d items)", totalItems));
     }
 
     private void validateStockForAllItems() {
@@ -442,7 +618,7 @@ public class CheckoutActivity extends AppCompatActivity implements CheckoutItems
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Integer pts = snapshot.child("points").getValue(Integer.class);
                 currentUserPoints = (pts != null) ? pts : 0;
-                binding.tvCurrentPoints.setText(String.format(Locale.US, "Points: %d", currentUserPoints));
+                binding.tvCurrentPoints.setText(String.format(Locale.US, "You have %,d points", currentUserPoints));
 
                 if (userShippingAddress == null) {
                     for (DataSnapshot s : snapshot.child("shippingAddress").getChildren()) {
@@ -466,20 +642,23 @@ public class CheckoutActivity extends AppCompatActivity implements CheckoutItems
 
                 updateShippingAddressUI();
                 populateRewards();
+                displayOrderSummary();
             }
 
-            @Override public void onCancelled(@NonNull DatabaseError error) {}
+            @Override public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("CheckoutActivity", "Failed to load user details", error.toException());
+            }
         });
     }
 
     private void populateRewards() {
-        binding.chipGroupDiscounts.removeAllViews();
-        Chip none = new Chip(this);
-        none.setText("No Discount");
-        none.setCheckable(true);
-        none.setChecked(true);
-        binding.chipGroupDiscounts.addView(none);
+        // Clear existing chips kecuali "No Discount"
+        int childCount = binding.chipGroupDiscounts.getChildCount();
+        for (int i = childCount - 1; i > 0; i--) {
+            binding.chipGroupDiscounts.removeViewAt(i);
+        }
 
+        // Add reward chips
         for (Reward r : availableRewards) {
             Chip chip = new Chip(this);
             chip.setText(String.format(Locale.US, "Voucher RM %.2f", r.getDiscountValue()));
@@ -493,8 +672,17 @@ public class CheckoutActivity extends AppCompatActivity implements CheckoutItems
         if (userShippingAddress != null) {
             binding.layoutAddressDetails.setVisibility(View.VISIBLE);
             binding.layoutNoAddress.setVisibility(View.GONE);
-            binding.tvRecipientNameAndPhone.setText(String.format("%s | %s", userShippingAddress.getRecipientName(), userShippingAddress.getPhoneNumber()));
-            binding.tvAddressLine.setText(String.format("%s, %s, %s", userShippingAddress.getStreet(), userShippingAddress.getCity(), userShippingAddress.getState()));
+
+            binding.tvRecipientNameAndPhone.setText(String.format("%s | %s",
+                    userShippingAddress.getRecipientName(),
+                    userShippingAddress.getPhoneNumber()));
+
+            binding.tvAddressLine.setText(String.format("%s, %s, %s, %s %s",
+                    userShippingAddress.getStreet(),
+                    userShippingAddress.getCity(),
+                    userShippingAddress.getState(),
+                    userShippingAddress.getZipcode(),
+                    userShippingAddress.getZone()));
         } else {
             binding.layoutAddressDetails.setVisibility(View.GONE);
             binding.layoutNoAddress.setVisibility(View.VISIBLE);
@@ -503,8 +691,34 @@ public class CheckoutActivity extends AppCompatActivity implements CheckoutItems
 
     private void setupAddMoreItems() {
         binding.tvAddMoreItems.setVisibility(isFromBuyNow ? View.GONE : View.VISIBLE);
-        binding.tvAddMoreItems.setOnClickListener(v -> finish());
+        binding.tvAddMoreItems.setOnClickListener(v -> {
+            // Kembali ke CartActivity
+            setResult(RESULT_CANCELED);
+            finish();
+        });
     }
 
-    @Override public boolean onSupportNavigateUp() { onBackPressed(); return true; }
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Tanya user jika mereka mahu keluar dari checkout
+        if (!isFromBuyNow) {
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle("Cancel Checkout")
+                    .setMessage("Are you sure you want to cancel checkout?")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        setResult(RESULT_CANCELED);
+                        finish();
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
+        } else {
+            super.onBackPressed();
+        }
+    }
 }
