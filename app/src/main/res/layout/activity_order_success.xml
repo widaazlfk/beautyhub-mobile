@@ -88,39 +88,11 @@
                     tools:text="Paid &amp; Processing" />
             </RelativeLayout>
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp">
-                <TextView
-                    android:id="@+id/tv_ref_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Reference"
-                    android:textColor="#757575" />
-                <TextView
-                    android:id="@+id/tv_order_id"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:textStyle="bold"
-                    tools:text="#ORD-12345" />
-            </RelativeLayout>
-
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginVertical="12dp"
                 android:background="#EEEEEE" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:text="Your items will be shipped separately by each seller."
-                android:textSize="12sp"
-                android:textColor="#757575" />
 
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

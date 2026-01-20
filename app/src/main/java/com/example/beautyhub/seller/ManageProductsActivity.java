@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.beautyhub.R;
 import com.example.beautyhub.admin.LogHelper;
 import com.example.beautyhub.adapters.SellerProductAdapter;
-import com.example.beautyhub.buyer.ProductDetailActivity;
 import com.example.beautyhub.models.Product;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -26,7 +25,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -57,7 +55,6 @@ public class ManageProductsActivity extends AppCompatActivity implements SellerP
         setupListeners();
         setupRecyclerView();
 
-        // Initialize LogHelper
         LogHelper.initialize(this);
     }
 
@@ -70,51 +67,72 @@ public class ManageProductsActivity extends AppCompatActivity implements SellerP
     private void fetchSellerProducts() {
         progressBar.setVisibility(View.VISIBLE);
         noProductsTextView.setVisibility(View.GONE);
-        productsRecyclerView.setVisibility(View.GONE);
 
+        String filter = getIntent().getStringExtra("filter");
         FirebaseUser currentUser = mAuth.getCurrentUser();
+
         if (currentUser == null) {
-            Toast.makeText(this, "You are not logged in.", Toast.LENGTH_SHORT).show();
             progressBar.setVisibility(View.GONE);
             return;
         }
 
         String sellerId = currentUser.getUid();
-        Query sellerProductsQuery = productsRef.orderByChild("sellerId").equalTo(sellerId);
 
-        sellerProductsQuery.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                productList.clear();
-                if (dataSnapshot.exists()) {
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        Product product = snapshot.getValue(Product.class);
-                        if (product != null) {
-                            product.setProductId(snapshot.getKey());
-                            productList.add(product);
+        // Query produk mengikut sellerId
+        productsRef.orderByChild("sellerId").equalTo(sellerId)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        productList.clear();
+
+                        if (dataSnapshot.exists()) {
+                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                Product product = snapshot.getValue(Product.class);
+                                if (product != null) {
+                                    product.setProductId(snapshot.getKey());
+
+                                    // --- LOGIK STOK ---
+                                    // Pastikan model Product.java anda mempunyai method getStock()
+                                    int currentStock = product.getStock();
+
+                                    if ("low_stock".equals(filter)) {
+                                        // Filter: Hanya ambil produk yang stok <= 5
+                                        if (currentStock <= 10) {
+                                            productList.add(product);
+                                        }
+                                    } else {
+                                        // No filter: Ambil semua produk seller
+                                        productList.add(product);
+                                    }
+                                }
+                            }
+                        }
+
+                        Collections.reverse(productList);
+                        productAdapter.notifyDataSetChanged();
+                        progressBar.setVisibility(View.GONE);
+
+                        // Update UI jika senarai kosong
+                        if (productList.isEmpty()) {
+                            noProductsTextView.setVisibility(View.VISIBLE);
+                            productsRecyclerView.setVisibility(View.GONE);
+                            if ("low_stock".equals(filter)) {
+                                noProductsTextView.setText("No low stock products found (Stock <= 5)");
+                            } else {
+                                noProductsTextView.setText("No products added yet");
+                            }
+                        } else {
+                            noProductsTextView.setVisibility(View.GONE);
+                            productsRecyclerView.setVisibility(View.VISIBLE);
                         }
                     }
-                }
 
-                Collections.reverse(productList);
-                productAdapter.notifyDataSetChanged();
-
-                progressBar.setVisibility(View.GONE);
-                if (productList.isEmpty()) {
-                    noProductsTextView.setVisibility(View.VISIBLE);
-                    productsRecyclerView.setVisibility(View.GONE);
-                } else {
-                    noProductsTextView.setVisibility(View.GONE);
-                    productsRecyclerView.setVisibility(View.VISIBLE);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(ManageProductsActivity.this, "Failed to load products: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        progressBar.setVisibility(View.GONE);
+                        Toast.makeText(ManageProductsActivity.this, "Database Error: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void initViews() {
@@ -131,16 +149,21 @@ public class ManageProductsActivity extends AppCompatActivity implements SellerP
     private void setupToolbar() {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Manage Products");
+            String filter = getIntent().getStringExtra("filter");
+            if ("low_stock".equals(filter)) {
+                getSupportActionBar().setTitle("Low Stock Products");
+            } else {
+                getSupportActionBar().setTitle("Manage Products");
+            }
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
     }
 
     private void setupListeners() {
         fabAddProduct.setOnClickListener(v ->
                 startActivity(new Intent(ManageProductsActivity.this, AddProductActivity.class)));
-        toolbar.setNavigationOnClickListener(v -> finish());
+
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
     }
 
     private void setupRecyclerView() {
@@ -151,42 +174,27 @@ public class ManageProductsActivity extends AppCompatActivity implements SellerP
     }
 
     private void showDeleteConfirmationDialog(Product product) {
-        if (product == null || product.getProductId() == null) {
-            Toast.makeText(this, "Cannot delete product, ID is missing.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         new AlertDialog.Builder(this)
                 .setTitle("Confirm Delete")
                 .setMessage("Are you sure you want to delete '" + product.getName() + "'?")
-                .setPositiveButton("Delete", (dialog, which) -> {
-                    deleteProductFromFirebase(product);
-                })
+                .setPositiveButton("Delete", (dialog, which) -> deleteProductFromFirebase(product))
                 .setNegativeButton("Cancel", null)
                 .show();
     }
 
     private void deleteProductFromFirebase(Product product) {
-        String productId = product.getProductId();
-        String productName = product.getName();
-
-        productsRef.child(productId).removeValue().addOnCompleteListener(task -> {
+        productsRef.child(product.getProductId()).removeValue().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                // Log the deletion
-                String logDetails = "Seller deleted product: '" + productName + "' (ID: " + productId + ")";
-                LogHelper.logCurrentUserAction("Product Deleted", logDetails, "Seller");
-
-                Toast.makeText(ManageProductsActivity.this, "Product deleted successfully.", Toast.LENGTH_SHORT).show();
+                LogHelper.logCurrentUserAction("Product Deleted", "Seller deleted: " + product.getName(), "Seller");
+                Toast.makeText(this, "Deleted successfully.", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(ManageProductsActivity.this, "Failed to delete product.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Failed to delete.", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    // Implement OnProductActionListener methods
     @Override
     public void onProductClick(Product product) {
-        // Navigate to product details
         Intent intent = new Intent(this, SellerProductDetailActivity.class);
         intent.putExtra("PRODUCT_ID", product.getProductId());
         startActivity(intent);

@@ -150,6 +150,8 @@ public class BuyerActivity extends AppCompatActivity implements
                 startActivity(new Intent(BuyerActivity.this, AboutUsActivity.class));
             } else if (itemId == R.id.nav_contact_us) {
                 startActivity(new Intent(BuyerActivity.this, ContactUsActivity.class));
+            }else if (itemId == R.id.nav_report) {
+                    startActivity(new Intent(BuyerActivity.this, ReportProblemActivity.class));
             } else if (itemId == R.id.nav_logout) {
                 showLogoutConfirmation();
             }
@@ -320,76 +322,57 @@ public class BuyerActivity extends AppCompatActivity implements
         };
         cartRef.addValueEventListener(cartListener);
     }
-    private void setupNotificationBadge() {
-        if (currentUser == null) {
-            notificationBadge.setVisibility(View.GONE);
-            return;
-        }
+  private void setupNotificationBadge() {
+      if (currentUser == null) {
+          notificationBadge.setVisibility(View.GONE);
+          return;
+      }
 
-        String userId = currentUser.getUid();
-        notificationRef = FirebaseDatabase.getInstance().getReference("Notifications").child(userId);
+      String userId = currentUser.getUid();
+      notificationRef = FirebaseDatabase.getInstance().getReference("Notifications").child(userId);
 
-        notificationListener = new ValueEventListener() {
-            // Variable untuk elakkan pop-up keluar untuk semua data lama masa mula buka app
-            private boolean isInitialLoad = true;
+      notificationListener = new ValueEventListener() {
+          @Override
+          public void onDataChange(@NonNull DataSnapshot snapshot) {
+              int unreadCount = 0;
 
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                long unreadCount = 0;
-                NotificationModel latestNotif = null;
+              for (DataSnapshot ds : snapshot.getChildren()) {
+                  // PENTING: Gunakan key "unread" (boolean) bukan "read"
+                  // Dan pastikan ia disemak sebagai Boolean object untuk elak NullPointerException
+                  Boolean isUnread = ds.child("unread").getValue(Boolean.class);
 
-                for (DataSnapshot ds : snapshot.getChildren()) {
-                    // Semak status 'read' (Pastikan field ini ada dalam Firebase anda)
-                    Boolean isRead = ds.child("read").getValue(Boolean.class);
-                    if (isRead != null && !isRead) {
-                        unreadCount++;
-                        // Simpan data notifikasi terakhir untuk dipaparkan sebagai pop-up
-                        latestNotif = ds.getValue(NotificationModel.class);
-                    }
-                }
+                  if (isUnread != null && isUnread) {
+                      unreadCount++;
+                  }
+              }
 
-                // Kemaskini Badge (Loceng)
-                if (unreadCount > 0) {
-                    notificationBadge.setText(String.valueOf(unreadCount));
-                    notificationBadge.setVisibility(View.VISIBLE);
+              // Kemaskini UI Badge
+              if (unreadCount > 0) {
+                  notificationBadge.setVisibility(View.VISIBLE);
+                  notificationBadge.setText(String.valueOf(unreadCount));
+              } else {
+                  notificationBadge.setVisibility(View.GONE);
+              }
+          }
 
-                    // --- LOGIK POP-UP START ---
-                    // Hanya tunjuk pop-up jika bukan kali pertama buka (data baru masuk)
-                    if (!isInitialLoad && latestNotif != null) {
-                        showInAppNotification(latestNotif.getTitle(), latestNotif.getMessage());
-                    }
-                    // --- LOGIK POP-UP END ---
-                } else {
-                    notificationBadge.setVisibility(View.GONE);
-                }
+          @Override
+          public void onCancelled(@NonNull DatabaseError error) {
+              Log.e("BuyerActivity", "NotificationBadge Error: " + error.getMessage());
+          }
+      };
 
-                isInitialLoad = false; // Selepas load pertama, set kepada false
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("BuyerActivity", "Error notification badge", error.toException());
-            }
-        };
-        notificationRef.addValueEventListener(notificationListener);
-    }
-
+      // Guna addValueEventListener untuk update real-time
+      notificationRef.addValueEventListener(notificationListener);
+  }
     // Fungsi tambahan untuk paparkan Pop-up ringkas
     private void showInAppNotification(String title, String message) {
-        // Cara 1: Toast ringkas (Paling senang)
-        Toast.makeText(this, "🔔 " + title + "\n" + message, Toast.LENGTH_LONG).show();
-
-        // Cara 2: Jika anda mahu guna AlertDialog (User kena tekan OK baru hilang)
-        /*
-        new androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle(title)
-            .setMessage(message)
-            .setPositiveButton("Lihat", (dialog, which) -> {
-                startActivity(new Intent(this, NotificationActivity.class));
-            })
-            .setNegativeButton("Tutup", null)
-            .show();
-        */
+        // Gunakan Snackbar supaya tidak terlalu mengganggu tapi nampak moden
+        View parentLayout = findViewById(android.R.id.content);
+        com.google.android.material.snackbar.Snackbar.make(parentLayout, title + ": " + message, 5000)
+                .setAction("VIEW", v -> {
+                    startActivity(new Intent(this, NotificationActivity.class));
+                })
+                .show();
     }
 
 

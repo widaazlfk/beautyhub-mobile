@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.example.beautyhub.MainActivity;
 import com.example.beautyhub.R;
 import com.example.beautyhub.adapters.OrderDetailItemAdapter;
 import com.example.beautyhub.databinding.ActivityOrderDetailsBinding;
@@ -181,27 +182,45 @@ public class OrderDetailsActivity extends AppCompatActivity {
         if (status == null) return;
         updateStatusBadgeStyle(status);
 
-        switch (status) {
-            case "Pending":
-                binding.btnCancelOrder.setVisibility(View.VISIBLE);
-                break;
-            case "Shipped":
-                binding.btnOrderReceived.setVisibility(View.VISIBLE);
-                break;
-            case "Completed":
-            case "Cancelled":
-                binding.btnOrderAgain.setVisibility(View.VISIBLE);
-                break;
+        // Guna equalsIgnoreCase supaya tak kisah huruf besar atau kecil
+        if (status.equalsIgnoreCase("Pending")) {
+            binding.btnCancelOrder.setVisibility(View.VISIBLE);
+        } else if (status.equalsIgnoreCase("Shipped")) {
+            binding.btnOrderReceived.setVisibility(View.VISIBLE);
+        } else if (status.equalsIgnoreCase("Completed") || status.equalsIgnoreCase("Cancelled")) {
+            binding.btnOrderAgain.setVisibility(View.VISIBLE);
         }
     }
+
 
     private void handleOrderReceived() {
         new AlertDialog.Builder(this)
                 .setTitle("Confirm Received")
                 .setMessage("Are you sure you have received all items from this store?")
                 .setPositiveButton("Yes", (dialog, which) -> {
+                    if (currentOrder == null) return;
+
+                    // 1. Kemaskini status kepada Completed
                     orderRef.child("status").setValue("Completed")
                             .addOnSuccessListener(aVoid -> {
+                                // 2. Ambil maklumat produk pertama untuk notifikasi
+                                String productName = "Product";
+                                String productImage = "";
+                                if (currentOrder.getOrderItems() != null && !currentOrder.getOrderItems().isEmpty()) {
+                                    productName = currentOrder.getOrderItems().get(0).getProductName();
+                                    productImage = currentOrder.getOrderItems().get(0).getImageUrls();
+                                }
+
+                                // 3. Hantar Notifikasi kepada Seller
+                                sendNotificationToSeller(
+                                        currentOrder.getSellerId(),
+                                        currentOrder.getOrderId(),
+                                        currentOrder.getShippingAddress().getRecipientName(),
+                                        productName,
+                                        productImage,
+                                        "ORDER_COMPLETED" // Argument ke-6
+                                );
+
                                 Toast.makeText(this, "Order Completed!", Toast.LENGTH_SHORT).show();
                                 loadOrderDetails();
                             });
@@ -209,10 +228,88 @@ public class OrderDetailsActivity extends AppCompatActivity {
                 .setNegativeButton("No", null)
                 .show();
     }
+    private void sendNotificationToSeller(String sellerId, String orderId, String buyerName, String productName, String imageUrl, String type) {
+        if (sellerId == null) return;
 
+        DatabaseReference notifyRef = FirebaseDatabase.getInstance().getReference("Notifications").child(sellerId);
+        String notifId = notifyRef.push().getKey();
+
+        // Memendekkan ID untuk paparan (8 aksara)
+        String displayId = orderId.replace("-", "").toUpperCase();
+        if (displayId.length() > 8) displayId = displayId.substring(0, 8);
+
+        java.util.HashMap<String, Object> notification = new java.util.HashMap<>();
+        notification.put("id", notifId);
+        notification.put("orderId", orderId);
+        notification.put("timestamp", System.currentTimeMillis());
+        notification.put("unread", true);
+        notification.put("type", type);
+        notification.put("productImageUrl", imageUrl);
+        notification.put("productName", productName);
+        notification.put("buyerName", buyerName);
+
+        if ("ORDER_COMPLETED".equals(type)) {
+            notification.put("title", "Order Completed! ✅");
+            notification.put("message", "Customer " + buyerName + " has confirmed receiving " + productName + ". Funds are being processed.");
+        } else {
+            notification.put("title", "New Order Received! 🛍️");
+            notification.put("message", "Customer " + buyerName + " has ordered " + productName + ". Please ship it soon.");
+        }
+
+        if (notifId != null) {
+            notifyRef.child(notifId).setValue(notification);
+        }
+    }
+    private void handleOrderAgain() {
+        if (currentOrder == null || currentOrder.getOrderItems() == null) {
+            Toast.makeText(this, "Order data not available", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        binding.progressBar.setVisibility(View.VISIBLE);
+        String userId = com.google.firebase.auth.FirebaseAuth.getInstance().getUid();
+
+        if (userId == null) {
+            binding.progressBar.setVisibility(View.GONE);
+            return;
+        }
+
+        DatabaseReference cartRef = FirebaseDatabase.getInstance().getReference("Carts").child(userId);
+
+        int totalItems = currentOrder.getOrderItems().size();
+        final int[] processedItems = {0};
+
+        for (OrderItem item : currentOrder.getOrderItems()) {
+            // Kita simpan semula dalam Cart menggunakan ProductId sebagai key
+            // Ini akan memastikan jika item sudah ada dalam cart, ia akan dikemaskini
+            cartRef.child(item.getProductId()).setValue(item)
+                    .addOnCompleteListener(task -> {
+                        processedItems[0]++;
+
+                        // Jika semua item dalam senarai order sudah berjaya dimasukkan ke cart
+                        if (processedItems[0] == totalItems) {
+                            binding.progressBar.setVisibility(View.GONE);
+                            Toast.makeText(this, "Items added to cart!", Toast.LENGTH_SHORT).show();
+
+                            // Bawa user ke MainActivity atau terus ke tab Cart
+                            Intent intent = new Intent(this,BuyerActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                            // Anda boleh tambah extra untuk beritahu MainActivity supaya buka Fragment Cart
+                            intent.putExtra("OPEN_CART", true);
+                            startActivity(intent);
+                            finish();
+                        }
+                    });
+        }
+    }
     private void setupButtonListeners() {
+        // 1. Order Received
         binding.btnOrderReceived.setOnClickListener(v -> handleOrderReceived());
 
+        // 2. Order Again (Diletakkan di luar supaya tidak bertindih scope 'v')
+        binding.btnOrderAgain.setOnClickListener(v -> handleOrderAgain());
+
+        // 3. Cancel Order
         binding.btnCancelOrder.setOnClickListener(v -> {
             new AlertDialog.Builder(this)
                     .setTitle("Cancel Order")
@@ -225,6 +322,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
                     .show();
         });
 
+        // 4. Shop View
         binding.layoutSellerProfile.setOnClickListener(v -> {
             if (currentOrder != null && currentOrder.getSellerId() != null) {
                 Intent intent = new Intent(this, ShopViewActivity.class);
@@ -232,15 +330,14 @@ public class OrderDetailsActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        // 5. Report Seller
         binding.btnReportSeller.setOnClickListener(v -> {
             if (currentOrder != null) {
                 Intent intent = new Intent(OrderDetailsActivity.this, ReportProblemActivity.class);
-
-                // Masukkan data yang diperlukan oleh ReportProblemActivity
                 intent.putExtra("REPORT_TYPE", "BUYER_REPORT_SELLER");
                 intent.putExtra("TARGET_ID", currentOrder.getSellerId());
                 intent.putExtra("TARGET_NAME", currentOrder.getSellerName());
-
                 startActivity(intent);
             } else {
                 Toast.makeText(this, "Order data not loaded yet.", Toast.LENGTH_SHORT).show();

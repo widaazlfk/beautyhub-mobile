@@ -70,7 +70,7 @@
         android:id="@+id/phone_value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="+60 12-345 6789"
+        android:text="+60 179288974"
         app:layout_constraintBaseline_toBaselineOf="@+id/phone_label"
         app:layout_constraintStart_toStartOf="@+id/guideline_content" />
 

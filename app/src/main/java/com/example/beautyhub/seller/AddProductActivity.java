@@ -316,6 +316,18 @@ public class AddProductActivity extends AppCompatActivity {
             intent.setType("image/*");
             imagePickerLauncher.launch(intent);
         });
+        // Paksa dropdown muncul apabila kotak kategori diklik
+        binding.actvCategory.setOnClickListener(v -> {
+            binding.actvCategory.showDropDown();
+        });
+
+        // Pastikan senarai muncul juga apabila mendapat fokus
+        binding.actvCategory.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                binding.actvCategory.showDropDown();
+            }
+        });
+
         binding.btnSaveProduct.setOnClickListener(v -> validateAndSaveProduct());
         binding.btnCancel.setOnClickListener(v -> finish());
     }
@@ -334,14 +346,34 @@ public class AddProductActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 List<String> categories = new ArrayList<>();
                 for (DataSnapshot ds : snapshot.getChildren()) {
-                    categories.add(ds.child("name").getValue(String.class));
+                    // Cuba ambil field "name", jika tiada ambil terus value tersebut
+                    String categoryName = ds.child("categoryName").getValue(String.class);
+                    if (categoryName == null) {
+                        categoryName = ds.getValue(String.class);
+                    }
+
+                    if (categoryName != null) {
+                        categories.add(categoryName);
+                    }
                 }
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(AddProductActivity.this,
-                        android.R.layout.simple_dropdown_item_1line, categories);
-                binding.actvCategory.setAdapter(adapter);
+
+                if (!categories.isEmpty()) {
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                            AddProductActivity.this,
+                            android.R.layout.simple_dropdown_item_1line,
+                            categories
+                    );
+                    binding.actvCategory.setAdapter(adapter);
+
+                    // Set threshold kepada 1 supaya cadangan muncul cepat jika ditaip
+                    binding.actvCategory.setThreshold(1);
+                }
             }
+
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {}
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("AddProductActivity", "Error fetch categories", error.toException());
+            }
         });
     }
-}
+    }

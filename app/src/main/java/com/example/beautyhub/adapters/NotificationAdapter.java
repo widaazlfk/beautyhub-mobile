@@ -41,47 +41,42 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     public void onBindViewHolder(@NonNull HolderNotification holder, int position) {
         NotificationModel model = notificationList.get(position);
 
-        // --- 1. SET TITLE WITH SHORTENED ORDER ID (FIRST 8 CHARS) ---
+        // --- 1. SET TITLE DENGAN SHORTENED ORDER ID ---
         String originalTitle = model.getTitle();
         String processedTitle = originalTitle;
 
         if (originalTitle != null && originalTitle.contains("#")) {
             try {
                 int hashIndex = originalTitle.indexOf("#");
-                // Text before '#' (e.g., "New Order ")
                 String prefix = originalTitle.substring(0, hashIndex + 1);
-                // Text after '#' (The long ID)
                 String idPart = originalTitle.substring(hashIndex + 1).trim();
 
                 if (!idPart.isEmpty()) {
-                    // Remove '-' and take first 8 characters
                     String cleanId = idPart.replace("-", "");
                     String shortId = cleanId.substring(0, Math.min(cleanId.length(), 8)).toUpperCase();
                     processedTitle = prefix + " " + shortId;
                 }
             } catch (Exception e) {
-                processedTitle = originalTitle; // Fallback to original if error occurs
+                processedTitle = originalTitle;
             }
         }
         holder.titleTv.setText(processedTitle);
 
-        // --- PRODUCT & SELLER NAMES ---
+        // --- 2. DISPLAY NAMA PRODUK & INFO SELLER/BUYER ---
         if (model.getProductName() != null && !model.getProductName().isEmpty()) {
             holder.productNameTv.setVisibility(View.VISIBLE);
             holder.productNameTv.setText(model.getProductName());
-            holder.productNameTv.setTextColor(Color.parseColor("#800000"));
         } else {
             holder.productNameTv.setVisibility(View.GONE);
         }
 
-        if (model.getSellerName() != null && !model.getSellerName().isEmpty()) {
-            holder.sellerNameTv.setVisibility(View.VISIBLE);
-            holder.sellerNameTv.setText(model.getSellerName());
+        if ("ORDER_NEW".equals(model.getType())) {
+            holder.sellerNameTv.setText("Buyer: " + (model.getBuyerName() != null ? model.getBuyerName() : "Customer"));
         } else {
-            holder.sellerNameTv.setVisibility(View.GONE);
+            holder.sellerNameTv.setText(model.getSellerName() != null ? model.getSellerName() : "");
         }
 
-        // --- 2. GLIDE IMAGE ---
+        // --- 3. GAMBAR PRODUK ---
         Glide.with(context)
                 .load(model.getProductImageUrl())
                 .placeholder(R.drawable.product_placeholder)
@@ -89,12 +84,13 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
                 .centerCrop()
                 .into(holder.productImageIv);
 
-        // --- 3. FORMAT TIME ---
+        // --- 4. FORMAT MASA ---
         long time = model.getTimestamp();
         CharSequence timeAgo = DateUtils.getRelativeTimeSpanString(time, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS);
         holder.timeTv.setText(timeAgo);
 
-        // --- 4. UNREAD UI LOGIC ---
+        // --- 5. UNREAD INDICATOR & BACKGROUND ---
+        // Item akan berwarna merah cair jika belum diklik
         if (model.isUnread()) {
             holder.itemView.setBackgroundColor(Color.parseColor("#FFF0F0"));
             holder.unreadIndicator.setVisibility(View.VISIBLE);
@@ -103,36 +99,37 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             holder.unreadIndicator.setVisibility(View.GONE);
         }
 
-        // --- 5. CLICK LOGIC (NAVIGATION) ---
+        // --- 6. LOGIK KLIK: TANDA SEBAGAI BACA HANYA PADA ITEM YANG DITEKAN ---
         holder.itemView.setOnClickListener(v -> {
-            // Mark as Read in Firebase
             if (model.isUnread()) {
                 String uid = FirebaseAuth.getInstance().getUid();
-                if (uid != null) {
+                if (uid != null && model.getId() != null) {
+                    // Update Firebase: Tukar unread kepada false
                     FirebaseDatabase.getInstance().getReference("Notifications")
                             .child(uid)
                             .child(model.getId())
                             .child("unread").setValue(false);
                 }
+                // Update UI secara lokal serta-merta
                 model.setUnread(false);
                 notifyItemChanged(position);
             }
 
-            // Determine Navigation Destination
+            // Navigasi ke Order Details yang sepadan
             Intent intent;
-            if ("NewOrder".equals(model.getType())) {
-                // If type is NewOrder, go to Seller Details
+            String type = model.getType();
+            String orderId = model.getOrderId() != null ? model.getOrderId() : "";
+
+            if ("ORDER_NEW".equals(type) || "ORDER_COMPLETED".equals(type) || "ORDER_CANCELLED_BY_BUYER".equals(type)) {
                 intent = new Intent(context, com.example.beautyhub.seller.SellerOrderDetailActivity.class);
             } else {
-                // Otherwise, go to Buyer Details
                 intent = new Intent(context, com.example.beautyhub.buyer.OrderDetailsActivity.class);
             }
 
-            // Always pass the FULL ORIGINAL Order ID for database reference
-            intent.putExtra("ORDER_ID", model.getOrderId());
+            intent.putExtra("ORDER_ID", orderId);
             context.startActivity(intent);
         });
-    }
+    } // Penutup onBindViewHolder yang betul
 
     @Override
     public int getItemCount() {

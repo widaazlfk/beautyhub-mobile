@@ -86,7 +86,7 @@ public class ReportProblemActivity extends AppCompatActivity {
             binding.editTextSubject.setHint("Issue Type (e.g. Payment, Bug, Login)");
             binding.editTextDescription.setHint("Please describe the problem you encountered...");
         } else {
-            binding.editTextSubject.setHint("Reason for report (e.g. Rude behavior, Scammed)");
+            binding.editTextSubject.setHint("Reason for report (e.g. Fraud, Scammed)");
             binding.editTextDescription.setHint("Please provide more details about the incident...");
         }
     }

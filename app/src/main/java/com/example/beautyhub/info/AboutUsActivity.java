@@ -1,15 +1,16 @@
 package com.example.beautyhub.info;
 
 import androidx.appcompat.app.AppCompatActivity;
-
+import android.content.Intent;
+import android.net.Uri;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ImageButton;
 import android.widget.TextView;
-
 import com.example.beautyhub.R;
-import com.google.android.material.appbar.MaterialToolbar; // Tambah import ini
+import com.google.android.material.appbar.MaterialToolbar;
 
 public class AboutUsActivity extends AppCompatActivity {
 
@@ -18,43 +19,45 @@ public class AboutUsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about_us);
 
-        // 1. Inisialisasi Toolbar dan fungsi Back Button
+        // 1. Setup Toolbar & Back Button
         setupToolbar();
 
-        // Dapatkan TextView untuk versi aplikasi
-        TextView tvAppVersion = findViewById(R.id.tv_app_version);
+        // 2. Setup Instagram Click
+        ImageButton btnInstagram = findViewById(R.id.btn_instagram);
+        btnInstagram.setOnClickListener(v -> {
+            String url = "https://www.instagram.com/beautyhubofficial?igsh=b2dnaGV1OXhzN2lx"; // Tukar ke username anda
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            startContext(intent);
+        });
 
-        // Panggil method untuk menetapkan teks versi secara dinamik
+        // 3. Set Version
+        TextView tvAppVersion = findViewById(R.id.tv_app_version);
         setAppVersion(tvAppVersion);
     }
 
-    /**
-     * Method untuk menguruskan Toolbar dan butang kembali.
-     */
     private void setupToolbar() {
         MaterialToolbar toolbar = findViewById(R.id.toolbar_about);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
-
-            // Logik apabila butang back diklik
-            toolbar.setNavigationOnClickListener(v -> {
-                onBackPressed(); // Menutup aktiviti semasa dan kembali ke halaman sebelumnya
-            });
+            // Ikon Arrow Back dikendalikan di sini
+            toolbar.setNavigationOnClickListener(v -> finish());
         }
     }
 
-    /**
-     * Method ini mendapatkan versi aplikasi dari Gradle dan memaparkannya.
-     * @param textView TextView untuk memaparkan versi.
-     */
     private void setAppVersion(TextView textView) {
         try {
             PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-            String version = pInfo.versionName;
-            textView.setText("Version " + version);
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.e("AboutUsActivity", "Could not get package version", e);
+            textView.setText("Version " + pInfo.versionName);
+        } catch (Exception e) {
             textView.setText("Version 1.0.0");
+        }
+    }
+
+    private void startContext(Intent intent) {
+        try {
+            startActivity(intent);
+        } catch (Exception e) {
+            Log.e("AboutUs", "Browser tidak dijumpai");
         }
     }
 }

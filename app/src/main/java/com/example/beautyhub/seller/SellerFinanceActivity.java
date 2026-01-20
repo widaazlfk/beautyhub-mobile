@@ -80,10 +80,13 @@ public class SellerFinanceActivity extends AppCompatActivity {
         financeList = new ArrayList<>();
 
 // Tambah logic klik di sini
+        // Dalam SellerFinanceActivity.java
         financeAdapter = new FinanceAdapter(financeList, orderId -> {
-            // Buka activity butiran pesanan
             Intent intent = new Intent(SellerFinanceActivity.this, SellerOrderDetailActivity.class);
-            intent.putExtra("orderId", orderId);
+
+            // TUKAR: "orderId" -> "ORDER_ID" (supaya sepadan dengan Activity Detail)
+            intent.putExtra("ORDER_ID", orderId);
+
             startActivity(intent);
         });
 
@@ -122,18 +125,24 @@ public class SellerFinanceActivity extends AppCompatActivity {
                             String status = ds.child("status").getValue(String.class);
                             Double amount = ds.child("totalAmount").getValue(Double.class);
                             Long timestamp = ds.child("orderDate").getValue(Long.class);
-                            String orderId = ds.getKey();
+                            String fullOrderId = ds.getKey(); // Ini ID penuh (cth: -Nxyz123...)
 
-                            if (amount != null) {
+                            if (amount != null && fullOrderId != null) {
+                                // Ambil 8 aksara pertama sahaja untuk paparan
+                                // Guna substring(0, Math.min(length, 8)) untuk elak error jika ID pendek
+                                String shortOrderId = fullOrderId.length() > 8 ? fullOrderId.substring(0, 8) : fullOrderId;
+
                                 // Deduct 10% platform fee
                                 double netProfit = amount * 0.90;
 
                                 if ("Completed".equalsIgnoreCase(status)) {
                                     totalAvailable += netProfit;
 
-                                    // Add to history list
+                                    // Masukkan ke dalam list
+                                    // Pastikan FinanceModel anda menyimpan ID yang anda mahu papar
+                                    // Gunakan fullOrderId supaya bila klik, data boleh ditarik balik
                                     financeList.add(new FinanceModel(
-                                            orderId,
+                                            fullOrderId,
                                             netProfit,
                                             timestamp != null ? timestamp : System.currentTimeMillis()
                                     ));

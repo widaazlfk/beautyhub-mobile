@@ -11,11 +11,11 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Toolbar Section -->
+        <!-- Toolbar Section (Set transparent supaya nampak background maroon) -->
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/white"
+            android:background="@android:color/transparent"
             app:elevation="0dp">
 
             <com.google.android.material.appbar.MaterialToolbar
@@ -23,63 +23,53 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:navigationIcon="@drawable/ic_arrow_back"
-                app:navigationIconTint="@color/black"
+                app:navigationIconTint="@color/white"
                 app:title="About Us"
-                app:titleTextColor="@color/black" />
+                app:titleTextColor="@color/white" />
         </com.google.android.material.appbar.AppBarLayout>
 
-        <!-- Header Section (Digerakkan sedikit ke atas menggunakan layout_marginTop negatif jika mahu Toolbar bertindih dengan background) -->
+        <!-- Header Section -->
+
+        <!-- Content Section -->
+
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="280dp"
+            android:layout_height="247dp"
             android:layout_marginTop="-56dp"
-            android:orientation="vertical"
-            android:gravity="center"
             android:background="#800000"
+            android:gravity="center"
+            android:orientation="vertical"
             android:padding="24dp">
 
-            <!-- ... isi kandungan Header sedia ada ... -->
-
-            <!-- App Logo -->
-            <ImageView
-                android:layout_width="120dp"
-                android:layout_height="120dp"
-                android:src="@drawable/bhlogoin"
-                android:layout_marginBottom="16dp" />
-
-            <!-- App Name -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="BeautyHub"
+                android:textColor="@color/white"
                 android:textSize="32sp"
-                android:textStyle="bold"
-                android:textColor="@color/white" />
+                android:textStyle="bold" />
 
-            <!-- Tagline -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Your Beauty Destination"
-                android:textSize="16sp"
-                android:textColor="@color/white"
+                android:layout_marginTop="4dp"
                 android:alpha="0.9"
-                android:layout_marginTop="4dp" />
+                android:text="Your Beauty Destination"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
 
-            <!-- Version Info -->
             <TextView
                 android:id="@+id/tv_app_version"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Version 1.0.0"
-                android:textSize="14sp"
-                android:textColor="@color/white"
+                android:layout_marginTop="8dp"
                 android:alpha="0.8"
-                android:layout_marginTop="8dp" />
+                android:text="Version 1.0.0"
+                android:textColor="@color/white"
+                android:textSize="14sp" />
 
         </LinearLayout>
 
-        <!-- Content Section -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -114,7 +104,7 @@
                         android:text="BeautyHub was born from a passion for making premium beauty products accessible to everyone. Founded in 2024, we've grown from a small startup to a trusted beauty destination serving thousands of customers worldwide."
                         android:textSize="14sp"
                         android:lineSpacingExtra="4dp"
-                        android:textColor="@color/gray" />
+                        android:textColor="@android:color/darker_gray" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -144,10 +134,10 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="To empower individuals to express their unique beauty through high-quality, cruelty-free products while fostering a community that celebrates diversity and self-expression."
+                        android:text="To empower individuals to express their unique beauty through high-quality, authentic products while fostering a community that celebrates diversity and self-expression."
                         android:textSize="14sp"
                         android:lineSpacingExtra="4dp"
-                        android:textColor="@color/gray" />
+                        android:textColor="@android:color/darker_gray" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -165,9 +155,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:columnCount="2"
-                android:rowCount="1"
-                android:alignmentMode="alignBounds"
-                android:columnOrderPreserved="false"
                 android:layout_marginBottom="24dp">
 
                 <!-- Quality Feature -->
@@ -176,7 +163,6 @@
                     android:layout_height="120dp"
                     android:layout_columnWeight="1"
                     android:layout_margin="8dp"
-                    android:layout_gravity="fill"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="2dp">
 
@@ -191,7 +177,7 @@
                             android:layout_width="40dp"
                             android:layout_height="40dp"
                             android:src="@drawable/ic_quality"
-                            app:tint="@color/primary_color" />
+                            app:tint="#800000" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -199,7 +185,6 @@
                             android:text="Premium Quality"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:gravity="center"
                             android:layout_marginTop="8dp" />
 
                     </LinearLayout>
@@ -211,7 +196,6 @@
                     android:layout_height="120dp"
                     android:layout_columnWeight="1"
                     android:layout_margin="8dp"
-                    android:layout_gravity="fill"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="2dp">
 
@@ -226,7 +210,7 @@
                             android:layout_width="40dp"
                             android:layout_height="40dp"
                             android:src="@drawable/ic_reward"
-                            app:tint="@color/gold" />
+                            app:tint="#FFD700" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -234,7 +218,6 @@
                             android:text="Loyalty Rewards"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:gravity="center"
                             android:layout_marginTop="8dp" />
 
                     </LinearLayout>
@@ -242,120 +225,11 @@
 
             </GridLayout>
 
-            <!-- Statistics -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="By The Numbers"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="16dp" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <!-- Happy Customers -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:gravity="center">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="10K+"
-                                android:textSize="24sp"
-                                android:textStyle="bold"
-                                android:textColor="@color/primary_color" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Happy Customers"
-                                android:textSize="12sp"
-                                android:textColor="@color/gray"
-                                android:gravity="center" />
-
-                        </LinearLayout>
-
-                        <!-- Products -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:gravity="center">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="500+"
-                                android:textSize="24sp"
-                                android:textStyle="bold"
-                                android:textColor="@color/green" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Products"
-                                android:textSize="12sp"
-                                android:textColor="@color/gray"
-                                android:gravity="center" />
-
-                        </LinearLayout>
-
-                        <!-- Countries -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:gravity="center">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="50+"
-                                android:textSize="24sp"
-                                android:textStyle="bold"
-                                android:textColor="@color/orange" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Countries"
-                                android:textSize="12sp"
-                                android:textColor="@color/gray"
-                                android:gravity="center" />
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
             <!-- Contact Information -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="2dp">
 
@@ -379,23 +253,19 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:layout_marginBottom="12dp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground">
+                        android:layout_marginBottom="12dp">
 
                         <ImageView
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:src="@drawable/ic_email"
-                            app:tint="@color/primary_color"
+                            app:tint="#800000"
                             android:layout_marginEnd="12dp" />
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="support@beautyhub.com"
+                            android:text="admin@beautyhub.com"
                             android:textSize="14sp" />
 
                     </LinearLayout>
@@ -405,80 +275,42 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginBottom="12dp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground">
+                        android:gravity="center_vertical">
 
                         <ImageView
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:src="@drawable/ic_phone"
-                            app:tint="@color/primary_color"
+                            app:tint="#800000"
                             android:layout_marginEnd="12dp" />
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="+1 (555) 123-4567"
+                            android:text="017-9288974"
                             android:textSize="14sp" />
 
                     </LinearLayout>
-
-
-
-                    <!-- Address -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground">
+                        android:gravity="center"
+                        android:layout_marginTop="24dp"
+                        android:layout_marginBottom="32dp">
 
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_address"
-                            app:tint="@color/primary_color"
-                            android:layout_marginEnd="12dp" />
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="123 Beauty Street, Cosmetic City, CA 90210"
-                            android:textSize="14sp" />
-
+                        <ImageButton
+                            android:id="@+id/btn_instagram"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:src="@drawable/ic_instagram"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:layout_margin="8dp" />
                     </LinearLayout>
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Social Media Links -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="32dp">
-
-
-                <!-- Instagram -->
-                <ImageButton
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:src="@drawable/ic_instagram"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:layout_margin="8dp" />
-
-            </LinearLayout>
-
         </LinearLayout>
-
     </LinearLayout>
 </ScrollView>

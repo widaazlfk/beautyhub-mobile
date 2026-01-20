@@ -253,7 +253,7 @@ public class SellerOrderDetailActivity extends AppCompatActivity {
             if (orderItemsSnap.exists()) {
                 for (DataSnapshot itemDs : orderItemsSnap.getChildren()) {
                     firstProductName = itemDs.child("productName").getValue(String.class);
-                    firstProductImage = itemDs.child("productImage").getValue(String.class);
+                    firstProductImage = itemDs.child("imageUrls").getValue(String.class);
                     break;
                 }
             }

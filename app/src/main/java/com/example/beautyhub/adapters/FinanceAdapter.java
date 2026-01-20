@@ -37,18 +37,30 @@ public class FinanceAdapter extends RecyclerView.Adapter<FinanceAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         FinanceModel model = list.get(position);
+        String fullOrderId = model.getOrderId();
 
-        String shortId = model.getOrderId().length() > 8 ? model.getOrderId().substring(0, 8).toUpperCase() : model.getOrderId();
-        holder.tvOrderId.setText("Order #" + shortId);
+        // 1. Logik memendekkan ID untuk paparan (8 aksara pertama)
+        String displayId = "Unknown";
+        if (fullOrderId != null && !fullOrderId.isEmpty()) {
+            // Ambil 8 aksara pertama, buang tanda "-" jika ada di depan, dan tukar ke Uppercase
+            String cleanId = fullOrderId.startsWith("-") ? fullOrderId.substring(1) : fullOrderId;
+            displayId = cleanId.length() > 8 ? cleanId.substring(0, 8).toUpperCase() : cleanId.toUpperCase();
+        }
+
+        holder.tvOrderId.setText("Order #" + displayId);
+
+        // 2. Format Jumlah (RM)
         holder.tvAmount.setText(String.format(Locale.US, "+RM %.2f", model.getAmount()));
 
+        // 3. Format Tarikh
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault());
         holder.tvDate.setText(sdf.format(new Date(model.getTimestamp())));
 
-        // Set klik pada item
+        // 4. Set klik pada item (MENGGUNAKAN ID PENUH)
         holder.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onItemClick(model.getOrderId());
+            if (listener != null && fullOrderId != null) {
+                // Kita hantar fullOrderId supaya Activity boleh tarik data penuh dari Firebase
+                listener.onItemClick(fullOrderId);
             }
         });
     }

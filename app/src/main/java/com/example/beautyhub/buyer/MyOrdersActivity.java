@@ -76,7 +76,9 @@ public class MyOrdersActivity extends AppCompatActivity implements OrderAdapter.
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("My Orders");
         }
-        toolbar.setNavigationOnClickListener(v -> finish());
+
+        // TUKAR DI SINI: Guna onBackPressed() bukannya finish() secara langsung
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
     }
 
     private void initViews() {

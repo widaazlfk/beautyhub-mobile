@@ -65,9 +65,9 @@ public class NotificationActivity extends AppCompatActivity {
         }
     }
 
+    // Dalam NotificationActivity.java
     private void fetchNotifications() {
         progressBar.setVisibility(View.VISIBLE);
-
         DatabaseReference notifRef = FirebaseDatabase.getInstance()
                 .getReference("Notifications")
                 .child(currentUserId);
@@ -80,21 +80,18 @@ public class NotificationActivity extends AppCompatActivity {
                     NotificationModel model = ds.getValue(NotificationModel.class);
                     if (model != null) {
                         notificationList.add(model);
+                        // PADAM LOGIK LAMA DI SINI (Jangan letak setValue(false) di sini)
                     }
                 }
-
-                Collections.reverse(notificationList); // Newest first
+                Collections.reverse(notificationList);
                 adapter.notifyDataSetChanged();
                 progressBar.setVisibility(View.GONE);
-
-                // Toggle empty state vs recycler view
                 updateUI(notificationList.isEmpty());
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 progressBar.setVisibility(View.GONE);
-                Toast.makeText(NotificationActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

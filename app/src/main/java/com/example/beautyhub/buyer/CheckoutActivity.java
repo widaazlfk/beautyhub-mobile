@@ -287,148 +287,203 @@ public class CheckoutActivity extends AppCompatActivity implements CheckoutItems
     }
 
     private Task<Void> updateStockForItems() {
-        List<Task<Void>> stockUpdateTasks = new ArrayList<>();
-
+        List<Task<Void>> tasks = new ArrayList<>();
         for (CartItem item : selectedItems) {
+            DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Products").child(item.getProductId());
+
             TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
-            DatabaseReference productRef = database.getReference("Products").child(item.getProductId());
-
-            productRef.runTransaction(new Transaction.Handler() {
-                @NonNull
+            ref.runTransaction(new Transaction.Handler() {
                 @Override
-                public Transaction.Result doTransaction(@NonNull MutableData currentData) {
-                    Product product = currentData.getValue(Product.class);
-                    if (product == null) {
-                        return Transaction.abort();
+                public Transaction.Result doTransaction(MutableData currentData) {
+                    // Gunakan Map atau class Product, pastikan field "stock" wujud
+                    Long currentStock = currentData.child("stock").getValue(Long.class);
+                    if (currentStock == null) return Transaction.success(currentData); // Atau abort jika wajib ada
+
+                    if (currentStock < item.getQuantity()) {
+                        return Transaction.abort(); // Stok tak cukup
                     }
 
-                    if (product.getStock() < item.getQuantity()) {
-                        return Transaction.abort(); // Stok tidak cukup saat akhir
-                    }
-
-                    // Tolak stok
-                    product.setStock(product.getStock() - item.getQuantity());
-                    currentData.setValue(product);
+                    currentData.child("stock").setValue(currentStock - item.getQuantity());
                     return Transaction.success(currentData);
                 }
 
                 @Override
-                public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {
-                    if (committed && error == null) {
-                        tcs.setResult(null);
-                    } else {
-                        tcs.setException(error != null ? error.toException() : new Exception("Stock transaction failed"));
-                    }
+                public void onComplete(DatabaseError error, boolean committed, DataSnapshot currentData) {
+                    if (committed) tcs.setResult(null);
+                    else tcs.setException(error != null ? error.toException() : new Exception("Stock update failed"));
                 }
             });
-            stockUpdateTasks.add(tcs.getTask());
+            tasks.add(tcs.getTask());
         }
-        return Tasks.whenAll(stockUpdateTasks);
+        return Tasks.whenAll(tasks);
     }
 
     private void saveOrderToFirebase(String paymentMethod) {
         progressDialog.setMessage("Finalizing order...");
-        String orderId = database.getReference("Orders").push().getKey();
-        if (orderId == null) return;
-
+        DatabaseReference ordersRef = database.getReference("Orders");
         long timestamp = System.currentTimeMillis();
 
-        // Group items by seller (untuk split order mengikut kedai)
-        Map<String, List<CartItem>> itemsBySeller = selectedItems.stream()
-                .collect(Collectors.groupingBy(CartItem::getSellerId));
+        // List untuk simpan semua Task Firebase dan Order ID
+        List<Task<Void>> tasks = new ArrayList<>();
+        ArrayList<String> orderIdsList = new ArrayList<>();
 
-        List<Task<Void>> allTasks = new ArrayList<>();
-        ArrayList<String> subOrderIds = new ArrayList<>();
-
-        for (Map.Entry<String, List<CartItem>> entry : itemsBySeller.entrySet()) {
-            String sellerId = entry.getKey();
-            List<CartItem> sellerItems = entry.getValue();
-            String subOrderId = orderId + "_" + sellerId;
-            subOrderIds.add(subOrderId);
-
-            // Ringkaskan ID untuk paparan (6 aksara terakhir)
-            String shortId = subOrderId.substring(Math.max(0, subOrderId.length() - 6)).toUpperCase();
-
-            Order order = new Order();
-            order.setOrderId(subOrderId);
-            order.setUserId(currentUser.getUid());
-            order.setSellerId(sellerId);
-
-            // PEMBETULAN 1: Map CartItem ke OrderItem secara manual (elak ralat Protected Access)
-            List<OrderItem> orderItems = new ArrayList<>();
-            for (CartItem item : sellerItems) {
-                OrderItem oi = new OrderItem();
-                oi.setProductId(item.getProductId());
-                oi.setProductName(item.getName());
-                oi.setQuantity(item.getQuantity());
-                oi.setPrice(item.getPrice());
-
-                // Gunakan imageUrls terus daripada CartItem (buang rujukan productImage)
-                oi.setImageUrls(item.getImageUrls());
-                orderItems.add(oi);
-            }
-            order.setOrderItems(orderItems);
-
-            order.setOrderDate(timestamp);
-            order.setPaymentMethod(paymentMethod);
-            order.setStatus("Pending");
-            order.setShippingAddress(userShippingAddress);
-            order.setTotalAmount(calculateSellerSubtotal(sellerItems));
-
-            // Simpan ke node Orders
-            allTasks.add(database.getReference("Orders").child(subOrderId).setValue(order));
-
-            // Hantar Notifikasi kepada Seller
-            String notifId = database.getReference("Notifications").child(sellerId).push().getKey();
-            if (notifId != null) {
-                // Ambil thumbUrl secara selamat
-                String thumbUrl = "";
-                if (!sellerItems.isEmpty()) {
-                    Object imgObj = sellerItems.get(0).getImageUrls();
-                    if (imgObj instanceof List && !((List<?>) imgObj).isEmpty()) {
-                        thumbUrl = String.valueOf(((List<?>) imgObj).get(0));
-                    } else {
-                        thumbUrl = String.valueOf(imgObj);
-                    }
-                }
-
-                // PEMBETULAN 2: Guna subOrderId/shortId (elak ralat currentOrder undefined)
-                NotificationModel sellerNotif = new NotificationModel(
-                        notifId,
-                        "New Order #" + shortId,
-                        "You received a new order from " + (currentUser.getDisplayName() != null ? currentUser.getDisplayName() : "a buyer"),
-                        timestamp, // long
-                        "NewOrder",
-                        subOrderId,
-                        thumbUrl,
-                        sellerItems.get(0).getName(),
-                        currentUser.getDisplayName(),
-                        true
-                );
-
-                // PEMBETULAN 3: Guna pembolehubah 'sellerNotif' (bukan 'notification')
-                allTasks.add(database.getReference("Notifications").child(sellerId).child(notifId).setValue(sellerNotif));
-            }
+        Map<String, List<CartItem>> itemsBySeller = new HashMap<>();
+        for (CartItem item : selectedItems) {
+            itemsBySeller.computeIfAbsent(item.getSellerId(), k -> new ArrayList<>()).add(item);
         }
 
-        // Padam item dari Cart jika bukan "Buy Now"
-        if (!isFromBuyNow) {
-            for (CartItem item : selectedItems) {
-                allTasks.add(cartsRef.child(item.getSellerId()).child(item.getCartItemId()).removeValue());
-            }
-        }
+        userRef.child("recipientName").get().addOnSuccessListener(snapshot -> {
+                    String buyerName = snapshot.getValue(String.class);
+                    if (buyerName == null) buyerName = "A Buyer";
 
-        Tasks.whenAllComplete(allTasks).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                // Berjaya: Jalankan proses pasca-order (Points, Success UI, etc)
-                handlePostOrderCleanup(subOrderIds, paymentMethod);
-            } else {
-                progressDialog.dismiss();
-                Toast.makeText(this, "Failed to save order details.", Toast.LENGTH_SHORT).show();
-                // Opsional: Rollback stok jika simpan order gagal
-                rollbackStockUpdates(new ArrayList<>(selectedItems));
-            }
+                    // 1. Kumpulkan item mengikut SellerId
+
+                    for (Map.Entry<String, List<CartItem>> entry : itemsBySeller.entrySet()) {
+                        String sellerId = entry.getKey();
+                        List<CartItem> sellerItems = entry.getValue();
+
+                        // Jana Order ID unik
+                        String orderId = ordersRef.push().getKey();
+                        orderIdsList.add(orderId);
+
+                        // 2. Ambil Maklumat Seller
+                        String sellerName = "Unknown Store";
+                        if (!sellerItems.isEmpty()) {
+                            sellerName = sellerItems.get(0).getSellerName();
+                        }
+
+                        // 3. Kira Kos
+                        double sellerSubtotal = 0;
+                        for (CartItem item : sellerItems) {
+                            sellerSubtotal += (item.getPrice() * item.getQuantity());
+                        }
+                        double shipping = userShippingAddress.getState().toLowerCase().contains("sabah") ||
+                                userShippingAddress.getState().toLowerCase().contains("sarawak") ?
+                                SHIPPING_FEE_EAST_MY : SHIPPING_FEE_WEST_MY;
+
+                        // 4. Sediakan List OrderItems (Sama format JSON anda)
+                        List<OrderItem> currentOrderItems = new ArrayList<>();
+                        for (CartItem item : sellerItems) {
+                            OrderItem orderItem = new OrderItem();
+                            orderItem.setProductId(item.getProductId());
+                            orderItem.setProductName(item.getName()); // Map ke 'productName
+                            orderItem.setQuantity(item.getQuantity());
+                            orderItem.setPrice(item.getPrice());
+                            orderItem.setImageUrls(item.getImageUrls()); // Ambil dari Cart (plural)
+                            orderItem.setSellerId(sellerId);
+                            orderItem.setSellerName(sellerName);
+                            orderItem.setReviewed(false);
+                            orderItem.setFromJson(false);
+                            orderItem.setSellerProfileImageUrl(item.getSellerProfileImageUrl());
+                            orderItem.setOfficialStore(false);
+
+
+                            currentOrderItems.add(orderItem);
+                        }
+
+                        // 5. Bina Objek Order (Ikut struktur JSON yang anda beri)
+                        Order order = new Order();
+                        order.setOrderId(orderId);
+                        order.setUserId(currentUser.getUid());
+                        order.setSellerId(sellerId);
+                        order.setSellerName(sellerName);
+                        order.setPaymentMethod(paymentMethod);
+                        order.setTotalAmount(sellerSubtotal + shipping);
+                        order.setOrderDate(timestamp);
+                        order.setShippingAddress(userShippingAddress);
+                        order.setOrderItems(currentOrderItems); // Masukkan list item ke dalam order
+                        order.setStatus("Pending");
+                        order.setOrderSource(isFromBuyNow ? "buy_now" : "cart");
+                        order.setDiscountAmount(0); // Set default jika tiada
+                        order.setOfficialStore(false);
+
+                        // 6. Simpan ke Firebase
+                        // 6. Simpan ke Firebase
+                        tasks.add(ordersRef.child(orderId).setValue(order));
+
+                        // 7. Notifikasi
+                        // Ambil nama produk pertama untuk ringkasan notifikasi
+                        String firstProductName = currentOrderItems.get(0).getProductName();
+                        // Ambil gambar produk pertama penjual ini
+                        String firstProductImage = currentOrderItems.get(0).getImageUrls();
+
+                        if (currentOrderItems.size() > 1) {
+                            firstProductName += " (and " + (currentOrderItems.size() - 1) + " more)";
+                        }
+
+                        // Di dalam loop itemsBySeller
+                        double orderTotal = sellerSubtotal + shipping;
+
+// TAMBAHKAN "ORDER_NEW" di hujung
+                        sendNotificationToSeller(sellerId, orderId, buyerName, firstProductName, firstProductImage, "ORDER_NEW");
+
+                        sendNotificationToBuyer(orderId, orderTotal, sellerName, firstProductName, firstProductImage);
+                    }});
+        // 8. Tunggu semua siap & panggil handlePostOrderCleanup
+        Tasks.whenAll(tasks).addOnSuccessListener(aVoid -> {
+            handlePostOrderCleanup(orderIdsList, paymentMethod);
+        }).addOnFailureListener(e -> {
+            progressDialog.dismiss();
+            Toast.makeText(this, "Order failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         });
+    }
+    private void sendNotificationToBuyer(String orderId, double amount, String sellerName, String productName, String imageUrl) {
+        DatabaseReference notifRef = database.getReference("Notifications").child(currentUser.getUid());
+        String id = notifRef.push().getKey();
+
+        NotificationModel notification = new NotificationModel();
+        notification.setId(id);
+        notification.setOrderId(orderId);
+        notification.setTitle("Order Placed Successfully! ✅");
+
+        // Mesej yang lebih spesifik mengikut pesanan seller tersebut
+        notification.setMessage("You ordered " + productName + " from " + sellerName + ". Total: RM" + String.format(Locale.getDefault(), "%.2f", amount));
+
+        notification.setSellerName(sellerName);
+        notification.setProductName(productName);
+        notification.setProductImageUrl(imageUrl); // Guna gambar produk dari seller ini
+
+        notification.setType("ORDER_PLACED");
+        notification.setTimestamp(System.currentTimeMillis());
+        notification.setUnread(true);
+
+        if (id != null) {
+            notifRef.child(id).setValue(notification);
+        }
+    }
+    private void sendNotificationToSeller(String sellerId, String orderId, String buyerName, String productName, String imageUrl, String type) {
+        DatabaseReference notifyRef = database.getReference("Notifications").child(sellerId);
+        String id = notifyRef.push().getKey();
+
+        NotificationModel notification = new NotificationModel();
+        notification.setId(id);
+        notification.setOrderId(orderId);
+
+        // Gunakan nama dari shipping address jika ada
+        String nameToDisplay = buyerName;
+        if (userShippingAddress != null && userShippingAddress.getRecipientName() != null) {
+            nameToDisplay = userShippingAddress.getRecipientName();
+        }
+
+        if (type.equals("ORDER_COMPLETED")) {
+            notification.setTitle("Order Completed! ✅");
+            notification.setMessage("Customer " + nameToDisplay + " has confirmed receiving " + productName + ". Funds are being processed.");
+            notification.setType("ORDER_COMPLETED");
+        } else {
+            notification.setTitle("New Order Received! 🛍️");
+            notification.setMessage("Customer " + nameToDisplay + " has ordered " + productName + ". Please ship it soon.");
+            notification.setType("ORDER_NEW");
+        }
+
+        notification.setBuyerName(nameToDisplay);
+        notification.setProductName(productName);
+        notification.setProductImageUrl(imageUrl);
+        notification.setTimestamp(System.currentTimeMillis());
+        notification.setUnread(true);
+
+        if (id != null) {
+            notifyRef.child(id).setValue(notification);
+        }
     }
 
     private double calculateSellerSubtotal(List<CartItem> items) {
@@ -437,10 +492,12 @@ public class CheckoutActivity extends AppCompatActivity implements CheckoutItems
         return sub;
     }
     private void handlePostOrderCleanup(ArrayList<String> orderIds, String paymentMethod) {
+        // 1. Bersihkan Cart jika perlu
         if (!isFromBuyNow && shouldClearCartAfterOrder) {
             removeOrderedItemsFromCart();
         }
 
+        // 2. Buang reward yang telah digunakan (Kekalkan logik anda)
         int checkedId = binding.chipGroupDiscounts.getCheckedChipId();
         if (checkedId != View.NO_ID) {
             Chip chip = binding.chipGroupDiscounts.findViewById(checkedId);
@@ -450,6 +507,7 @@ public class CheckoutActivity extends AppCompatActivity implements CheckoutItems
             }
         }
 
+        // 3. Tambah point (Kekalkan logik anda)
         userRef.child("points").runTransaction(new Transaction.Handler() {
             @NonNull
             @Override
@@ -462,20 +520,49 @@ public class CheckoutActivity extends AppCompatActivity implements CheckoutItems
             @Override public void onComplete(@Nullable DatabaseError e, boolean c, @Nullable DataSnapshot d) {}
         });
 
-        if (progressDialog.isShowing()) progressDialog.dismiss();
+        // 4. Tutup progress dialog
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
 
+        // 5. NAVIGASI KE OrderSuccessActivity
         Intent intent = new Intent(this, OrderSuccessActivity.class);
-        intent.putStringArrayListExtra("ORDER_IDS", orderIds);
-        intent.putExtra("PAYMENT_METHOD", paymentMethod);
-        intent.putExtra("ORDER_COMPLETED", true);
-        intent.putExtra("SHOULD_CLEAR_CART", shouldClearCartAfterOrder);
 
-        setResult(RESULT_OK, intent);
+        // PENTING: Pastikan orderIds tidak null sebelum hantar
+        if (orderIds == null) {
+            orderIds = new ArrayList<>();
+        }
+
+        // Hantar sebagai ArrayList
+        intent.putStringArrayListExtra("ORDER_IDS", orderIds);
+
+        // Hantar String tunggal sebagai backup (Ambil yang pertama)
+        if (!orderIds.isEmpty()) {
+            intent.putExtra("ORDER_ID", orderIds.get(0));
+        } else {
+            intent.putExtra("ORDER_ID", "N/A");
+        }
+
+        intent.putExtra("PAYMENT_METHOD", paymentMethod);
+        intent.putExtra("TOTAL_AMOUNT", totalPayment);
+
+        // Guna flag ini supaya user tidak boleh 'back' ke Checkout semula
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
         startActivity(intent);
         finish();
     }
 
+    public void onQuantityChanged(CartItem item, int newQuantity) {
+        // Find item in selectedItems and update
+        for (CartItem selected : selectedItems) {
+            if (selected.getProductId().equals(item.getProductId())) {
+                selected.setQuantity(newQuantity);
+                break;
+            }
+        }
+        displayOrderSummary();
+    }
     private void removeOrderedItemsFromCart() {
         if (cartsRef == null || selectedItems.isEmpty()) return;
 

@@ -8,7 +8,10 @@ public class NotificationModel {
     private String type;
     private String productName;
     private String sellerName;
+    private String buyerName;
+
     private String productImageUrl;
+    private String imageUrls;
     private String orderId; // Tambahan field baru untuk navigasi
     private boolean unread;
 
@@ -18,7 +21,7 @@ public class NotificationModel {
 
     // Update Constructor untuk sertakan 'orderId' dan 'unread'
     public NotificationModel(String id, String title, String message, long timestamp, String type,
-                             String productName, String sellerName, String productImageUrl,
+                             String productName, String sellerName, String buyerName, String productImageUrl,
                              String orderId, boolean unread) {
         this.id = id;
         this.title = title;
@@ -27,6 +30,7 @@ public class NotificationModel {
         this.type = type;
         this.productName = productName;
         this.sellerName = sellerName;
+        this.buyerName = buyerName;
         this.productImageUrl = productImageUrl;
         this.orderId = orderId; // Set orderId
         this.unread = unread;
@@ -62,4 +66,10 @@ public class NotificationModel {
 
     public boolean isUnread() { return unread; }
     public void setUnread(boolean unread) { this.unread = unread; }
+
+    public String getImageUrls() { return imageUrls; }
+    public void setImageUrls(String imageUrls) { this.imageUrls = imageUrls; }
+    public String getBuyerName() { return buyerName; }
+    public void setBuyerName(String buyerName) { this.buyerName = buyerName; }
+
 }

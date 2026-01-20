@@ -177,7 +177,7 @@ public class SellerActivity extends AppCompatActivity {
         });
     }
 
-        private void loadDashboardData() {
+    private void loadDashboardData() {
         DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
 
         // Dapatkan bulan semasa untuk filter Sales Month
@@ -185,6 +185,7 @@ public class SellerActivity extends AppCompatActivity {
         int currentMonth = calNow.get(Calendar.MONTH);
         int currentYear = calNow.get(Calendar.YEAR);
 
+        // --- 1. LISTENER UNTUK ORDERS (Sales, New Orders, etc.) ---
         rootRef.child("Orders").orderByChild("sellerId").equalTo(currentSellerId)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
@@ -201,47 +202,76 @@ public class SellerActivity extends AppCompatActivity {
                             Double amount = ds.child("totalAmount").getValue(Double.class);
                             Long timestamp = ds.child("orderDate").getValue(Long.class);
 
-                            // 1. Kira JUALAN BULAN SEMASA (Status Completed & 10% Fee)
                             if (amount != null && timestamp != null && "Completed".equalsIgnoreCase(status)) {
                                 orderCal.setTimeInMillis(timestamp);
                                 if (orderCal.get(Calendar.MONTH) == currentMonth &&
                                         orderCal.get(Calendar.YEAR) == currentYear) {
-
-                                    double netAmount = amount * 0.90; // Tolak 10%
-                                    monthlyNetSales += netAmount;
+                                    monthlyNetSales += (amount * 0.90);
                                 }
                             }
 
-                            // 2. Kira TOTAL ORDERS (Semua order milik seller)
                             totalOrdersCount++;
 
-                            // 3. Kira NEW ORDERS (Pending atau Processing)
                             if ("Pending".equalsIgnoreCase(status) || "Processing".equalsIgnoreCase(status)) {
                                 newOrdersCount++;
                                 toShipBadgeCount++;
                             }
                         }
 
-                        // Kemaskini UI
                         tvTotalSales.setText(String.format(Locale.US, "RM %.2f", monthlyNetSales));
                         tvTotalOrders.setText(String.valueOf(totalOrdersCount));
 
-                        // tv_new_orders_count adalah ID di dalam Business Insights
                         if (findViewById(R.id.tv_new_orders_count) != null) {
-                            ((TextView)findViewById(R.id.tv_new_orders_count)).setText(String.valueOf(newOrdersCount));
+                            ((TextView) findViewById(R.id.tv_new_orders_count)).setText(String.valueOf(newOrdersCount));
                         }
 
-                        // tv_to_ship_count adalah ID di dalam To-Do List (biasanya sama dengan New Orders)
                         if (tvToShipCount != null) {
                             tvToShipCount.setText(String.valueOf(toShipBadgeCount));
                         }
 
-                        // Kemaskini Carta
                         setupStatisticsChart(snapshot);
                     }
 
                     @Override
-                    public void onCancelled(@NonNull DatabaseError error) {}
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.e("SellerActivity", "Orders Error: " + error.getMessage());
+                    }
+                });
+
+        // --- 2. LISTENER UNTUK PRODUCTS (Low Stock) ---
+        rootRef.child("Products").orderByChild("sellerId").equalTo(currentSellerId)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        int lowStockCount = 0;
+                        for (DataSnapshot ds : snapshot.getChildren()) {
+                            // PASTIKAN: Di Firebase anda guna key "productQuantity" atau "stock"
+                            // Jika model anda guna getProductQuantity(), gunakan key "productQuantity"
+                            Integer stock = ds.child("quantity").getValue(Integer.class);
+
+                            // Jika "productQuantity" null, cuba cari key "stock"
+                            if (stock == null) {
+                                stock = ds.child("stock").getValue(Integer.class);
+                            }
+
+                            if (stock != null && stock <= 10) {
+                                lowStockCount++;
+                            }
+                        }
+
+                        // Update Badge di Dashboard
+                        if (tvLowStockBadge != null) {
+                            // Sentiasa set text (akan jadi "0" jika tiada low stock)
+                            tvLowStockBadge.setText(String.valueOf(lowStockCount));
+
+                            // Sentiasa VISIBLE supaya angka 0 tetap kelihatan
+                            tvLowStockBadge.setVisibility(View.VISIBLE);
+                        }
+                    }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.e("SellerActivity", "Products Error: " + error.getMessage());
+                    }
                 });
     }
     private void setupStatisticsChart(DataSnapshot ordersSnapshot) {
@@ -310,27 +340,37 @@ public class SellerActivity extends AppCompatActivity {
         barChartStatistics.invalidate();
     }
     private void updateNotificationBadge() {
+        if (currentSellerId == null) return;
+
         DatabaseReference notifRef = FirebaseDatabase.getInstance().getReference("Notifications").child(currentSellerId);
+
+        // Guna ValueEventListener supaya badge update automatik bila ada notif baru masuk
         notifRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                long unreadCount = 0;
+                int unreadCount = 0;
                 for (DataSnapshot ds : snapshot.getChildren()) {
-                    Boolean read = ds.child("read").getValue(Boolean.class);
-                    if (read != null && !read) unreadCount++;
+                    // Semak field "unread" (boolean) dalam setiap notifikasi
+                    Boolean isUnread = ds.child("unread").getValue(Boolean.class);
+                    if (isUnread != null && isUnread) {
+                        unreadCount++;
+                    }
                 }
 
                 if (unreadCount > 0) {
                     tvNotificationBadge.setVisibility(View.VISIBLE);
-                    tvNotificationBadge.setText(unreadCount > 9 ? "9+" : String.valueOf(unreadCount));
+                    tvNotificationBadge.setText(String.valueOf(unreadCount));
                 } else {
                     tvNotificationBadge.setVisibility(View.GONE);
                 }
             }
-            @Override public void onCancelled(@NonNull DatabaseError error) {}
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("SellerActivity", "Badge Error: " + error.getMessage());
+            }
         });
     }
-
     private void logoutUser() {
         mAuth.signOut();
         Intent intent = new Intent(this, LoginActivity.class);
