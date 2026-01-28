@@ -151,20 +151,25 @@ public class SellersStatisticsActivity extends AppCompatActivity {
                             salesMap.put(id, 0f);
                         }
 
+                        // Di dalam method fetchSellersStatistics(), bahagian ordersRef
                         for (DataSnapshot ds : ordersSnapshot.getChildren()) {
                             String status = ds.child("status").getValue(String.class);
 
-                            // Kira semua status kecuali Cancelled
-                            if (!"Cancelled".equalsIgnoreCase(status)) {
+                            // HANYA AMBIL YANG COMPLETED SAHAJA
+                            if ("Completed".equalsIgnoreCase(status)) {
                                 String sId = ds.child("sellerId").getValue(String.class);
                                 Object amt = ds.child("totalAmount").getValue();
 
-                                float val = 0f;
-                                if (amt instanceof Double) val = ((Double) amt).floatValue();
-                                else if (amt instanceof Long) val = ((Long) amt).floatValue();
+                                float totalOrderAmount = 0f;
+                                if (amt instanceof Double) totalOrderAmount = ((Double) amt).floatValue();
+                                else if (amt instanceof Long) totalOrderAmount = ((Long) amt).floatValue();
+
+                                // LOGIK BARU: Tolak 10% komisen platform (Seller dapat 90%)
+                                float netSellerRevenue = totalOrderAmount * 0.90f;
 
                                 if (sId != null && salesMap.containsKey(sId)) {
-                                    salesMap.put(sId, salesMap.get(sId) + val);
+                                    // Simpan nilai yang telah ditolak komisen ke dalam map
+                                    salesMap.put(sId, salesMap.get(sId) + netSellerRevenue);
                                 }
                             }
                         }

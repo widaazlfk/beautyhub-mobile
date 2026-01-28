@@ -2,7 +2,6 @@ package com.example.beautyhub.seller;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -27,7 +26,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -40,7 +38,7 @@ public class SellerOrderActivity extends AppCompatActivity {
     private SellerOrderAdapter adapter;
     private List<Order> orderList;
     private ProgressBar progressBar;
-    private TextView tvNoOrders, tvFilterInfo; // Tambah tvFilterInfo
+    private TextView tvNoOrders, tvFilterInfo;
     private DatabaseReference ordersRef;
     private FirebaseUser currentUser;
     private Query sellerQuery;
@@ -92,13 +90,15 @@ public class SellerOrderActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progress_bar_seller_orders);
         tvNoOrders = findViewById(R.id.tv_no_orders);
         tvTotalAmount = findViewById(R.id.tv_detail_total_amount);
-        tvFilterInfo = findViewById(R.id.tv_filter_info); // Inisialisasi TextView Info
+        tvFilterInfo = findViewById(R.id.tv_filter_info);
 
         com.google.android.material.chip.ChipGroup chipGroup = findViewById(R.id.chip_group_seller_status);
         if (chipGroup != null) {
             chipGroup.setOnCheckedChangeListener((group, checkedId) -> {
-                // Apabila chip ditekan, kita buang filter bulan dari intent supaya data tidak clash
+                // Apabila chip ditekan secara manual, kita reset filter dari intent graf
+                getIntent().removeExtra("filter_day");
                 getIntent().removeExtra("filter_month");
+                getIntent().removeExtra("filter_year");
                 getIntent().removeExtra("filter_status");
                 fetchOrders();
             });
@@ -125,21 +125,25 @@ public class SellerOrderActivity extends AppCompatActivity {
         showLoadingState(true);
         ordersRef = FirebaseDatabase.getInstance().getReference("Orders");
 
-        // 1. Ambil data filter daripada Intent (jika diklik dari Graf)
-        String filterMonth = getIntent().getStringExtra("filter_month");
+        // Ambil data filter daripada Intent
+        int filterDay = getIntent().getIntExtra("filter_day", -1);
+        int filterMonth = getIntent().getIntExtra("filter_month", -1);
+        int filterYear = getIntent().getIntExtra("filter_year", -1);
         String filterStatus = getIntent().getStringExtra("filter_status");
 
-        // 2. Kemaskini teks info filter
+        // Update UI Info Filter
         if (tvFilterInfo != null) {
-            if (filterMonth != null) {
-                tvFilterInfo.setText("Showing Completed orders for " + filterMonth);
+            if (filterDay != -1) {
+                Calendar c = Calendar.getInstance();
+                c.set(Calendar.MONTH, filterMonth);
+                String monthName = c.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault());
+                tvFilterInfo.setText("Filtered: " + filterDay + " " + monthName + " " + filterYear + " (" + filterStatus + ")");
                 tvFilterInfo.setVisibility(View.VISIBLE);
             } else {
                 tvFilterInfo.setVisibility(View.GONE);
             }
         }
 
-        // 3. Dapatkan status penapis daripada ChipGroup
         com.google.android.material.chip.ChipGroup chipGroup = findViewById(R.id.chip_group_seller_status);
         int checkedId = (chipGroup != null) ? chipGroup.getCheckedChipId() : R.id.chip_seller_all;
 
@@ -162,19 +166,21 @@ public class SellerOrderActivity extends AppCompatActivity {
 
                             Calendar cal = Calendar.getInstance();
                             cal.setTimeInMillis(timestamp);
-                            String orderMonth = new SimpleDateFormat("MMM", Locale.US).format(cal.getTime());
 
                             boolean matchesFilter = false;
 
-                            // LOGIK DRILL-DOWN DARI GRAF (Prioriti Utama)
-                            if (filterMonth != null && filterStatus != null) {
-                                if (filterMonth.equalsIgnoreCase(orderMonth) && filterStatus.equalsIgnoreCase(status)) {
+                            // 1. Logik Drill-down dari Graf (Filter Tarikh Tepat)
+                            if (filterDay != -1) {
+                                if (cal.get(Calendar.DAY_OF_MONTH) == filterDay &&
+                                        cal.get(Calendar.MONTH) == filterMonth &&
+                                        cal.get(Calendar.YEAR) == filterYear &&
+                                        status.equalsIgnoreCase(filterStatus)) {
                                     matchesFilter = true;
                                 }
                             }
-                            // LOGIK PENAPIS BIASA (CHIP GROUP)
+                            // 2. Logik Chip Group (Filter Status Biasa)
                             else {
-                                if (checkedId == R.id.chip_seller_all || checkedId == View.NO_ID) {
+                                if (checkedId == R.id.chip_seller_all || checkedId == -1) {
                                     matchesFilter = true;
                                 } else if (checkedId == R.id.chip_seller_pending && "Pending".equalsIgnoreCase(status)) {
                                     matchesFilter = true;
@@ -195,6 +201,7 @@ public class SellerOrderActivity extends AppCompatActivity {
                             }
                         }
                     }
+                    // Susun paling baru di atas
                     Collections.sort(orderList, (o1, o2) -> Long.compare(o2.getOrderDate(), o1.getOrderDate()));
                 }
 
@@ -228,9 +235,6 @@ public class SellerOrderActivity extends AppCompatActivity {
     private void showLoadingState(boolean isLoading) {
         if (progressBar != null) {
             progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
-        }
-        if (!isLoading) {
-            updateUI();
         }
     }
 }

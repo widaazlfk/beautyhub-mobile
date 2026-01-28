@@ -31,8 +31,9 @@ public class Product implements Parcelable {
     private boolean isOfficialStore;
 
     private boolean active;
-    // --- FIX #1: Change the field type from Object to long ---
-    private long creationTimestamp;
+
+    // Changed to Object to support ServerValue.TIMESTAMP (Map) and long (Long)
+    private Object creationTimestamp;
 
     // Info Penjual
     @SerializedName("sellerId")
@@ -48,9 +49,10 @@ public class Product implements Parcelable {
     private boolean isPreloaded;
 
     public Product() {
+        // IMPORTANT: Set active to true so it appears in Buyer's list
         this.active = true;
-        // this.creationTimestamp = ServerValue.TIMESTAMP; // This is an object, cannot be assigned to a long.
-        this.creationTimestamp = 0L; // Initialize with 0. Firebase will populate the actual value.
+        // Use Firebase ServerValue for automatic timestamping
+        this.creationTimestamp = ServerValue.TIMESTAMP;
         this.imageUrls = new ArrayList<>();
         this.averageRating = 0.0f;
         this.soldCount = 0;
@@ -143,8 +145,6 @@ public class Product implements Parcelable {
     public int getSoldCount() { return soldCount; }
     public void setSoldCount(int soldCount) { this.soldCount = soldCount; }
 
-
-
     public double getDiscountPrice() { return discountPrice; }
     public void setDiscountPrice(double discountPrice) { this.discountPrice = discountPrice; }
 
@@ -154,10 +154,17 @@ public class Product implements Parcelable {
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
 
-    // --- FIX #2: Change Getter and Setter to use 'long' ---
-    public long getCreationTimestamp() { return creationTimestamp; }
-    public void setCreationTimestamp(long creationTimestamp) { this.creationTimestamp = creationTimestamp; }
+    // Helper to get timestamp as long (used for sorting/Parcelable)
+    @Exclude
+    public long getCreationTimestampLong() {
+        if (creationTimestamp instanceof Long) {
+            return (long) creationTimestamp;
+        }
+        return 0L;
+    }
 
+    public Object getCreationTimestamp() { return creationTimestamp; }
+    public void setCreationTimestamp(Object creationTimestamp) { this.creationTimestamp = creationTimestamp; }
 
     public String getSellerId() { return sellerId; }
     public void setSellerId(String sellerId) { this.sellerId = sellerId; }
@@ -171,7 +178,7 @@ public class Product implements Parcelable {
     public boolean isPreloaded() { return isPreloaded; }
     public void setPreloaded(boolean preloaded) { this.isPreloaded = preloaded; }
 
-    // --- PERUBAHAN 6: Kemas kini implementasi Parcelable ---
+    // --- PARCELABLE IMPLEMENTATION ---
     protected Product(Parcel in) {
         productId = in.readString();
         name = in.readString();
@@ -188,8 +195,7 @@ public class Product implements Parcelable {
         discountPrice = in.readDouble();
         isOfficialStore = in.readByte() != 0;
         active = in.readByte() != 0;
-        // --- FIX #3: Read the 'long' value for timestamp ---
-        creationTimestamp = in.readLong();
+        creationTimestamp = in.readLong(); // Read as long
         sellerId = in.readString();
         sellerName = in.readString();
         sellerProfileImageUrl = in.readString();
@@ -213,8 +219,7 @@ public class Product implements Parcelable {
         dest.writeDouble(discountPrice);
         dest.writeByte((byte) (isOfficialStore ? 1 : 0));
         dest.writeByte((byte) (active ? 1 : 0));
-        // --- FIX #4: Write the 'long' value for timestamp ---
-        dest.writeLong(creationTimestamp);
+        dest.writeLong(getCreationTimestampLong()); // Write as long
         dest.writeString(sellerId);
         dest.writeString(sellerName);
         dest.writeString(sellerProfileImageUrl);
@@ -257,6 +262,7 @@ public class Product implements Parcelable {
                 "productId='" + productId + '\'' +
                 ", name='" + name + '\'' +
                 ", price=" + price +
+                ", active=" + active +
                 ", stock=" + stock +
                 '}';
     }

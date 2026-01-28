@@ -23,57 +23,56 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize">
 
-            </com.google.android.material.appbar.MaterialToolbar>
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <ImageView
-                    android:id="@+id/icon_menu_seller"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/ic_menu"
-                    app:tint="@color/black" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:text="Seller Centre"
-                    android:textColor="@color/black"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <FrameLayout
-                    android:id="@+id/btn_notifications_seller"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="12dp">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
 
                     <ImageView
-                        android:id="@+id/iv_notification_icon"
+                        android:id="@+id/icon_menu_seller"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/notification_icon" />
+                        android:layout_centerVertical="true"
+                        android:src="@drawable/ic_menu"
+                        app:tint="@color/black" />
 
                     <TextView
-                        android:id="@+id/tv_notification_badge"
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:layout_gravity="top|end"
-                        android:background="@drawable/bg_notification_badge"
-                        android:gravity="center"
-                        android:text="0"
-                        android:textColor="@android:color/white"
-                        android:textSize="9sp"
-                        android:visibility="gone" />
-                </FrameLayout>
-            </RelativeLayout>
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:text="Seller Centre"
+                        android:textColor="@color/black"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <FrameLayout
+                        android:id="@+id/btn_notifications_seller"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="12dp">
+
+                        <ImageView
+                            android:id="@+id/iv_notification_icon"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/notification_icon" />
+
+                        <TextView
+                            android:id="@+id/tv_notification_badge"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_gravity="top|end"
+                            android:background="@drawable/bg_notification_badge"
+                            android:gravity="center"
+                            android:text="0"
+                            android:textColor="@android:color/white"
+                            android:textSize="9sp"
+                            android:visibility="gone" />
+                    </FrameLayout>
+                </RelativeLayout>
+            </com.google.android.material.appbar.MaterialToolbar>
         </com.google.android.material.appbar.AppBarLayout>
 
         <androidx.core.widget.NestedScrollView
@@ -87,7 +86,6 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- Section: Business Insights -->
                 <!-- Section: Business Insights -->
                 <TextView
                     android:layout_width="wrap_content"
@@ -111,7 +109,6 @@
                         android:padding="16dp"
                         android:weightSum="3">
 
-                        <!-- Sales Month -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -130,13 +127,11 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Sales Month"
-                                android:textSize="10sp"
-                                android:gravity="center" />
+                                android:textSize="10sp" />
                         </LinearLayout>
 
                         <View android:layout_width="1dp" android:layout_height="30dp" android:background="#EEEEEE" android:layout_gravity="center"/>
 
-                        <!-- Total Orders -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -155,13 +150,11 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Total Orders"
-                                android:textSize="10sp"
-                                android:gravity="center" />
+                                android:textSize="10sp" />
                         </LinearLayout>
 
                         <View android:layout_width="1dp" android:layout_height="30dp" android:background="#EEEEEE" android:layout_gravity="center"/>
 
-                        <!-- New Orders (To Ship) -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -180,14 +173,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="New Orders"
-                                android:textSize="10sp"
-                                android:gravity="center" />
+                                android:textSize="10sp" />
                         </LinearLayout>
-                  >
-
-                        <View android:layout_width="1dp" android:layout_height="30dp" android:background="#EEEEEE" android:layout_gravity="center"/>
-
-
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -205,9 +192,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:columnCount="2"
-                    android:rowCount="2">
+                    android:rowCount="1">
 
-                    <!-- To Ship Card -->
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/card_to_ship"
                         android:layout_width="0dp"
@@ -237,7 +223,6 @@
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
-                    <!-- Low Stock Card -->
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/low_stock_card_mini"
                         android:layout_width="0dp"
@@ -268,7 +253,7 @@
                     </com.google.android.material.card.MaterialCardView>
                 </GridLayout>
 
-                <!-- Quick Actions -->
+                <!-- Section: Quick Actions -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -307,8 +292,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Add"
-                                android:textSize="11sp"
-                                android:layout_marginTop="4dp"/>
+                                android:textSize="11sp"/>
                         </LinearLayout>
 
                         <LinearLayout
@@ -328,8 +312,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Products"
-                                android:textSize="11sp"
-                                android:layout_marginTop="4dp"/>
+                                android:textSize="11sp"/>
                         </LinearLayout>
 
                         <LinearLayout
@@ -349,8 +332,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Orders"
-                                android:textSize="11sp"
-                                android:layout_marginTop="4dp"/>
+                                android:textSize="11sp"/>
                         </LinearLayout>
 
                         <LinearLayout
@@ -359,13 +341,8 @@
                             android:layout_height="wrap_content"
                             android:layout_columnWeight="1"
                             android:gravity="center"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:foreground="?android:attr/selectableItemBackground"
                             android:orientation="vertical"
                             android:padding="8dp">
-
-
                             <ImageView
                                 android:layout_width="32dp"
                                 android:layout_height="32dp"
@@ -375,21 +352,39 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Finance"
-                                android:textSize="11sp"
-                                android:layout_marginTop="4dp"/>
+                                android:textSize="11sp"/>
                         </LinearLayout>
                     </GridLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Sales Chart -->
-                <TextView
-                    android:layout_width="wrap_content"
+                <!-- Section: Sales Performance (With Full Report Link) -->
+                <RelativeLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Sales Performance"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
                     android:layout_marginTop="20dp"
-                    android:layout_marginBottom="12dp"/>
+                    android:layout_marginBottom="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Sales Performance"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_alignParentStart="true"/>
+
+                    <TextView
+                        android:id="@+id/btn_view_full_report"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Full Report >"
+                        android:textColor="#FF69B4"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:layout_alignParentEnd="true"
+                        android:padding="4dp"
+                        android:clickable="true"
+                        android:focusable="true"/>
+                </RelativeLayout>
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
@@ -403,9 +398,7 @@
                         android:padding="8dp" />
                 </com.google.android.material.card.MaterialCardView>
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="80dp" />
+                <View android:layout_width="match_parent" android:layout_height="80dp" />
 
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
@@ -425,7 +418,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        app:headerLayout="@layout/nav_header_seller"
+        app:headerLayout="@layout/nav_header"
         app:menu="@menu/navigation_menu" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

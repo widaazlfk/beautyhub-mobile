@@ -57,11 +57,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.glide)
 
-    // Import the Firebase BoM (Bill of Materials)
-    // This will manage the versions of all your Firebase libraries
     implementation(platform(libs.firebase.bom))
-
-    // Add the dependencies for the Firebase products you want to use
     // The versions are managed by the BoM, so you don't need to specify them here
     implementation(libs.firebase.auth)
     implementation(libs.firebase.database)

@@ -122,12 +122,11 @@ public class AdminProfileActivity extends AppCompatActivity {
         tvFullNameValue = findViewById(R.id.tv_full_name_value);
         tvEmailValue = findViewById(R.id.tv_email_value);
         tvPhoneValue = findViewById(R.id.tv_phone_value);
-        btnChangePassword = findViewById(R.id.btn_change_password);
-        btnLogout = findViewById(R.id.btn_logout);
+
 
         progressDialog = new ProgressDialog(this);
-        progressDialog.setTitle("Mengemas kini Profil");
-        progressDialog.setMessage("Sila tunggu...");
+        progressDialog.setTitle("Updating Profile");
+        progressDialog.setMessage("Loading...");
         progressDialog.setCancelable(false);
     }
 
@@ -193,11 +192,6 @@ public class AdminProfileActivity extends AppCompatActivity {
         itemPhone.setOnClickListener(v -> showEditDialog("Phone Number",
                 tvPhoneValue.getText().toString(), "phone"));
 
-        // Change Password - FIXED
-        btnChangePassword.setOnClickListener(v -> showChangePasswordDialog());
-
-        // Logout
-        btnLogout.setOnClickListener(v -> showLogoutConfirmationDialog());
     }
 
     private void loadAdminData() {

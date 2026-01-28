@@ -26,6 +26,7 @@ import com.example.beautyhub.R;
 import com.example.beautyhub.adapters.BuyerCategoryAdapter;
 import com.example.beautyhub.adapters.BuyerProductAdapter;
 import com.example.beautyhub.adapters.PromoCarouselAdapter;
+import com.example.beautyhub.adapters.BrandAdapter;
 import com.example.beautyhub.auth.LoginActivity;
 import com.example.beautyhub.info.AboutUsActivity;
 import com.example.beautyhub.info.ContactUsActivity;
@@ -50,6 +51,9 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Set;
 
 public class BuyerActivity extends AppCompatActivity implements
         BuyerCategoryAdapter.OnCategoryClickListener,
@@ -92,12 +96,19 @@ public class BuyerActivity extends AppCompatActivity implements
     private TextView notificationBadge;
     private DatabaseReference notificationRef; // Untuk tarik data notifikasi
     private ValueEventListener notificationListener;
+    private androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefreshLayout;
+    private android.os.Handler carouselHandler = new android.os.Handler();
+    private Runnable carouselRunnable;
+    private RecyclerView brandsRecyclerView;
+    private BrandAdapter brandAdapter;
+    private List<String> brandList;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.b_activity_buyer);
+
 
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
@@ -106,9 +117,11 @@ public class BuyerActivity extends AppCompatActivity implements
         productViewModel = new ViewModelProvider(this).get(ProductViewModel.class);
 
         initViews();
+        setupSwipeRefresh();
         setupNavigation();
         setupPromoCarousel();
         setupCategories();
+        setupBrands();
         setupNewestProducts();
 
         fetchCategoriesFromFirebase();
@@ -120,6 +133,7 @@ public class BuyerActivity extends AppCompatActivity implements
     // ... (initViews, setupNavigation, setupPromoCarousel, setupCategories, fetchCategoriesFromFirebase, setupNewestProducts tetap sama) ...
     private void initViews() {
         drawerLayout = findViewById(R.id.drawer_layout);
+        swipeRefreshLayout = findViewById(R.id.swipe_refresh);
         navigationView = findViewById(R.id.navigation_view);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         iconMenu = findViewById(R.id.icon_menu);
@@ -130,9 +144,23 @@ public class BuyerActivity extends AppCompatActivity implements
         cartBadge = findViewById(R.id.cart_badge);
         promoCarousel = findViewById(R.id.promo_carousel);
         categoriesRecyclerView = findViewById(R.id.rv_categories);
+        brandsRecyclerView = findViewById(R.id.rv_brands);
         tvViewAllProducts = findViewById(R.id.tv_view_all_products);
         newestProductsRecyclerView = findViewById(R.id.newest_products_grid);
         productsProgressBar = findViewById(R.id.products_progress_bar);
+    }
+    private void setupSwipeRefresh() {
+        swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            // Panggil semula data dari Firebase
+            fetchCategoriesFromFirebase();
+            productViewModel.loadAllProducts();
+
+            // Hentikan animasi loading selepas 2 saat atau selepas data siap
+            new android.os.Handler().postDelayed(() -> {
+                swipeRefreshLayout.setRefreshing(false);
+            }, 2000);
+        });
     }
 
     private void setupNavigation() {
@@ -159,7 +187,14 @@ public class BuyerActivity extends AppCompatActivity implements
             return true;
         });
 
-        searchButton.setOnClickListener(v -> startActivity(new Intent(BuyerActivity.this, SearchActivity.class)));
+        // Jika anda mahu search bar nampak lebih 'klik-able'
+        searchButton.setOnClickListener(v -> {
+            // Animasi skala kecil apabila diklik
+            v.animate().scaleX(0.95f).scaleY(0.95f).setDuration(100).withEndAction(() -> {
+                v.animate().scaleX(1.0f).scaleY(1.0f).setDuration(100);
+                startActivity(new Intent(BuyerActivity.this, SearchActivity.class));
+            });
+        });
         notificationIconLayout.setOnClickListener(v -> {
             // Ganti NotificationActivity.class dengan nama activity notifikasi anda
             Intent intent = new Intent(BuyerActivity.this, NotificationActivity.class);
@@ -196,15 +231,54 @@ public class BuyerActivity extends AppCompatActivity implements
         promoImageList.add(R.drawable.promo_placeholder_1);
         promoImageList.add(R.drawable.promo_placeholder_2);
         promoImageList.add(R.drawable.promo_placeholder_3);
+
         promoCarouselAdapter = new PromoCarouselAdapter(promoImageList);
         promoCarousel.setAdapter(promoCarouselAdapter);
+
+        // --- INTERAKTIF: Auto Scroll ---
+        carouselRunnable = () -> {
+            int currentItem = promoCarousel.getCurrentItem();
+            int nextItem = (currentItem + 1) % promoImageList.size();
+            promoCarousel.setCurrentItem(nextItem, true);
+            carouselHandler.postDelayed(carouselRunnable, 4000); // Tukar setiap 4 saat
+        };
+        carouselHandler.postDelayed(carouselRunnable, 4000);
+
+        // Tambah effect transformation (Zoom out/in sedikit)
+        promoCarousel.setPageTransformer((page, position) -> {
+            float r = 1 - Math.abs(position);
+            page.setScaleY(0.85f + r * 0.15f);
+        });
+    }
+
+    // Tambah kawalan Lifecycle untuk mengelakkan memory leak pada Carousel
+    @Override
+    protected void onPause() {
+        super.onPause();
+        carouselHandler.removeCallbacks(carouselRunnable);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (carouselRunnable != null) {
+            carouselHandler.postDelayed(carouselRunnable, 4000);
+        }
     }
 
     private void setupCategories() {
         categoryList = new ArrayList<>();
         categoryAdapter = new BuyerCategoryAdapter(this, categoryList, this);
-        categoriesRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        categoriesRecyclerView.setLayoutManager(layoutManager);
         categoriesRecyclerView.setAdapter(categoryAdapter);
+
+        // Tambah SnapHelper supaya item berhenti tepat di tengah/tepi (lebih smooth)
+        androidx.recyclerview.widget.SnapHelper snapHelper = new androidx.recyclerview.widget.LinearSnapHelper();
+        if (categoriesRecyclerView.getOnFlingListener() == null) {
+            snapHelper.attachToRecyclerView(categoriesRecyclerView);
+        }
     }
 
     private void fetchCategoriesFromFirebase() {
@@ -224,19 +298,56 @@ public class BuyerActivity extends AppCompatActivity implements
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(BuyerActivity.this, "Failed to load categories", Toast.LENGTH_SHORT).show();
+                Log.e("BuyerActivity", "Error: " + error.getMessage());
             }
         });
     }
 
+    private void setupBrands() {
+        brandList = new ArrayList<>();
+        brandAdapter = new BrandAdapter(this, brandList, brandName -> {
+            // Logik klik: Pergi ke ShopViewActivity dengan filter Brand
+            Intent intent = new Intent(this, ShopViewActivity.class);
+            intent.putExtra("BRAND_NAME", brandName);
+            intent.putExtra("FILTER_TYPE", "BRAND");
+            startActivity(intent);
+        });
+
+        // Gunakan Horizontal Layout supaya nampak macam kotak-kotak categories
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        brandsRecyclerView.setLayoutManager(layoutManager);
+        brandsRecyclerView.setAdapter(brandAdapter);
+    }
+
+
+    private void updateBrandList(List<Product> products) {
+        // Guna HashSet supaya nama brand yang sama tidak berulang
+        Set<String> uniqueBrands = new HashSet<>();
+        for (Product p : products) {
+            if (p.getBrand() != null && !p.getBrand().isEmpty()) {
+                uniqueBrands.add(p.getBrand());
+            }
+        }
+
+        brandList.clear();
+        brandList.addAll(uniqueBrands);
+        brandAdapter.notifyDataSetChanged();
+
+        // Sembunyikan Section Brand jika tiada data
+        if (brandList.isEmpty()) {
+            brandsRecyclerView.setVisibility(View.GONE);
+        } else {
+            brandsRecyclerView.setVisibility(View.VISIBLE);
+        }
+    }
+
     private void setupNewestProducts() {
         productList = new ArrayList<>();
+        // isSellerView = false (Mode Pembeli)
         productAdapter = new BuyerProductAdapter(this, productList, this);
         newestProductsRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         newestProductsRecyclerView.setAdapter(productAdapter);
-        newestProductsRecyclerView.setNestedScrollingEnabled(false);
     }
-
 
     private void fetchProductsWithViewModel() {
         // ... (Logik fetchProductsWithViewModel tetap sama, pastikan product.hasStock() berfungsi dengan betul) ...

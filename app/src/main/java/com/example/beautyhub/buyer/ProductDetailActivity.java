@@ -170,23 +170,34 @@ public class ProductDetailActivity extends AppCompatActivity {
                 }
             }
             // 2. Logik Harga (Price Logic) - Mengelakkan formatting error jika harga null
+            // 2. Logik Harga (Price Logic) - Sudah diperkukuh
             try {
                 double originalPrice = product.getPrice();
                 double discountPrice = product.getDiscountPrice();
                 double finalPrice = product.getFinalPrice();
 
+                // Debugging: Lihat nilai dalam Logcat (Filter: DEBUG_PRICE)
+                Log.d("DEBUG_PRICE", "ID: " + productId + " | Ori: " + originalPrice + " | Disc: " + discountPrice + " | Final: " + finalPrice);
+
                 if (product.hasDiscount() && discountPrice > 0) {
+                    // Papar Harga Asal (Dicoret/Strikethrough)
                     binding.tvProductPrice.setPaintFlags(binding.tvProductPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
-                    binding.tvProductPrice.setText(String.format(Locale.US, "RM%.2f", originalPrice));
-                    binding.tvProductDiscountPrice.setText(String.format(Locale.US, "RM%.2f", discountPrice));
+                    binding.tvProductPrice.setText(String.format(Locale.US, "RM %.2f", originalPrice));
+                    binding.tvProductPrice.setTextColor(getResources().getColor(R.color.gray)); // Pastikan warna tak sama dengan background
+
+                    // Papar Harga Diskaun (Warna Merah/Promo)
+                    binding.tvProductDiscountPrice.setText(String.format(Locale.US, "RM %.2f", discountPrice));
                     binding.tvProductDiscountPrice.setVisibility(View.VISIBLE);
                 } else {
+                    // Tiada diskaun: Sembunyikan tvProductDiscountPrice, tunjuk harga asal tanpa coret
                     binding.tvProductPrice.setPaintFlags(binding.tvProductPrice.getPaintFlags() & (~android.graphics.Paint.STRIKE_THRU_TEXT_FLAG));
-                    binding.tvProductPrice.setText(String.format(Locale.US, "RM%.2f", finalPrice));
+                    binding.tvProductPrice.setText(String.format(Locale.US, "RM %.2f", finalPrice));
+                    binding.tvProductPrice.setTextColor(getResources().getColor(R.color.black)); // Warna gelap supaya nampak
+
                     binding.tvProductDiscountPrice.setVisibility(View.GONE);
                 }
             } catch (Exception e) {
-                binding.tvProductPrice.setText("RM0.00");
+                binding.tvProductPrice.setText("RM 0.00");
                 Log.e("ProductDetail", "Error formatting price: " + e.getMessage());
             }
 

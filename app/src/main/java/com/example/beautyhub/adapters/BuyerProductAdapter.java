@@ -1,24 +1,21 @@
 package com.example.beautyhub.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.beautyhub.R;
+import com.example.beautyhub.buyer.ShopViewActivity;
 import com.example.beautyhub.databinding.BItemProductGrid2Binding;
 import com.example.beautyhub.models.Product;
-// --- PERUBAHAN 1: Padam import Variant ---
-// import com.example.beautyhub.models.Variant;
 
 import java.util.HashSet;
 import java.util.List;
@@ -32,11 +29,10 @@ public class BuyerProductAdapter extends RecyclerView.Adapter<BuyerProductAdapte
     private final OnProductInteractionListener listener;
     private final Set<String> favouriteProductIds = new HashSet<>();
 
-    // --- PERUBAHAN 2: Permudahkan Listener Interface ---
     public interface OnProductInteractionListener {
         void onProductClick(Product product);
-        void onBuyNowClick(Product product); // Parameter Variant dibuang
-        void onAddToCartClick(Product product); // Parameter Variant dibuang
+        void onBuyNowClick(Product product);
+        void onAddToCartClick(Product product);
         void onFavouriteClick(Product product, boolean isFavourite);
         void onSellerClick(String sellerId);
     }
@@ -92,6 +88,7 @@ public class BuyerProductAdapter extends RecyclerView.Adapter<BuyerProductAdapte
         void bind(Product product) {
             binding.tvProductName.setText(product.getName());
 
+            // 1. Rating & Sold
             if (product.getAverageRating() > 0) {
                 binding.rbProductRating.setRating(product.getAverageRating());
                 binding.rbProductRating.setVisibility(View.VISIBLE);
@@ -115,44 +112,27 @@ public class BuyerProductAdapter extends RecyclerView.Adapter<BuyerProductAdapte
 
         private void setupClickListeners(Product product) {
             binding.getRoot().setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onProductClick(product);
-                }
+                if (listener != null) listener.onProductClick(product);
             });
 
-            // --- PERUBAHAN 3: Permudahkan listener butang ---
             binding.btnBuyNow.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onBuyNowClick(product);
-                }
+                if (listener != null) listener.onBuyNowClick(product);
             });
 
             binding.btnAddToCart.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onAddToCartClick(product);
-                }
+                if (listener != null) listener.onAddToCartClick(product);
             });
 
+            // KLIK PADA NAMA PENJUAL -> Pergi ke ShopViewActivity
             binding.tvSellerName.setOnClickListener(v -> {
-                if (listener == null) return; // Keselamatan: Pastikan listener wujud
-
-                String sellerId = product.getSellerId();
-
-                // Semak jika sellerId sah
-                if (sellerId != null && !sellerId.isEmpty()) {
-                    if (product.isPreloaded()) {
-                        // Jika produk rasmi BeautyHub
-                        String sellerName = product.getSellerName() != null ? product.getSellerName() : "BeautyHub Official";
-                        Toast.makeText(context, "Official Store: " + sellerName, Toast.LENGTH_SHORT).show();
-                    } else {
-                        // Jika penjual komuniti, navigasi ke profil
-                        listener.onSellerClick(sellerId);
-                    }
-                } else {
-                    Toast.makeText(context, "Seller info unavailable", Toast.LENGTH_SHORT).show();
+                if (product.getSellerId() != null) {
+                    Intent intent = new Intent(context, ShopViewActivity.class);
+                    intent.putExtra("SELLER_ID", product.getSellerId());
+                    intent.putExtra("SELLER_NAME", product.getSellerName());
+                    intent.putExtra("FILTER_TYPE", "SELLER");
+                    context.startActivity(intent);
                 }
             });
-
 
             binding.icFavourite.setOnClickListener(v -> {
                 if (listener != null) {
@@ -163,6 +143,37 @@ public class BuyerProductAdapter extends RecyclerView.Adapter<BuyerProductAdapte
             });
         }
 
+        private void setupPriceDisplay(Product product) {
+            boolean hasDiscount = product.hasDiscount();
+            binding.tvProductDiscountPrice.setVisibility(hasDiscount ? View.VISIBLE : View.GONE);
+
+            if (hasDiscount) {
+                binding.tvProductDiscountPrice.setText(String.format(Locale.US, "RM%.2f", product.getDiscountPrice()));
+                binding.tvProductPrice.setText(String.format(Locale.US, "RM%.2f", product.getPrice()));
+                binding.tvProductPrice.setPaintFlags(binding.tvProductPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                binding.tvProductPrice.setTextColor(ContextCompat.getColor(context, android.R.color.darker_gray));
+            } else {
+                binding.tvProductPrice.setText(String.format(Locale.US, "RM%.2f", product.getPrice()));
+                binding.tvProductPrice.setPaintFlags(binding.tvProductPrice.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+                binding.tvProductPrice.setTextColor(ContextCompat.getColor(context, R.color.purple_700));
+            }
+        }
+
+        private void setupSellerInfo(Product product) {
+            if (product.getSellerName() != null && !product.getSellerName().isEmpty()) {
+                binding.tvSellerName.setText(product.getSellerName());
+                binding.tvSellerName.setVisibility(View.VISIBLE);
+                binding.tvSellerName.setPaintFlags(binding.tvSellerName.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+
+                Glide.with(context)
+                        .load(product.getSellerProfileImageUrl())
+                        .placeholder(R.drawable.ic_profile)
+                        .into(binding.ivSellerProfile);
+            } else {
+                binding.tvSellerName.setVisibility(View.GONE);
+            }
+        }
+
         private void updateFavouriteIconOnClick(String productId) {
             boolean isNowFavourite = !favouriteProductIds.contains(productId);
             if (isNowFavourite) {
@@ -170,44 +181,6 @@ public class BuyerProductAdapter extends RecyclerView.Adapter<BuyerProductAdapte
                 binding.icFavourite.setImageResource(R.drawable.ic_favourite_filled);
             } else {
                 favouriteProductIds.remove(productId);
-                binding.icFavourite.setImageResource(R.drawable.ic_favorite_border);
-            }
-        }
-
-        // --- PERUBAHAN 4: Padam kaedah handleAction dan showVariantSelectionDialog ---
-        /*
-        private void handleAction(Product product, boolean isAddToCart) { ... }
-        private void showVariantSelectionDialog(Product product, boolean isAddToCart) { ... }
-        */
-
-        private void setupPriceDisplay(Product product) {
-            boolean hasDiscount = product.hasDiscount();
-
-            // 1. Handle Visibility
-            binding.tvProductDiscountPrice.setVisibility(hasDiscount ? View.VISIBLE : View.GONE);
-
-            if (hasDiscount) {
-                // 2. Setup Discount Price
-                binding.tvProductDiscountPrice.setText(String.format(Locale.US, "RM%.2f", product.getDiscountPrice()));
-
-                // 3. Setup Original Price (Strikethrough)
-                binding.tvProductPrice.setText(String.format(Locale.US, "RM%.2f", product.getPrice()));
-                binding.tvProductPrice.setPaintFlags(binding.tvProductPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                binding.tvProductPrice.setTextColor(ContextCompat.getColor(context, android.R.color.darker_gray));
-
-            } else {
-                // 4. Setup Normal Price (No Strikethrough)
-                binding.tvProductPrice.setText(String.format(Locale.US, "RM%.2f", product.getPrice()));
-                binding.tvProductPrice.setPaintFlags(binding.tvProductPrice.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-                binding.tvProductPrice.setTextColor(ContextCompat.getColor(context, R.color.purple_700));
-            }
-
-        }
-
-        private void updateFavouriteIcon(Product product) {
-            if (favouriteProductIds.contains(product.getProductId())) {
-                binding.icFavourite.setImageResource(R.drawable.ic_favourite_filled);
-            } else {
                 binding.icFavourite.setImageResource(R.drawable.ic_favorite_border);
             }
         }
@@ -222,25 +195,16 @@ public class BuyerProductAdapter extends RecyclerView.Adapter<BuyerProductAdapte
             }
         }
 
-        private void setupSellerInfo(Product product) {
-            if (product.getSellerName() != null && !product.getSellerName().isEmpty()) {
-                binding.tvSellerName.setText(product.getSellerName());
-                binding.tvSellerName.setVisibility(View.VISIBLE);
-
-                Glide.with(context)
-                        .load(product.getSellerProfileImageUrl())
-                        .placeholder(R.drawable.ic_profile)
-                        .error(R.drawable.ic_profile)
-                        .into(binding.ivSellerProfile);
+        private void updateFavouriteIcon(Product product) {
+            if (favouriteProductIds.contains(product.getProductId())) {
+                binding.icFavourite.setImageResource(R.drawable.ic_favourite_filled);
             } else {
-                binding.tvSellerName.setVisibility(View.GONE);
+                binding.icFavourite.setImageResource(R.drawable.ic_favorite_border);
             }
         }
 
         private String formatSoldCount(int count) {
-            if (count >= 1000) {
-                return (count / 1000) + "k";
-            }
+            if (count >= 1000) return (count / 1000) + "k";
             return String.valueOf(count);
         }
     }

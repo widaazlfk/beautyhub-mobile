@@ -251,6 +251,13 @@
             android:label="Finance"
             android:parentActivityName=".seller.ManageProductsActivity" />
 
+        <activity
+            android:name=".seller.SellerReportActivity"
+            android:exported="false"
+            android:label="Finance"
+            android:parentActivityName=".seller.SellerActivity" />
+
+
         <!-- ================== ADMIN ACTIVITIES ================== -->
         <activity
             android:name=".admin.AdminDashboardActivity"

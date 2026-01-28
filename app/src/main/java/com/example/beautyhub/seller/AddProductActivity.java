@@ -15,7 +15,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
 import com.canhub.cropper.CropImageContract;
@@ -88,7 +87,6 @@ public class AddProductActivity extends AppCompatActivity {
         progressDialog = new ProgressDialog(this);
         progressDialog.setCancelable(false);
 
-        // MOD EDIT: Check for Object OR ID
         if (getIntent().hasExtra("EDIT_PRODUCT")) {
             isEditMode = true;
             Product product = getIntent().getParcelableExtra("EDIT_PRODUCT");
@@ -100,7 +98,7 @@ public class AddProductActivity extends AppCompatActivity {
         } else if (getIntent().hasExtra("PRODUCT_ID")) {
             isEditMode = true;
             editingProductId = getIntent().getStringExtra("PRODUCT_ID");
-            setupForEditMode(); // This will fetch data from Firebase
+            setupForEditMode();
         } else {
             setupForAddMode();
         }
@@ -203,10 +201,8 @@ public class AddProductActivity extends AppCompatActivity {
         for (Uri uri : newImageUris) {
             MediaManager.get().upload(uri)
                     .callback(new UploadCallback() {
-                        @Override
-                        public void onStart(String requestId) {}
-                        @Override
-                        public void onProgress(String requestId, long bytes, long totalBytes) {}
+                        @Override public void onStart(String requestId) {}
+                        @Override public void onProgress(String requestId, long bytes, long totalBytes) {}
                         @Override
                         public void onSuccess(String requestId, Map resultData) {
                             uploadedImageUrls.add((String) resultData.get("secure_url"));
@@ -221,48 +217,114 @@ public class AddProductActivity extends AppCompatActivity {
                             progressDialog.dismiss();
                             Toast.makeText(AddProductActivity.this, "Upload failed", Toast.LENGTH_SHORT).show();
                         }
-                        @Override
-                        public void onReschedule(String requestId, ErrorInfo error) {}
+                        @Override public void onReschedule(String requestId, ErrorInfo error) {}
                     }).dispatch();
         }
     }
 
     private void saveProductToFirebase(List<String> imageUrls) {
-        String productId = isEditMode ? editingProductId : databaseReference.child("Products").push().getKey();
+        progressDialog.setMessage("Generating ID and saving...");
+        String currentUserId = currentUser.getUid();
 
-        double price = Double.parseDouble(binding.etProductPrice.getText().toString());
-        double discount = binding.etDiscountPrice.getText().toString().isEmpty() ? 0 :
-                Double.parseDouble(binding.etDiscountPrice.getText().toString());
-        int stock = Integer.parseInt(binding.etStock.getText().toString());
+        // Jika sedang EDIT, kita guna ID asal (contoh: prod_001)
+        if (isEditMode) {
+            // Nota: Untuk edit, kita biasanya dah ada sName dan sImage dari loadProductData
+            // Saya letak default "BeautyHub Seller" jika data tersebut null
+            proceedToSave(editingProductId, currentUserId, "BeautyHub Seller", null, imageUrls);
+        } else {
+            // Jika ADD NEW, cari ID terakhir dalam database (untuk buat prod_077 dan ke atas)
+            databaseReference.child("Products").orderByKey().limitToLast(1)
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot productsSnapshot) {
+                            String newId = "prod_001"; // Default jika database kosong
 
-        Product product = new Product();
-        product.setProductId(productId);
-        product.setSellerId(currentUser.getUid());
-        product.setName(binding.etProductName.getText().toString().trim());
-        product.setDescription(binding.etProductDescription.getText().toString().trim());
-        product.setPrice(price);
-        product.setDiscountPrice(discount);
-        product.setStock(stock);
-        product.setCategory(binding.actvCategory.getText().toString());
-        product.setBrand(binding.etBrand.getText().toString().trim());
-        product.setIngredients(binding.etIngredients.getText().toString().trim());
-        product.setSkinType(binding.etSkinType.getText().toString().trim());
-        product.setImageUrls(imageUrls);
+                            if (productsSnapshot.exists()) {
+                                for (DataSnapshot child : productsSnapshot.getChildren()) {
+                                    String lastId = child.getKey();
+                                    try {
+                                        if (lastId != null && lastId.startsWith("prod_")) {
+                                            // Ambil nombor terakhir, contoh 076 -> jadi 76
+                                            int lastNumber = Integer.parseInt(lastId.replace("prod_", ""));
+                                            // Tambah 1 -> jadi 77, format balik jadi prod_077
+                                            newId = String.format("prod_%03d", lastNumber + 1);
+                                        }
+                                    } catch (Exception e) {
+                                        newId = "prod_" + System.currentTimeMillis();
+                                    }
+                                }
+                            }
+                            // Kita panggil proceedToSave.
+                            // Nama Seller akan diuruskan di dalam proceedToSave
+                            proceedToSave(newId, currentUserId, null, null, imageUrls);
+                        }
 
-        databaseReference.child("Products").child(productId).setValue(product)
-                .addOnCompleteListener(task -> {
-                    progressDialog.dismiss();
-                    if (task.isSuccessful()) {
-                        Toast.makeText(this, isEditMode ? "Product Updated" : "Product Added", Toast.LENGTH_SHORT).show();
-                        finish();
-                    } else {
-                        Toast.makeText(this, "Failed to save product", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            progressDialog.dismiss();
+                            Toast.makeText(AddProductActivity.this, "Database Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        }
     }
+    // Method Helper untuk simpan data setelah ID ditentukan
+    private void proceedToSave(String productId, String currentUserId, String sName, String sImage, List<String> imageUrls) {
+        // Tarik data seller yang terkini dari database dahulu
+        databaseReference.child("Users").child(currentUserId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                String dbSellerName = snapshot.child("username").getValue(String.class);
+                String dbSellerImage = snapshot.child("profileImage").getValue(String.class);
 
-    // --- HELPER METHODS (Toolbar, Launchers, Categories) ---
+                Product product = new Product();
+                product.setProductId(productId);
+                product.setSellerId(currentUserId);
 
+                if (dbSellerName != null) product.setSellerName(dbSellerName);
+                if (dbSellerImage != null) product.setSellerProfileImageUrl(dbSellerImage);
+
+
+                // Set data dari form
+                product.setName(binding.etProductName.getText().toString().trim());
+                product.setDescription(binding.etProductDescription.getText().toString().trim());
+                product.setBrand(binding.etBrand.getText().toString().trim());
+                product.setIngredients(binding.etIngredients.getText().toString().trim());
+                product.setSkinType(binding.etSkinType.getText().toString().trim());
+                product.setCategory(binding.actvCategory.getText().toString().trim());
+                product.setImageUrls(imageUrls);
+                product.setActive(true);
+
+                try {
+                    product.setPrice(Double.parseDouble(binding.etProductPrice.getText().toString()));
+                    String dStr = binding.etDiscountPrice.getText().toString().trim();
+                    product.setDiscountPrice(dStr.isEmpty() ? 0 : Double.parseDouble(dStr));
+                    product.setStock(Integer.parseInt(binding.etStock.getText().toString()));
+                } catch (Exception e) {
+                    progressDialog.dismiss();
+                    Toast.makeText(AddProductActivity.this, "Wrong format of price or stock", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // SIMPAN KE FIREBASE
+                databaseReference.child("Products").child(productId).setValue(product)
+                        .addOnCompleteListener(task -> {
+                            progressDialog.dismiss();
+                            if (task.isSuccessful()) {
+                                Toast.makeText(AddProductActivity.this, "Product saved successfully! ID: " + productId, Toast.LENGTH_SHORT).show();
+                                finish();
+                            } else {
+                                Toast.makeText(AddProductActivity.this, "Failed to save: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                progressDialog.dismiss();
+                Toast.makeText(AddProductActivity.this, "Gagal akses data penjual", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
     private void initImageLaunchers() {
         imagePickerLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK && result.getData() != null) {
@@ -280,14 +342,8 @@ public class AddProductActivity extends AppCompatActivity {
 
     private void updateImagePreviews() {
         binding.imageContainer.removeAllViews();
-        // Show Existing
-        for (String url : existingImageUrls) {
-            addImageToPreview(url, true);
-        }
-        // Show New
-        for (Uri uri : newImageUris) {
-            addImageToPreview(uri, false);
-        }
+        for (String url : existingImageUrls) { addImageToPreview(url, true); }
+        for (Uri uri : newImageUris) { addImageToPreview(uri, false); }
         binding.imageContainer.addView(binding.btnAddImage);
     }
 
@@ -316,18 +372,7 @@ public class AddProductActivity extends AppCompatActivity {
             intent.setType("image/*");
             imagePickerLauncher.launch(intent);
         });
-        // Paksa dropdown muncul apabila kotak kategori diklik
-        binding.actvCategory.setOnClickListener(v -> {
-            binding.actvCategory.showDropDown();
-        });
-
-        // Pastikan senarai muncul juga apabila mendapat fokus
-        binding.actvCategory.setOnFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus) {
-                binding.actvCategory.showDropDown();
-            }
-        });
-
+        binding.actvCategory.setOnClickListener(v -> binding.actvCategory.showDropDown());
         binding.btnSaveProduct.setOnClickListener(v -> validateAndSaveProduct());
         binding.btnCancel.setOnClickListener(v -> finish());
     }
@@ -346,34 +391,16 @@ public class AddProductActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 List<String> categories = new ArrayList<>();
                 for (DataSnapshot ds : snapshot.getChildren()) {
-                    // Cuba ambil field "name", jika tiada ambil terus value tersebut
                     String categoryName = ds.child("categoryName").getValue(String.class);
-                    if (categoryName == null) {
-                        categoryName = ds.getValue(String.class);
-                    }
-
-                    if (categoryName != null) {
-                        categories.add(categoryName);
-                    }
+                    if (categoryName == null) categoryName = ds.getValue(String.class);
+                    if (categoryName != null) categories.add(categoryName);
                 }
-
                 if (!categories.isEmpty()) {
-                    ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                            AddProductActivity.this,
-                            android.R.layout.simple_dropdown_item_1line,
-                            categories
-                    );
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(AddProductActivity.this, android.R.layout.simple_dropdown_item_1line, categories);
                     binding.actvCategory.setAdapter(adapter);
-
-                    // Set threshold kepada 1 supaya cadangan muncul cepat jika ditaip
-                    binding.actvCategory.setThreshold(1);
                 }
             }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("AddProductActivity", "Error fetch categories", error.toException());
-            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
-    }
+}

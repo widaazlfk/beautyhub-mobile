@@ -140,17 +140,36 @@ public class CheckoutActivity extends AppCompatActivity implements CheckoutItems
 
         binding.rgPaymentMethod.setOnCheckedChangeListener((group, checkedId) -> displayOrderSummary());
 
+        // Cari bahagian ini dalam setupListeners()
         binding.chipGroupDiscounts.setOnCheckedChangeListener((group, checkedId) -> {
             Chip selectedChip = group.findViewById(checkedId);
+
             if (selectedChip == null || selectedChip.getId() == R.id.chip_no_discount) {
                 discountAmount = 0.0;
+                displayOrderSummary();
             } else {
                 Reward selectedReward = (Reward) selectedChip.getTag();
                 if (selectedReward != null) {
-                    discountAmount = selectedReward.getDiscountValue();
+                    double voucherValue = selectedReward.getDiscountValue();
+
+                    // LOGIK: Subtotal mesti ≥ (Voucher + 10)
+                    if (subtotal < (voucherValue + 10.0)) {
+                        // Jika tak cukup syarat, reset ke "No Discount"
+                        // Jika guna View Binding, akses melalui 'binding'
+                        binding.chipNoDiscount.setChecked(true);
+                        discountAmount = 0.0;
+
+                        // Beritahu user kenapa tak boleh guna
+                        String mesej = String.format(Locale.US,
+                                "Voucher RM%.2f requires a minimum spend of RM%.2f",
+                                voucherValue, (voucherValue + 10.0));
+                        Toast.makeText(this, mesej, Toast.LENGTH_LONG).show();
+                    } else {
+                        discountAmount = voucherValue;
+                    }
                 }
+                displayOrderSummary();
             }
-            displayOrderSummary();
         });
     }
 
@@ -658,6 +677,25 @@ public class CheckoutActivity extends AppCompatActivity implements CheckoutItems
         subtotal = 0.0;
         for (CartItem item : selectedItems) subtotal += item.getPrice() * item.getQuantity();
 
+        for (int i = 0; i < binding.chipGroupDiscounts.getChildCount(); i++) {
+            View view = binding.chipGroupDiscounts.getChildAt(i);
+            if (view instanceof Chip && view.getId() != R.id.chip_no_discount) {
+                Chip chip = (Chip) view;
+                Reward r = (Reward) chip.getTag();
+                if (r != null) {
+                    boolean isEligible = subtotal >= (r.getDiscountValue() + 10.0);
+                    chip.setEnabled(isEligible);
+                    chip.setAlpha(isEligible ? 1.0f : 0.4f); // Kelamkan jika tak layak
+
+                    // Jika sedang pilih voucher yang tiba-tiba tak layak (sebab turunkan kuantiti)
+                    if (!isEligible && chip.isChecked()) {
+                        // Jika guna View Binding, akses melalui 'binding'
+                        binding.chipNoDiscount.setChecked(true);
+                        discountAmount = 0.0;
+                    }
+                }
+            }
+        }
         double totalShipping = 0.0;
         if (userShippingAddress != null && !binding.rbCashOnDelivery.isChecked()) {
             Map<String, List<CartItem>> itemsBySeller = selectedItems.stream()

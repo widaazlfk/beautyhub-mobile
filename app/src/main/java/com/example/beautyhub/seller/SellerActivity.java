@@ -41,6 +41,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.Random;
 
 public class SellerActivity extends AppCompatActivity {
 
@@ -161,6 +162,11 @@ public class SellerActivity extends AppCompatActivity {
             intent.putExtra("filter", "low_stock");
             startActivity(intent);
         });
+        // Tambah di setupListeners()
+        findViewById(R.id.btn_view_full_report).setOnClickListener(v -> {
+            Intent intent = new Intent(SellerActivity.this, SellerReportActivity.class);
+            startActivity(intent);
+        });
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
@@ -238,18 +244,16 @@ public class SellerActivity extends AppCompatActivity {
                     }
                 });
 
-        // --- 2. LISTENER UNTUK PRODUCTS (Low Stock) ---
+
         rootRef.child("Products").orderByChild("sellerId").equalTo(currentSellerId)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         int lowStockCount = 0;
                         for (DataSnapshot ds : snapshot.getChildren()) {
-                            // PASTIKAN: Di Firebase anda guna key "productQuantity" atau "stock"
-                            // Jika model anda guna getProductQuantity(), gunakan key "productQuantity"
+
                             Integer stock = ds.child("quantity").getValue(Integer.class);
 
-                            // Jika "productQuantity" null, cuba cari key "stock"
                             if (stock == null) {
                                 stock = ds.child("stock").getValue(Integer.class);
                             }
@@ -261,10 +265,7 @@ public class SellerActivity extends AppCompatActivity {
 
                         // Update Badge di Dashboard
                         if (tvLowStockBadge != null) {
-                            // Sentiasa set text (akan jadi "0" jika tiada low stock)
                             tvLowStockBadge.setText(String.valueOf(lowStockCount));
-
-                            // Sentiasa VISIBLE supaya angka 0 tetap kelihatan
                             tvLowStockBadge.setVisibility(View.VISIBLE);
                         }
                     }
@@ -275,88 +276,108 @@ public class SellerActivity extends AppCompatActivity {
                 });
     }
     private void setupStatisticsChart(DataSnapshot ordersSnapshot) {
-        float[] monthlyNetSales = new float[4];
-        String[] labels = {"Oct", "Nov", "Dec", "Jan"};
         Calendar cal = Calendar.getInstance();
 
-        for (DataSnapshot ds : ordersSnapshot.getChildren()) {
-            Double amount = ds.child("totalAmount").getValue(Double.class);
-            Long timestamp = ds.child("orderDate").getValue(Long.class);
-            String status = ds.child("status").getValue(String.class);
+        // 1. Ambil bulan dan tahun semasa secara automatik
+        int targetMonth = cal.get(Calendar.MONTH);
+        int currentYear = cal.get(Calendar.YEAR);
+        String monthName = cal.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault());
 
-            if (amount != null && timestamp != null && "Completed".equalsIgnoreCase(status)) {
-                cal.setTimeInMillis(timestamp);
-                int month = cal.get(Calendar.MONTH);
-                double netAmount = amount * 0.90;
+        // Dapatkan jumlah hari dalam bulan semasa (Contoh: Jan=31, Feb=28)
+        int daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
 
-                if (month == Calendar.OCTOBER) monthlyNetSales[0] += (float) netAmount;
-                else if (month == Calendar.NOVEMBER) monthlyNetSales[1] += (float) netAmount;
-                else if (month == Calendar.DECEMBER) monthlyNetSales[2] += (float) netAmount;
-                else if (month == Calendar.JANUARY) monthlyNetSales[3] += (float) netAmount;
+        // Inisialisasi array data dengan 0 (BUANG dummy data untuk ketepatan)
+        float[] dailyNetSales = new float[daysInMonth];
+        String[] labels = new String[daysInMonth];
+
+        for (int i = 0; i < daysInMonth; i++) {
+            labels[i] = String.valueOf(i + 1);
+            dailyNetSales[i] = 0f;
+        }
+
+        // 2. Baca data dari Firebase SNAPSHOT
+        if (ordersSnapshot.exists()) {
+            for (DataSnapshot ds : ordersSnapshot.getChildren()) {
+                String status = ds.child("status").getValue(String.class);
+                Double amount = ds.child("totalAmount").getValue(Double.class);
+                Long timestamp = ds.child("orderDate").getValue(Long.class);
+
+                // PENAPIS KETAT: Mesti "Completed" & Bulan/Tahun yang tepat
+                if (amount != null && timestamp != null && "Completed".equalsIgnoreCase(status)) {
+                    cal.setTimeInMillis(timestamp);
+
+                    if (cal.get(Calendar.MONTH) == targetMonth && cal.get(Calendar.YEAR) == currentYear) {
+                        int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
+
+                        // Pastikan hari tidak melebihi array index (1-31 -> 0-30)
+                        if (dayOfMonth >= 1 && dayOfMonth <= daysInMonth) {
+                            // Tambah ke hari yang spesifik (Ambil 90% selepas komisen)
+                            dailyNetSales[dayOfMonth - 1] += (float) (amount * 0.90);
+                        }
+                    }
+                }
             }
         }
 
+        // 3. Masukkan data ke dalam MPAndroidChart
         ArrayList<BarEntry> entries = new ArrayList<>();
-        for (int i = 0; i < monthlyNetSales.length; i++) {
-            entries.add(new BarEntry(i, monthlyNetSales[i]));
+        for (int i = 0; i < dailyNetSales.length; i++) {
+            entries.add(new BarEntry(i, dailyNetSales[i]));
         }
 
-        BarDataSet dataSet = new BarDataSet(entries, "Net Sales (After 10% Fee)");
-        dataSet.setColor(Color.parseColor("#FF69B4"));
-        dataSet.setValueTextColor(Color.BLACK);
-        dataSet.setValueTextSize(10f);
+        BarDataSet dataSet = new BarDataSet(entries, "Net Sales - " + monthName + " (RM)");
+        dataSet.setColor(Color.parseColor("#FF69B4")); // Pink BeautyHub
+        dataSet.setDrawValues(false); // Sembunyikan teks nilai di atas bar supaya tak serabut
 
         BarData data = new BarData(dataSet);
         barChartStatistics.setData(data);
 
+        // 4. Konfigurasi X-Axis (Label 1 - 31)
         XAxis xAxis = barChartStatistics.getXAxis();
         xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setGranularity(1f);
+        xAxis.setLabelCount(10); // Tunjuk label selang-seli supaya muat
         xAxis.setDrawGridLines(false);
 
-        // --- TAMBAH LOGIK CLICK DI SINI ---
+        barChartStatistics.getAxisRight().setEnabled(false);
+        barChartStatistics.getAxisLeft().setAxisMinimum(0f); // Paksa mula dari 0
+        barChartStatistics.getDescription().setEnabled(false);
+
+        // 5. Logik Klik: Lihat order bagi tarikh spesifik yang diklik
         barChartStatistics.setOnChartValueSelectedListener(new com.github.mikephil.charting.listener.OnChartValueSelectedListener() {
             @Override
             public void onValueSelected(com.github.mikephil.charting.data.Entry e, com.github.mikephil.charting.highlight.Highlight h) {
-                int index = (int) e.getX();
-                if (index >= 0 && index < labels.length) {
-                    String selectedMonth = labels[index];
+                int selectedDay = (int) e.getX() + 1;
 
-                    // Buka SellerOrderActivity dan hantar filter bulan & status Completed
-                    Intent intent = new Intent(SellerActivity.this, SellerOrderActivity.class);
-                    intent.putExtra("filter_status", "Completed");
-                    intent.putExtra("filter_month", selectedMonth);
-                    startActivity(intent);
-                }
+                // Pergi ke SellerOrderActivity dengan filter tarikh & status
+                Intent intent = new Intent(SellerActivity.this, SellerOrderActivity.class);
+                intent.putExtra("filter_status", "Completed");
+                intent.putExtra("filter_day", selectedDay);
+                intent.putExtra("filter_month", targetMonth);
+                intent.putExtra("filter_year", currentYear);
+                startActivity(intent);
             }
 
             @Override
             public void onNothingSelected() {}
         });
 
-        barChartStatistics.getDescription().setEnabled(false);
         barChartStatistics.animateY(1000);
-        barChartStatistics.invalidate();
+        barChartStatistics.invalidate(); // Refresh graf
     }
+
     private void updateNotificationBadge() {
         if (currentSellerId == null) return;
-
         DatabaseReference notifRef = FirebaseDatabase.getInstance().getReference("Notifications").child(currentSellerId);
-
-        // Guna ValueEventListener supaya badge update automatik bila ada notif baru masuk
         notifRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 int unreadCount = 0;
                 for (DataSnapshot ds : snapshot.getChildren()) {
-                    // Semak field "unread" (boolean) dalam setiap notifikasi
                     Boolean isUnread = ds.child("unread").getValue(Boolean.class);
-                    if (isUnread != null && isUnread) {
-                        unreadCount++;
-                    }
+                    if (isUnread != null && isUnread) unreadCount++;
                 }
-
                 if (unreadCount > 0) {
                     tvNotificationBadge.setVisibility(View.VISIBLE);
                     tvNotificationBadge.setText(String.valueOf(unreadCount));
@@ -364,13 +385,13 @@ public class SellerActivity extends AppCompatActivity {
                     tvNotificationBadge.setVisibility(View.GONE);
                 }
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Log.e("SellerActivity", "Badge Error: " + error.getMessage());
             }
         });
     }
+
     private void logoutUser() {
         mAuth.signOut();
         Intent intent = new Intent(this, LoginActivity.class);

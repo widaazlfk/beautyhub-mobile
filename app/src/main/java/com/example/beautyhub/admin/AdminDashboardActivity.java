@@ -82,7 +82,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
         bindClickListener(R.id.card_total_users, v -> startActivity(new Intent(this, UsersStatisticsActivity.class)));
         bindClickListener(R.id.card_total_sellers, v -> startActivity(new Intent(this, SellersStatisticsActivity.class)));
 
-        // Klik Market Performance membawa ke Products Statistics
+
         bindClickListener(R.id.card_total_products, v -> startActivity(new Intent(this, ProductsStatisticsActivity.class)));
 
         bindClickListener(R.id.card_total_revenue, v -> startActivity(new Intent(this, RevenueStatisticsActivity.class)));
@@ -92,7 +92,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
         bindClickListener(R.id.card_manage_products, v -> startActivity(new Intent(this, ManageProductsActivity.class)));
         bindClickListener(R.id.card_manage_reports, v -> startActivity(new Intent(this, AdminManageReportsActivity.class)));
         bindClickListener(R.id.card_manage_categories, v -> startActivity(new Intent(this, ManageCategoriesActivity.class)));
-        bindClickListener(R.id.card_activity_logs, v -> startActivity(new Intent(this, AdminLogActivity.class)));
+        bindClickListener(R.id.card_manage_rewards, v -> startActivity(new Intent(this, ManageRewardsActivity.class)));
     }
 
     private void showProfileMenu(View v) {

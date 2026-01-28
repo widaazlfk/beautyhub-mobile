@@ -139,9 +139,27 @@ public class SellerProfileActivity extends AppCompatActivity {
         boolean isMyProfile = targetSellerId.equals(mAuth.getUid());
 
         ProductAdapter.OnProductClickListener productClickListener = new ProductAdapter.OnProductClickListener() {
-            @Override public void onProductClick(Product product) { /* Open Product Detail */ }
-            @Override public void onEditClick(Product product) { /* Open Edit Activity */ }
-            @Override public void onDeleteClick(Product product) { confirmDeleteProduct(product); }
+            @Override
+            public void onProductClick(Product product) {
+                // Logik buka detail
+                Intent intent = new Intent(SellerProfileActivity.this, SellerProductDetailActivity.class);
+                intent.putExtra("PRODUCT_ID", product.getProductId());
+                startActivity(intent);
+            }
+
+            @Override
+            public void onEditClick(Product product) {
+                // Pastikan key "EDIT_PRODUCT_ID" dan "EDIT_PRODUCT" sama dengan ManageProductsActivity
+                Intent intent = new Intent(SellerProfileActivity.this, AddProductActivity.class);
+                intent.putExtra("EDIT_PRODUCT_ID", product.getProductId());
+                intent.putExtra("EDIT_PRODUCT", product); // Menghantar objek product yang dah sedia ada
+                startActivity(intent);
+            }
+
+            @Override
+            public void onDeleteClick(Product product) {
+                confirmDeleteProduct(product);
+            }
             @Override public void onAddToCartClick(Product product) {}
             @Override public void onBuyNowClick(Product product) {}
             @Override public void onSellerClick(String sellerId) {}
@@ -214,16 +232,13 @@ public class SellerProfileActivity extends AppCompatActivity {
                 productList.clear();
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     Product product = ds.getValue(Product.class);
-                    if (product != null) productList.add(product);
+                    if (product != null) {
+                        // PENTING: Set ID dari key Firebase supaya fungsi edit/delete tahu produk mana nak diubah
+                        product.setProductId(ds.getKey());
+                        productList.add(product);
+                    }
                 }
-
-                if (productList.isEmpty()) {
-                    tvNoProducts.setVisibility(View.VISIBLE);
-                    rvSellerProducts.setVisibility(View.GONE);
-                } else {
-                    tvNoProducts.setVisibility(View.GONE);
-                    rvSellerProducts.setVisibility(View.VISIBLE);
-                }
+                // ... (logik visibility UI)
                 productAdapter.notifyDataSetChanged();
             }
             @Override public void onCancelled(@NonNull DatabaseError error) {}
@@ -300,10 +315,13 @@ public class SellerProfileActivity extends AppCompatActivity {
                 .setTitle("Delete Product")
                 .setMessage("Are you sure you want to delete " + product.getName() + "?")
                 .setPositiveButton("Delete", (dialog, which) -> {
-                    productsRef.child(product.getProductId()).removeValue()
-                            .addOnSuccessListener(aVoid -> Toast.makeText(this, "Product deleted", Toast.LENGTH_SHORT).show());
+                    productsRef.child(product.getProductId()).removeValue().addOnSuccessListener(aVoid -> {
+                        Toast.makeText(this, "Product deleted", Toast.LENGTH_SHORT).show();
+                    }).addOnFailureListener(e -> {
+                        Toast.makeText(this, "Failed to delete product", Toast.LENGTH_SHORT).show();
+                    });
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
     }
-}
+    }
