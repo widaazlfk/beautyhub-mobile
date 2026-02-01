@@ -2,41 +2,48 @@
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="100dp"
-    android:layout_height="100dp"
+    android:layout_height="wrap_content"
     android:layout_margin="8dp"
     app:cardCornerRadius="12dp"
-    app:cardElevation="2dp"
+    app:cardElevation="0dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="#F0F0F0"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="8dp">
+        android:paddingVertical="12dp"
+        android:paddingHorizontal="4dp">
 
-        <!-- Ikon Placeholder untuk Brand -->
-        <ImageView
+        <!-- Menggunakan CircleImageView untuk Logo Seller -->
+        <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/ivBrandLogo"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/ic_brand"
-            app:tint="?attr/colorPrimary" />
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@drawable/ic_shop"
+            app:civ_border_width="1dp"
+            app:civ_border_color="#EEEEEE" />
 
         <TextView
             android:id="@+id/tvBrandName"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="Brand Name"
             android:textAlignment="center"
             android:textColor="#333333"
-            android:textSize="12sp"
+            android:textSize="11sp"
             android:textStyle="bold"
             android:ellipsize="end"
-            android:maxLines="1" />
+            android:maxLines="2"
+            tools:text="Luna Beauty" />
+
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

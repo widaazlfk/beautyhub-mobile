@@ -186,19 +186,31 @@ public class SellerActivity extends AppCompatActivity {
     private void loadDashboardData() {
         DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
 
-        // Dapatkan bulan semasa untuk filter Sales Month
-        Calendar calNow = Calendar.getInstance();
-        int currentMonth = calNow.get(Calendar.MONTH);
-        int currentYear = calNow.get(Calendar.YEAR);
-
-        // --- 1. LISTENER UNTUK ORDERS (Sales, New Orders, etc.) ---
         rootRef.child("Orders").orderByChild("sellerId").equalTo(currentSellerId)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (!snapshot.exists()) return;
+
+                        long latestTimestamp = 0;
+                        // First pass: Find the latest order timestamp to determine "Recent Month"
+                        for (DataSnapshot ds : snapshot.getChildren()) {
+                            Long ts = ds.child("orderDate").getValue(Long.class);
+                            if (ts != null && ts > latestTimestamp) {
+                                latestTimestamp = ts;
+                            }
+                        }
+
+                        Calendar calRecent = Calendar.getInstance();
+                        if (latestTimestamp > 0) {
+                            calRecent.setTimeInMillis(latestTimestamp);
+                        }
+
+                        int recentMonth = calRecent.get(Calendar.MONTH);
+                        int recentYear = calRecent.get(Calendar.YEAR);
+
                         double monthlyNetSales = 0;
-                        int totalOrdersCount = 0;
-                        int newOrdersCount = 0;
+                        int totalOrdersInRecentMonth = 0;
                         int toShipBadgeCount = 0;
 
                         Calendar orderCal = Calendar.getInstance();
@@ -208,41 +220,47 @@ public class SellerActivity extends AppCompatActivity {
                             Double amount = ds.child("totalAmount").getValue(Double.class);
                             Long timestamp = ds.child("orderDate").getValue(Long.class);
 
-                            if (amount != null && timestamp != null && "Completed".equalsIgnoreCase(status)) {
+                            if (timestamp != null) {
                                 orderCal.setTimeInMillis(timestamp);
-                                if (orderCal.get(Calendar.MONTH) == currentMonth &&
-                                        orderCal.get(Calendar.YEAR) == currentYear) {
-                                    monthlyNetSales += (amount * 0.90);
+
+                                // Check if this order belongs to the recent month identified
+                                if (orderCal.get(Calendar.MONTH) == recentMonth &&
+                                        orderCal.get(Calendar.YEAR) == recentYear) {
+
+                                    totalOrdersInRecentMonth++;
+
+                                    if (amount != null && "Completed".equalsIgnoreCase(status)) {
+                                        monthlyNetSales += (amount * 0.90);
+                                    }
                                 }
                             }
 
-                            totalOrdersCount++;
-
+                            // Badge count remains global for current pending tasks
                             if ("Pending".equalsIgnoreCase(status) || "Processing".equalsIgnoreCase(status)) {
-                                newOrdersCount++;
                                 toShipBadgeCount++;
                             }
                         }
 
+                        // Update UI
                         tvTotalSales.setText(String.format(Locale.US, "RM %.2f", monthlyNetSales));
-                        tvTotalOrders.setText(String.valueOf(totalOrdersCount));
+                        tvTotalOrders.setText(String.valueOf(totalOrdersInRecentMonth));
 
-                        if (findViewById(R.id.tv_new_orders_count) != null) {
-                            ((TextView) findViewById(R.id.tv_new_orders_count)).setText(String.valueOf(newOrdersCount));
-                        }
+                        // Update label to show which month is being viewed
+                        String monthName = calRecent.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault());
+                        // Assuming you have a label for the section
+                        // tvSalesTitle.setText("Sales: " + monthName + " " + recentYear);
 
                         if (tvToShipCount != null) {
                             tvToShipCount.setText(String.valueOf(toShipBadgeCount));
                         }
 
-                        setupStatisticsChart(snapshot);
+                        setupStatisticsChart(snapshot, recentMonth, recentYear);
                     }
 
                     @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Log.e("SellerActivity", "Orders Error: " + error.getMessage());
-                    }
+                    public void onCancelled(@NonNull DatabaseError error) {}
                 });
+
 
 
         rootRef.child("Products").orderByChild("sellerId").equalTo(currentSellerId)
@@ -275,18 +293,18 @@ public class SellerActivity extends AppCompatActivity {
                     }
                 });
     }
-    private void setupStatisticsChart(DataSnapshot ordersSnapshot) {
+    private void setupStatisticsChart(DataSnapshot ordersSnapshot, int targetMonth, int targetYear) {
         Calendar cal = Calendar.getInstance();
 
-        // 1. Ambil bulan dan tahun semasa secara automatik
-        int targetMonth = cal.get(Calendar.MONTH);
-        int currentYear = cal.get(Calendar.YEAR);
+        // Set the calendar to the target month/year to calculate days correctly
+        cal.set(Calendar.YEAR, targetYear);
+        cal.set(Calendar.MONTH, targetMonth);
+
         String monthName = cal.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault());
 
-        // Dapatkan jumlah hari dalam bulan semasa (Contoh: Jan=31, Feb=28)
+        // Dapatkan jumlah hari dalam bulan yang dikesan (Contoh: Jan=31, Feb=28)
         int daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
 
-        // Inisialisasi array data dengan 0 (BUANG dummy data untuk ketepatan)
         float[] dailyNetSales = new float[daysInMonth];
         String[] labels = new String[daysInMonth];
 
@@ -302,16 +320,15 @@ public class SellerActivity extends AppCompatActivity {
                 Double amount = ds.child("totalAmount").getValue(Double.class);
                 Long timestamp = ds.child("orderDate").getValue(Long.class);
 
-                // PENAPIS KETAT: Mesti "Completed" & Bulan/Tahun yang tepat
+                // Filter: Mesti "Completed" & Bulan/Tahun yang dikesan tadi
                 if (amount != null && timestamp != null && "Completed".equalsIgnoreCase(status)) {
                     cal.setTimeInMillis(timestamp);
 
-                    if (cal.get(Calendar.MONTH) == targetMonth && cal.get(Calendar.YEAR) == currentYear) {
+                    if (cal.get(Calendar.MONTH) == targetMonth && cal.get(Calendar.YEAR) == targetYear) {
                         int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
 
-                        // Pastikan hari tidak melebihi array index (1-31 -> 0-30)
                         if (dayOfMonth >= 1 && dayOfMonth <= daysInMonth) {
-                            // Tambah ke hari yang spesifik (Ambil 90% selepas komisen)
+                            // Seller dapat 90%
                             dailyNetSales[dayOfMonth - 1] += (float) (amount * 0.90);
                         }
                     }
@@ -325,37 +342,36 @@ public class SellerActivity extends AppCompatActivity {
             entries.add(new BarEntry(i, dailyNetSales[i]));
         }
 
-        BarDataSet dataSet = new BarDataSet(entries, "Net Sales - " + monthName + " (RM)");
-        dataSet.setColor(Color.parseColor("#FF69B4")); // Pink BeautyHub
-        dataSet.setDrawValues(false); // Sembunyikan teks nilai di atas bar supaya tak serabut
+        BarDataSet dataSet = new BarDataSet(entries, "Net Sales - " + monthName + " " + targetYear + " (RM)");
+        dataSet.setColor(Color.parseColor("#FF69B4"));
+        dataSet.setDrawValues(false);
 
         BarData data = new BarData(dataSet);
         barChartStatistics.setData(data);
 
-        // 4. Konfigurasi X-Axis (Label 1 - 31)
+        // 4. Konfigurasi X-Axis
         XAxis xAxis = barChartStatistics.getXAxis();
         xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setGranularity(1f);
-        xAxis.setLabelCount(10); // Tunjuk label selang-seli supaya muat
+        xAxis.setLabelCount(10);
         xAxis.setDrawGridLines(false);
 
         barChartStatistics.getAxisRight().setEnabled(false);
-        barChartStatistics.getAxisLeft().setAxisMinimum(0f); // Paksa mula dari 0
+        barChartStatistics.getAxisLeft().setAxisMinimum(0f);
         barChartStatistics.getDescription().setEnabled(false);
 
-        // 5. Logik Klik: Lihat order bagi tarikh spesifik yang diklik
+        // 5. Logik Klik
         barChartStatistics.setOnChartValueSelectedListener(new com.github.mikephil.charting.listener.OnChartValueSelectedListener() {
             @Override
             public void onValueSelected(com.github.mikephil.charting.data.Entry e, com.github.mikephil.charting.highlight.Highlight h) {
                 int selectedDay = (int) e.getX() + 1;
 
-                // Pergi ke SellerOrderActivity dengan filter tarikh & status
-                Intent intent = new Intent(SellerActivity.this, SellerOrderActivity.class);
+                Intent intent = new Intent(SellerActivity.this, com.example.beautyhub.seller.SellerOrderActivity.class);
                 intent.putExtra("filter_status", "Completed");
                 intent.putExtra("filter_day", selectedDay);
                 intent.putExtra("filter_month", targetMonth);
-                intent.putExtra("filter_year", currentYear);
+                intent.putExtra("filter_year", targetYear);
                 startActivity(intent);
             }
 
@@ -364,7 +380,7 @@ public class SellerActivity extends AppCompatActivity {
         });
 
         barChartStatistics.animateY(1000);
-        barChartStatistics.invalidate(); // Refresh graf
+        barChartStatistics.invalidate();
     }
 
     private void updateNotificationBadge() {

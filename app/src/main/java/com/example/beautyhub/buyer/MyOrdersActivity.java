@@ -208,4 +208,5 @@ public class MyOrdersActivity extends AppCompatActivity implements OrderAdapter.
         rvOrders.setVisibility(View.GONE);
         layoutNoOrders.setVisibility(View.VISIBLE);
     }
+
 }

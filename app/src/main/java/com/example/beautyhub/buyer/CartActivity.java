@@ -574,7 +574,7 @@ public class CartActivity extends AppCompatActivity implements CartParentAdapter
     @Override
     public void onSellerHeaderClicked(String sellerId) {
         if (!isInEditMode) {
-            Intent intent = new Intent(this, SellerProfileActivity.class);
+            Intent intent = new Intent(this, ShopViewActivity.class);
             intent.putExtra("SELLER_ID", sellerId);
             startActivity(intent);
         }

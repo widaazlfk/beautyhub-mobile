@@ -208,19 +208,30 @@ public class ProductDetailActivity extends AppCompatActivity {
 
                 Glide.with(this)
                         .load(product.getSellerProfileImageUrl())
-                        .placeholder(R.drawable.ic_profile) // Pastikan drawable ini wujud atau guna ic_profile_placeholder
+                        .placeholder(R.drawable.ic_profile)
                         .error(R.drawable.ic_profile)
+                        .circleCrop() // Tambah ini supaya gambar bulat sempurna
                         .into(binding.ivSellerProfile);
 
-                binding.sellerInfoCard.setOnClickListener(v -> {
-                    Intent intent = new Intent(this, ShopViewActivity.class);
+                // LOGIK KLIK YANG DIPERBAIKI
+                View.OnClickListener openShopListener = v -> {
+                    Log.d("PRODUCT_DETAIL", "Navigating to shop: " + product.getSellerId());
+                    Intent intent = new Intent(ProductDetailActivity.this, ShopViewActivity.class);
                     intent.putExtra("SELLER_ID", product.getSellerId());
                     startActivity(intent);
-                });
+                };
+
+                // Pasang listener pada keseluruhan kad
+                binding.sellerInfoCard.setOnClickListener(openShopListener);
+
+                // Backup: Pasang juga pada nama seller (kadang-kadang kad terhalang oleh elemen dalam)
+                binding.tvSellerName.setOnClickListener(openShopListener);
+                binding.ivSellerProfile.setOnClickListener(openShopListener);
+
             } else {
                 binding.sellerInfoCard.setVisibility(View.GONE);
+                Log.e("PRODUCT_DETAIL", "Seller ID is NULL for product: " + productId);
             }
-
             // 4. Slider Gambar (Image Slider)
             List<String> images = product.getImageUrls();
             if (images != null && !images.isEmpty()) {
@@ -232,7 +243,39 @@ public class ProductDetailActivity extends AppCompatActivity {
                 binding.vpProductImages.setVisibility(View.GONE);
                 Log.d("ProductDetail", "No images available for this product.");
             }
+            String sid = product.getSellerId();
+            if (sid != null && !sid.isEmpty()) {
+                binding.sellerInfoCard.setVisibility(View.VISIBLE);
+                binding.tvSellerName.setText(product.getSellerName() != null ? product.getSellerName() : "Visit Store");
 
+                Glide.with(this)
+                        .load(product.getSellerProfileImageUrl())
+                        .placeholder(R.drawable.ic_profile)
+                        .error(R.drawable.ic_profile)
+                        .circleCrop()
+                        .into(binding.ivSellerProfile);
+
+                View.OnClickListener openShopListener = v -> {
+                    // Log untuk pengesahan di Logcat
+                    Log.d("PRODUCT_DETAIL", "Navigating to shop with UID: " + sid);
+
+                    // Toast untuk maklum balas visual segera
+                    Toast.makeText(ProductDetailActivity.this, "Opening shop...", Toast.LENGTH_SHORT).show();
+
+                    Intent intent = new Intent(ProductDetailActivity.this, ShopViewActivity.class);
+                    intent.putExtra("SELLER_ID", sid);
+                    startActivity(intent);
+                };
+
+                // Pasang pada 3 tempat untuk pastikan boleh ditekan
+                binding.sellerInfoCard.setOnClickListener(openShopListener);
+                binding.tvSellerName.setOnClickListener(openShopListener);
+                binding.ivSellerProfile.setOnClickListener(openShopListener);
+
+            } else {
+                binding.sellerInfoCard.setVisibility(View.GONE);
+                Log.e("PRODUCT_DETAIL", "Seller ID is NULL for product: " + productId);
+            }
         } catch (Exception e) {
             Log.e("ProductDetail", "General error in displayProductDetails: " + e.getMessage());
             Toast.makeText(this, "Error loading product details", Toast.LENGTH_SHORT).show();

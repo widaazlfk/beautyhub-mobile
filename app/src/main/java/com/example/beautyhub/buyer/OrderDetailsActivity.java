@@ -261,7 +261,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
         }
     }
     private void handleOrderAgain() {
-        if (currentOrder == null || currentOrder.getOrderItems() == null) {
+        if (currentOrder == null || currentOrder.getOrderItems() == null || currentOrder.getOrderItems().isEmpty()) {
             Toast.makeText(this, "Order data not available", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -274,30 +274,31 @@ public class OrderDetailsActivity extends AppCompatActivity {
             return;
         }
 
+        // MESTI GUNA "Carts" (ikut CartActivity.java anda)
         DatabaseReference cartRef = FirebaseDatabase.getInstance().getReference("Carts").child(userId);
 
         int totalItems = currentOrder.getOrderItems().size();
-        final int[] processedItems = {0};
+        final int[] completedItems = {0};
 
         for (OrderItem item : currentOrder.getOrderItems()) {
-            // Kita simpan semula dalam Cart menggunakan ProductId sebagai key
-            // Ini akan memastikan jika item sudah ada dalam cart, ia akan dikemaskini
-            cartRef.child(item.getProductId()).setValue(item)
+            String pid = item.getProductId();
+            String sid = item.getSellerId(); // Pastikan OrderItem ada getSellerId()
+
+            if (pid == null || sid == null) {
+                completedItems[0]++;
+                continue;
+            }
+
+            // Struktur MESTI: Carts -> UserId -> SellerId -> ProductId
+            cartRef.child(sid).child(pid).setValue(item)
                     .addOnCompleteListener(task -> {
-                        processedItems[0]++;
-
-                        // Jika semua item dalam senarai order sudah berjaya dimasukkan ke cart
-                        if (processedItems[0] == totalItems) {
+                        completedItems[0]++;
+                        if (completedItems[0] == totalItems) {
                             binding.progressBar.setVisibility(View.GONE);
-                            Toast.makeText(this, "Items added to cart!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(OrderDetailsActivity.this, "Added to cart", Toast.LENGTH_SHORT).show();
 
-                            // Bawa user ke MainActivity atau terus ke tab Cart
-                            Intent intent = new Intent(this,BuyerActivity.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                            // Anda boleh tambah extra untuk beritahu MainActivity supaya buka Fragment Cart
-                            intent.putExtra("OPEN_CART", true);
+                            Intent intent = new Intent(OrderDetailsActivity.this, CartActivity.class);
                             startActivity(intent);
-                            finish();
                         }
                     });
         }

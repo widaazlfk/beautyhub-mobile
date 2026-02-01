@@ -118,6 +118,7 @@ public class ManageRewardsActivity extends AppCompatActivity implements RewardAd
         // Buka dialog dalam mod edit
         showAddEditRewardDialog(reward);
     }
+
     private void showAddEditRewardDialog(final Reward existingReward) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogTheme);
         View view = LayoutInflater.from(this).inflate(R.layout.a_dialog_add_edit_reward, null);
@@ -135,10 +136,10 @@ public class ManageRewardsActivity extends AppCompatActivity implements RewardAd
         final SwitchCompat switchStatus = view.findViewById(R.id.switch_reward_status);
         final Button btnSave = view.findViewById(R.id.btn_save_reward);
         final Button btnDelete = view.findViewById(R.id.btn_delete_reward);
+        final Button btnCancel = view.findViewById(R.id.btn_cancel); // Pastikan ID ini sama dalam XML
 
         // Tentukan mod: Tambah Baru atau Edit Sedia Ada
         if (existingReward != null) {
-            // Mod Edit
             tvDialogTitle.setText("Edit Reward");
             etTitle.setText(existingReward.getTitle());
             etDescription.setText(existingReward.getDescription());
@@ -151,17 +152,18 @@ public class ManageRewardsActivity extends AppCompatActivity implements RewardAd
             } else {
                 rbFixedAmount.setChecked(true);
             }
-            btnDelete.setVisibility(View.VISIBLE); // Tunjukkan butang padam hanya dalam mod edit
+            btnDelete.setVisibility(View.VISIBLE);
         } else {
-            // Mod Tambah Baru
             tvDialogTitle.setText("Add New Reward");
             btnDelete.setVisibility(View.GONE);
         }
 
         AlertDialog dialog = builder.create();
 
+        // Logik butang Cancel - Menutup dialog tanpa simpan
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
         btnSave.setOnClickListener(v -> {
-            // Ambil semua input dari pengguna
             String title = etTitle.getText().toString().trim();
             String description = etDescription.getText().toString().trim();
             String pointsStr = etPoints.getText().toString().trim();
@@ -169,7 +171,6 @@ public class ManageRewardsActivity extends AppCompatActivity implements RewardAd
             boolean isActive = switchStatus.isChecked();
             int selectedTypeId = rgType.getCheckedRadioButtonId();
 
-            // Pengesahan Input
             if (TextUtils.isEmpty(title) || TextUtils.isEmpty(description) || TextUtils.isEmpty(pointsStr) || TextUtils.isEmpty(valueStr) || selectedTypeId == -1) {
                 Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
                 return;
@@ -180,15 +181,10 @@ public class ManageRewardsActivity extends AppCompatActivity implements RewardAd
             String type = (selectedTypeId == R.id.rb_percentage) ? "percentage" : "fixed_amount";
             String rewardId = (existingReward != null) ? existingReward.getRewardId() : rewardsRef.push().getKey();
 
-            if (rewardId == null) {
-                Toast.makeText(this, "Failed to create a unique ID.", Toast.LENGTH_SHORT).show();
-                return;
-            }
+            if (rewardId == null) return;
 
-            // Cipta atau kemas kini objek Reward
             Reward reward = new Reward(rewardId, title, description, points, type, value, isActive);
 
-            // Simpan ke Firebase
             rewardsRef.child(rewardId).setValue(reward)
                     .addOnSuccessListener(aVoid -> {
                         Toast.makeText(this, "Reward saved successfully", Toast.LENGTH_SHORT).show();
@@ -198,7 +194,6 @@ public class ManageRewardsActivity extends AppCompatActivity implements RewardAd
         });
 
         btnDelete.setOnClickListener(v -> {
-            // Logik untuk padam ganjaran
             if (existingReward != null) {
                 new AlertDialog.Builder(this)
                         .setTitle("Confirm Deletion")

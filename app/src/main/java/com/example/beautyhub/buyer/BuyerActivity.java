@@ -101,7 +101,7 @@ public class BuyerActivity extends AppCompatActivity implements
     private Runnable carouselRunnable;
     private RecyclerView brandsRecyclerView;
     private BrandAdapter brandAdapter;
-    private List<String> brandList;
+    private List<Product> brandList;
 
 
     @Override
@@ -230,7 +230,7 @@ public class BuyerActivity extends AppCompatActivity implements
         promoImageList = new ArrayList<>();
         promoImageList.add(R.drawable.promo_placeholder_1);
         promoImageList.add(R.drawable.promo_placeholder_2);
-        promoImageList.add(R.drawable.promo_placeholder_3);
+        promoImageList.add(R.drawable.model);
 
         promoCarouselAdapter = new PromoCarouselAdapter(promoImageList);
         promoCarousel.setAdapter(promoCarouselAdapter);
@@ -293,109 +293,78 @@ public class BuyerActivity extends AppCompatActivity implements
                         categoryList.add(category);
                     }
                 }
+                // Susun supaya Skincare & Makeup sentiasa di depan jika anda mahu
                 categoryAdapter.notifyDataSetChanged();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("BuyerActivity", "Error: " + error.getMessage());
+                Log.e("BuyerActivity", "Error fetch categories: " + error.getMessage());
             }
         });
     }
 
+
     private void setupBrands() {
-        brandList = new ArrayList<>();
-        brandAdapter = new BrandAdapter(this, brandList, brandName -> {
-            // Logik klik: Pergi ke ShopViewActivity dengan filter Brand
-            Intent intent = new Intent(this, ShopViewActivity.class);
-            intent.putExtra("BRAND_NAME", brandName);
-            intent.putExtra("FILTER_TYPE", "BRAND");
+        // brandList kini menyimpan objek Product supaya kita boleh akses URL Logo & SellerID
+        List<Product> brandProductList = new ArrayList<>();
+
+        // BrandAdapter dikemaskini untuk menerima List<Product>
+        brandAdapter = new BrandAdapter(this, brandProductList, product -> {
+            // Apabila logo ditekan, terus ke kedai menggunakan SellerID produk tersebut
+            Intent intent = new Intent(BuyerActivity.this, ShopViewActivity.class);
+            intent.putExtra("SELLER_ID", product.getSellerId());
             startActivity(intent);
         });
 
-        // Gunakan Horizontal Layout supaya nampak macam kotak-kotak categories
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-        brandsRecyclerView.setLayoutManager(layoutManager);
+        brandsRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         brandsRecyclerView.setAdapter(brandAdapter);
     }
-
-
-    private void updateBrandList(List<Product> products) {
-        // Guna HashSet supaya nama brand yang sama tidak berulang
-        Set<String> uniqueBrands = new HashSet<>();
-        for (Product p : products) {
-            if (p.getBrand() != null && !p.getBrand().isEmpty()) {
-                uniqueBrands.add(p.getBrand());
-            }
-        }
-
-        brandList.clear();
-        brandList.addAll(uniqueBrands);
-        brandAdapter.notifyDataSetChanged();
-
-        // Sembunyikan Section Brand jika tiada data
-        if (brandList.isEmpty()) {
-            brandsRecyclerView.setVisibility(View.GONE);
-        } else {
-            brandsRecyclerView.setVisibility(View.VISIBLE);
-        }
-    }
-
-    private void setupNewestProducts() {
-        productList = new ArrayList<>();
-        // isSellerView = false (Mode Pembeli)
-        productAdapter = new BuyerProductAdapter(this, productList, this);
-        newestProductsRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-        newestProductsRecyclerView.setAdapter(productAdapter);
-    }
-
     private void fetchProductsWithViewModel() {
-        // ... (Logik fetchProductsWithViewModel tetap sama, pastikan product.hasStock() berfungsi dengan betul) ...
         productsProgressBar.setVisibility(View.VISIBLE);
         newestProductsRecyclerView.setVisibility(View.GONE);
 
-        // Observer untuk products dari ViewModel
         productViewModel.getProducts().observe(this, products -> {
-            productList.clear();
+            if (products != null) {
+                // 1. Kemaskini Grid Produk (10 produk terbaru)
+                productList.clear();
+                int count = 0;
+                for (Product product : products) {
+                    if (product.isActive() && product.hasStock()) {
+                        productList.add(product);
+                        count++;
+                    }
+                    if (count >= 10) break;
+                }
+                productAdapter.updateProductList(productList);
 
-            // Filter: hanya active products dengan stock > 0
-            for (Product product : products) {
-                if (product.isActive() && product.hasStock()) {
-                    productList.add(product);
+                // 2. LOGIK BRAND DENGAN LOGO (Macam Categories)
+                // Kita guna HashMap supaya 1 Jenama = 1 Logo unik
+                java.util.Map<String, Product> brandLogoMap = new java.util.HashMap<>();
+                for (Product p : products) {
+                    if (p.getBrand() != null && !p.getBrand().isEmpty()) {
+                        // Jika jenama belum ada dalam map, masukkan produk ini sebagai wakil logo
+                        if (!brandLogoMap.containsKey(p.getBrand())) {
+                            brandLogoMap.put(p.getBrand(), p);
+                        }
+                    }
                 }
 
-                // Limit to 10 newest products
-                if (productList.size() >= 10) {
-                    break;
-                }
+                // Masukkan hasil unik ke dalam list brandAdapter
+                List<Product> uniqueBrandLogos = new ArrayList<>(brandLogoMap.values());
+
+                // Pastikan anda mempunyai method updateList di dalam BrandAdapter
+                brandAdapter.updateList(uniqueBrandLogos); // Betul
             }
 
-            productAdapter.updateProductList(productList);
             productsProgressBar.setVisibility(View.GONE);
             newestProductsRecyclerView.setVisibility(View.VISIBLE);
         });
 
-        // Observer untuk error
-        productViewModel.getError().observe(this, error -> {
-            productsProgressBar.setVisibility(View.GONE);
-            if (error != null && !error.isEmpty()) {
-                Toast.makeText(BuyerActivity.this, error, Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        // Observer untuk loading
-        productViewModel.getLoading().observe(this, isLoading -> {
-            if (isLoading != null) {
-                productsProgressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
-            }
-        });
-
-        // Load products melalui ViewModel
         productViewModel.loadAllProducts();
     }
 
     private void setupCartBadge() {
-        // ... (Logik setupCartBadge tetap sama) ...
         if (currentUser == null) {
             cartBadge.setVisibility(View.GONE);
             return;
@@ -486,60 +455,29 @@ public class BuyerActivity extends AppCompatActivity implements
                 .show();
     }
 
-
-
-    // --- Category Listener Implementation ---
-    // --- Category Listener Implementation ---
     @Override
     public void onCategoryClick(Category category) {
+        // Gunakan 'category' (dari parameter), bukan 'categories'
         Intent intent = new Intent(this, ShopActivity.class);
-        String categoryId = category.getCategoryId(); // Dapatkan ID kategori
 
-        // Periksa sama ada ID kategori yang diklik adalah untuk kategori induk
-        if ("cat_001".equals(categoryId)) { // Kes untuk Skincare
-            // Jika "Skincare" diklik, hantar senarai semua sub-kategori skincare
-            intent.putExtra("PARENT_CATEGORY_NAME", "Skincare");
+        // Ambil nama kategori terus dari objek yang ditekan (contoh: "Cleansers")
+        String categoryName = category.getCategoryName();
 
-            // Definisikan senarai sub-kategori Skincare secara tetap
-            // Pastikan nama ini sepadan dengan 'categoryName' di Firebase
-            ArrayList<String> skincareSubCategories = new ArrayList<>();
-            skincareSubCategories.add("Cleansers");
-            skincareSubCategories.add("Serums");
-            skincareSubCategories.add("Moisturizers");
-            skincareSubCategories.add("Sunscreens");
-            skincareSubCategories.add("Toners");
-            skincareSubCategories.add("Face Masks");
-
-            intent.putStringArrayListExtra("SUB_CATEGORIES", skincareSubCategories);
-
-        } else if ("cat_002".equals(categoryId)) { // Kes untuk Makeup
-            // Jika "Makeup" diklik, hantar senarai semua sub-kategori makeup
-            intent.putExtra("PARENT_CATEGORY_NAME", "Makeup");
-
-            // Definisikan senarai sub-kategori Makeup secara tetap
-            // Pastikan nama ini sepadan dengan 'categoryName' di Firebase
-            ArrayList<String> makeupSubCategories = new ArrayList<>();
-            makeupSubCategories.add("Foundations");
-            makeupSubCategories.add("Lipstick");
-            makeupSubCategories.add("Mascara");
-            makeupSubCategories.add("Eyeliner");
-            makeupSubCategories.add("Eyeshadow");
-            makeupSubCategories.add("Concealer");
-            makeupSubCategories.add("Powder");
-            makeupSubCategories.add("Primer");
-            makeupSubCategories.add("Blusher");
-
-            intent.putStringArrayListExtra("SUB_CATEGORIES", makeupSubCategories);
-
-        } else {
-            // Untuk sub-kategori lain (cth: "Serum", "Foundation"), kekalkan logik lama
-            // Hantar hanya nama kategori tunggal untuk ditapis
-            intent.putExtra("CATEGORY_NAME", category.getCategoryName());
-        }
+        // Hantar nama kategori ke ShopActivity supaya produk boleh ditapis
+        intent.putExtra("CATEGORY_NAME", categoryName);
 
         startActivity(intent);
     }
 
+    private void setupNewestProducts() {
+        productList = new ArrayList<>();
+        // Inisialisasi adapter. 'this' kedua merujuk kepada OnProductInteractionListener
+        productAdapter = new BuyerProductAdapter(this, productList, this);
+
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
+        newestProductsRecyclerView.setLayoutManager(gridLayoutManager);
+        newestProductsRecyclerView.setAdapter(productAdapter);
+    }
 
     // --- Product Interaction Listener Implementation ---
     @Override
@@ -712,12 +650,7 @@ public class BuyerActivity extends AppCompatActivity implements
                 .addOnFailureListener(e -> Toast.makeText(BuyerActivity.this, "Failed to add to cart", Toast.LENGTH_SHORT).show());
     }
 
-    // --- PERUBAHAN 5: Padam kaedah getMaxStock ---
-    /*
-    private int getMaxStock(Product product, Variant variant) {
-        // ... Kaedah ini tidak diperlukan lagi ...
-    }
-    */
+
 
     // ... (handleFavouriteClick, onFavouriteClick, onSellerClick, showLogoutConfirmation, onDestroy tetap sama) ...
     private void handleFavouriteClick(Product product, boolean isFavourite) {

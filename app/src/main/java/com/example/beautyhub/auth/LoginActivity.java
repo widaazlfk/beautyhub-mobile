@@ -181,12 +181,19 @@ public class LoginActivity extends AppCompatActivity {
                     User user = snapshot.getValue(User.class);
                     if (user != null && user.getUserType() != null) {
 
-                        // Check if account is suspended
                         if (user.isSuspended()) {
                             mAuth.signOut();
-                            Toast.makeText(LoginActivity.this,
-                                    "Your account has been suspended. Please contact support.",
-                                    Toast.LENGTH_LONG).show();
+                            progressDialog.dismiss();
+
+                            new androidx.appcompat.app.AlertDialog.Builder(LoginActivity.this)
+                                    .setTitle("Account Suspended")
+                                    .setMessage("Your account has been suspended due to a violation of our terms.\n\n" +
+                                            "Please contact our support team for assistance:\n" +
+                                            "📧 Email: admin@beautyhub.com\n" +
+                                            "📞 WhatsApp: +60179288974")
+                                    .setCancelable(false)
+                                    .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                                    .show();
                             return;
                         }
 

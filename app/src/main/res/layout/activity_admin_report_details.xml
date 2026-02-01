@@ -79,11 +79,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Reported By"
-                        android:textSize="12sp" />
+
                     <TextView
                         android:id="@+id/tv_reporter_name"
                         android:layout_width="wrap_content"
@@ -98,11 +94,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Reported Seller"
-                        android:textSize="12sp" />
+
                     <TextView
                         android:id="@+id/tv_seller_name"
                         android:layout_width="wrap_content"
@@ -138,8 +130,10 @@
                 android:layout_height="60dp"
                 android:layout_marginTop="40dp"
                 android:text="Dismiss Report"
+                android:textAllCaps="false"
                 app:strokeColor="#636E72"
                 android:textColor="#636E72" />
+
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_take_action"

@@ -66,7 +66,7 @@ public class PersonalInformationActivity extends AppCompatActivity {
     }
 
     private void setupToolbar() {
-        // binding.toolbarPersonalInfo.setNavigationOnClickListener(v -> finish());
+         binding.toolbarPersonalInfo.setNavigationOnClickListener(v -> finish());
     }
 
     private void attachDatabaseReadListener() {

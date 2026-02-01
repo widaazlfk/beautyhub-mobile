@@ -115,7 +115,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="12dp"
-                android:text="Cumulative Market Growth"
+                android:text="Cumulative Market Growth (2026)"
                 android:textColor="#2D3436"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -142,25 +142,34 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- BAHAGIAN BARU: LIST DETAILS DI BAWAH CHART -->
-            <TextView
-                android:layout_width="wrap_content"
+            <!-- LIST DETAILS SECTION WITH OVERVIEW TITLE -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="horizontal"
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="12dp"
-                android:text="Product Performance Details"
-                android:textColor="#2D3436"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:gravity="center_vertical">
 
-            <!-- RecyclerView untuk senarai ranking produk -->
+                <!-- Dynamic Title based on selected month -->
+                <TextView
+                    android:id="@+id/tv_overview_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Full Year 2026"
+                    android:textColor="#636E72"
+                    android:textSize="14sp"
+                    android:textStyle="italic" />
+            </LinearLayout>
+
+            <!-- RecyclerView for product ranking -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_products_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:nestedScrollingEnabled="false" />
 
-            <!-- Margin tambahan di bawah -->
+            <!-- Extra bottom margin -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="32dp"/>

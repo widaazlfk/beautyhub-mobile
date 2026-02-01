@@ -317,6 +317,7 @@ public class ShopActivity extends AppCompatActivity implements
         }
     }
 
+
     private void listenToFavourites() {
         if (currentUser == null) return;
         favouritesRef = FirebaseDatabase.getInstance().getReference("Favourites").child(currentUser.getUid());

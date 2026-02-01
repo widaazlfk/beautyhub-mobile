@@ -370,76 +370,81 @@
                     tools:visibility="visible"/>
             </LinearLayout>
 
-            <!-- Seller Info Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/seller_info_card"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="8dp"
-                android:clickable="true"
-                android:focusable="true"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/gray_light"
-                app:strokeWidth="1dp"
-                android:visibility="gone"
-                tools:visibility="visible">
 
-                <RelativeLayout
+                <!-- 3. SELLER INFO CARD (PENYELESAIAN) -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="Seller Information"
+                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/sellerInfoCard"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="12dp">
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="4dp"
+                    app:strokeColor="@color/gray_light"
+                    app:strokeWidth="1dp">
 
-                    <de.hdodenhof.circleimageview.CircleImageView
-                        android:id="@+id/iv_seller_profile"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:layout_alignParentStart="true"
-                        android:layout_centerVertical="true"
-                        tools:src="@drawable/ic_profile_placeholder" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
+                    <RelativeLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="12dp"
-                        android:layout_marginEnd="12dp"
-                        android:layout_toStartOf="@+id/btn_view_shop"
-                        android:layout_toEndOf="@id/iv_seller_profile"
-                        android:orientation="vertical">
+                        android:padding="12dp">
 
-                        <TextView
-                            android:id="@+id/tv_seller_name"
-                            android:layout_width="wrap_content"
+                        <de.hdodenhof.circleimageview.CircleImageView
+                            android:id="@+id/iv_seller_profile"
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:src="@drawable/ic_profile" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:ellipsize="end"
-                            android:maxLines="1"
-                            android:textAppearance="?attr/textAppearanceSubtitle1"
-                            android:textStyle="bold"
-                            tools:text="Nama Kedai Penjual" />
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="12dp"
+                            android:layout_toEndOf="@id/iv_seller_profile"
+                            android:layout_toStartOf="@id/iv_chevron"
+                            android:orientation="vertical">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="View Shop"
-                            android:textAppearance="?attr/textAppearanceCaption"
-                            android:textColor="?attr/colorPrimary" />
-                    </LinearLayout>
+                            <TextView
+                                android:id="@+id/tv_seller_name"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Loading Seller..."
+                                android:textAppearance="?attr/textAppearanceSubtitle2"
+                                android:textStyle="bold" />
 
-                    <ImageView
-                        android:id="@+id/btn_view_shop"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:src="@drawable/ic_arrow_forward"
-                        app:tint="?attr/colorControlNormal"
-                        android:contentDescription="View Shop"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="View Shop"
+                                android:textColor="?attr/colorPrimary"
+                                android:textSize="12sp" />
+                        </LinearLayout>
 
-                </RelativeLayout>
-            </com.google.android.material.card.MaterialCardView>
+                        <ImageView
+                            android:id="@+id/iv_chevron"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:src="@drawable/ic_arrow_forward"
+                            app:tint="@color/gray" />
+                    </RelativeLayout>
+                </com.google.android.material.card.MaterialCardView>
+
 
             <!-- Divider -->
             <View

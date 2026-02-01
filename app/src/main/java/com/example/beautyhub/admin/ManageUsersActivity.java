@@ -17,9 +17,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.beautyhub.R;
-// ▼▼▼ 1. IMPORT LogHelper ▼▼▼
-import com.example.beautyhub.admin.LogHelper;
-// ▲▲▲ AKHIR IMPORT ▲▲▲
 import com.example.beautyhub.adapters.AdminUserAdapter;
 import com.example.beautyhub.models.User;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -42,18 +39,15 @@ public class ManageUsersActivity extends AppCompatActivity implements AdminUserA
 
     private static final String TAG = "ManageUsersActivity";
 
-    // Views
     private RecyclerView rvUsers;
     private EditText etSearchUsers;
     private ChipGroup chipGroupUserTypes;
     private ProgressBar progressBar;
     private TextView tvNoUsersFound;
 
-    // Adapter dan Data
     private AdminUserAdapter userAdapter;
     private List<User> allUsersList;
 
-    // Firebase
     private DatabaseReference usersRef;
     private FirebaseAuth mAuth;
 
@@ -91,8 +85,6 @@ public class ManageUsersActivity extends AppCompatActivity implements AdminUserA
 
     private void fetchUsersFromFirebase() {
         progressBar.setVisibility(View.VISIBLE);
-        tvNoUsersFound.setVisibility(View.GONE);
-
         usersRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -111,8 +103,7 @@ public class ManageUsersActivity extends AppCompatActivity implements AdminUserA
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 progressBar.setVisibility(View.GONE);
-                Toast.makeText(ManageUsersActivity.this, "Failed to load users: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "Firebase DB Error: " + databaseError.getMessage());
+                Toast.makeText(ManageUsersActivity.this, "Error: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -143,7 +134,11 @@ public class ManageUsersActivity extends AppCompatActivity implements AdminUserA
             boolean matchesSearch = (user.getUsername() != null && user.getUsername().toLowerCase(Locale.ROOT).contains(searchQuery)) ||
                     (user.getEmail() != null && user.getEmail().toLowerCase(Locale.ROOT).contains(searchQuery));
 
-            boolean matchesRole = selectedRoles.isEmpty() || (user.getUserType() != null && selectedRoles.contains(user.getUserType()));
+            boolean matchesRole = true;
+            if (!selectedRoles.isEmpty() && user.getUserType() != null) {
+                // handles BUYER, Buyer, buyer by converting to lowercase
+                matchesRole = selectedRoles.contains(user.getUserType().toLowerCase(Locale.ROOT));
+            }
 
             if (matchesSearch && matchesRole) {
                 filteredList.add(user);
@@ -158,14 +153,10 @@ public class ManageUsersActivity extends AppCompatActivity implements AdminUserA
         for (int id : chipGroupUserTypes.getCheckedChipIds()) {
             Chip chip = findViewById(id);
             if (chip != null) {
-                String chipText = chip.getText().toString();
-                if (chipText.equalsIgnoreCase("Buyers")) {
-                    selectedRoles.add("Buyer");
-                } else if (chipText.equalsIgnoreCase("Sellers")) {
-                    selectedRoles.add("Seller");
-                } else if (chipText.equalsIgnoreCase("Admins")) {
-                    selectedRoles.add("Admin");
-                }
+                String text = chip.getText().toString().toLowerCase(Locale.ROOT);
+                if (text.contains("buyer")) selectedRoles.add("buyer");
+                else if (text.contains("seller")) selectedRoles.add("seller");
+                else if (text.contains("admin")) selectedRoles.add("admin");
             }
         }
         return selectedRoles;
@@ -174,102 +165,63 @@ public class ManageUsersActivity extends AppCompatActivity implements AdminUserA
     private void showUserActionDialog(User user) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null && user.getUid().equals(currentUser.getUid())) {
-            Toast.makeText(this, "You cannot perform actions on your own account.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Cannot modify your own account.", Toast.LENGTH_SHORT).show();
             return;
         }
 
         final CharSequence[] options = {"Toggle Suspend Status", "Change Role", "Delete User", "Cancel"};
-
         new AlertDialog.Builder(this, R.style.AlertDialogTheme)
                 .setTitle("Actions for: " + user.getUsername())
                 .setItems(options, (dialog, which) -> {
-                    switch (which) {
-                        case 0:
-                            toggleSuspendStatus(user);
-                            break;
-                        case 1:
-                            showChangeRoleDialog(user);
-                            break;
-                        case 2:
-                            confirmDeleteUser(user);
-                            break;
-                        case 3:
-                            dialog.dismiss();
-                            break;
-                    }
-                })
-                .show();
+                    if (which == 0) toggleSuspendStatus(user);
+                    else if (which == 1) showChangeRoleDialog(user);
+                    else if (which == 2) confirmDeleteUser(user);
+                }).show();
     }
 
     private void toggleSuspendStatus(User user) {
         boolean newStatus = !Boolean.TRUE.equals(user.isSuspended());
         usersRef.child(user.getUid()).child("suspended").setValue(newStatus)
                 .addOnSuccessListener(aVoid -> {
-                    // ▼▼▼ 2. TAMBAH LOG UNTUK STATUS PENGGANTUNGAN ▼▼▼
-                    String action = newStatus ? "Account Suspended" : "Account Reactivated";
-                    String logDetails = "Admin changed suspend status for user: " + user.getEmail() + " to " + newStatus;
-                    LogHelper.logCurrentUserAction(action, logDetails, "Admin");
-                    // ▲▲▲ AKHIR LOG ▲▲▲
-
-                    Toast.makeText(ManageUsersActivity.this, "User status updated.", Toast.LENGTH_SHORT).show();
-                })
-                .addOnFailureListener(e -> Toast.makeText(ManageUsersActivity.this, "Failed to update status: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                    String action = newStatus ? "Suspended" : "Reactivated";
+                    LogHelper.logCurrentUserAction(action, "Admin changed status for " + user.getEmail(), "Admin");
+                    Toast.makeText(this, "Status updated.", Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void showChangeRoleDialog(User user) {
         final String[] roles = {"Buyer", "Seller", "Admin"};
-        int currentRoleIndex = user.getUserType() != null ? Arrays.asList(roles).indexOf(user.getUserType()) : -1;
-
         new AlertDialog.Builder(this, R.style.AlertDialogTheme)
-                .setTitle("Change Role for " + user.getUsername())
-                .setSingleChoiceItems(roles, currentRoleIndex, null)
-                .setPositiveButton("Save", (dialog, which) -> {
-                    int selectedPosition = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
-                    if (selectedPosition != -1) {
-                        String newRole = roles[selectedPosition];
-                        String oldRole = user.getUserType(); // Simpan peranan lama untuk log
-
-                        usersRef.child(user.getUid()).child("userType").setValue(newRole)
-                                .addOnSuccessListener(aVoid -> {
-                                    // ▼▼▼ 2. TAMBAH LOG UNTUK PERUBAHAN PERANAN ▼▼▼
-                                    String logDetails = "Admin changed role for user: " + user.getEmail() + " from '" + oldRole + "' to '" + newRole + "'";
-                                    LogHelper.logCurrentUserAction("User Role Changed", logDetails, "Admin");
-                                    // ▲▲▲ AKHIR LOG ▲▲▲
-
-                                    Toast.makeText(ManageUsersActivity.this, "User role updated.", Toast.LENGTH_SHORT).show();
-                                })
-                                .addOnFailureListener(e -> Toast.makeText(ManageUsersActivity.this, "Failed to update role: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-                    }
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+                .setTitle("Select New Role")
+                .setItems(roles, (dialog, which) -> {
+                    String newRole = roles[which];
+                    usersRef.child(user.getUid()).child("userType").setValue(newRole)
+                            .addOnSuccessListener(aVoid -> {
+                                LogHelper.logCurrentUserAction("Role Change", "Changed " + user.getEmail() + " to " + newRole, "Admin");
+                                Toast.makeText(this, "Role updated.", Toast.LENGTH_SHORT).show();
+                            });
+                }).show();
     }
 
     private void confirmDeleteUser(User user) {
         new AlertDialog.Builder(this, R.style.AlertDialogTheme)
-                .setTitle("Confirm Deletion")
-                .setMessage("Are you sure you want to permanently delete user '" + user.getUsername() + "'? This only removes the database entry.")
+                .setTitle("Confirm Delete")
+                .setMessage("Delete user " + user.getUsername() + "?")
                 .setPositiveButton("Delete", (dialog, which) -> {
-                    usersRef.child(user.getUid()).removeValue()
-                            .addOnSuccessListener(aVoid -> {
-                                // ▼▼▼ 2. TAMBAH LOG UNTUK PEMADAMAN PENGGUNA ▼▼▼
-                                String logDetails = "Admin deleted user data for: " + user.getEmail() + " (UID: " + user.getUid() + ")";
-                                LogHelper.logCurrentUserAction("User Data Deleted", logDetails, "Admin");
-                                // ▲▲▲ AKHIR LOG ▲▲▲
-
-                                Toast.makeText(ManageUsersActivity.this, "User data deleted from database.", Toast.LENGTH_SHORT).show();
-                            })
-                            .addOnFailureListener(e -> Toast.makeText(ManageUsersActivity.this, "Failed to delete user data: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                    usersRef.child(user.getUid()).removeValue().addOnSuccessListener(aVoid -> {
+                        LogHelper.logCurrentUserAction("Delete", "Deleted " + user.getEmail(), "Admin");
+                        Toast.makeText(this, "Deleted.", Toast.LENGTH_SHORT).show();
+                    });
                 })
-                .setNegativeButton("Cancel", null)
-                .show();
+                .setNegativeButton("Cancel", null).show();
     }
 
     private void updateEmptyState(boolean isEmpty) {
-        rvUsers.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
         tvNoUsersFound.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+        rvUsers.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
     }
 
+    // This must be named onActionClick to match the interface in AdminUserAdapter
     @Override
     public void onActionClick(User user) {
         showUserActionDialog(user);

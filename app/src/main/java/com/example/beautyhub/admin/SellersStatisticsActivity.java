@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.beautyhub.R;
+import com.example.beautyhub.models.Order;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
@@ -30,29 +31,35 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class SellersStatisticsActivity extends AppCompatActivity {
 
     private BarChart barChart;
     private DatabaseReference ordersRef, usersRef;
-    private TextView tvTotalSellersCount, tvTopSellerName;
+    private TextView tvTotalSellersCount, tvTopSellerName, tvOverviewTitle;
 
     private RecyclerView recyclerView;
     private SellerAdapter adapter;
-    private List<SellerStat> sellerList;
-    private List<String> fullNamesForChart; // Untuk rujukan klik pada graf
+    private List<SellerStat> filteredSellerList = new ArrayList<>();
+
+    // Data storage
+    private Map<String, String> sellerNamesMap = new HashMap<>();
+    private List<Order> allOrders2026 = new ArrayList<>();
+    private String[] monthNames = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sellers_statistics);
 
-        fullNamesForChart = new ArrayList<>();
         initViews();
         setupToolbar();
         setupProfessionalBarChart();
@@ -67,29 +74,26 @@ public class SellersStatisticsActivity extends AppCompatActivity {
         barChart = findViewById(R.id.sellers_bar_chart);
         tvTotalSellersCount = findViewById(R.id.tv_total_sellers_count);
         tvTopSellerName = findViewById(R.id.tv_top_seller_name);
+        tvOverviewTitle = findViewById(R.id.tv_overview_title); // Pastikan ID ini ada di XML
 
         recyclerView = findViewById(R.id.rv_sellers_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        sellerList = new ArrayList<>();
-        adapter = new SellerAdapter(sellerList);
+        adapter = new SellerAdapter(filteredSellerList);
         recyclerView.setAdapter(adapter);
 
-        // Listener: Apabila Admin klik pada Bar di dalam graf
+        // Filter apabila Admin klik pada Bar di graf (Bulan)
         barChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
             @Override
             public void onValueSelected(Entry e, Highlight h) {
-                int index = (int) e.getX();
-                if (index >= 0 && index < fullNamesForChart.size()) {
-                    String fullName = fullNamesForChart.get(index);
-                    float revenue = e.getY();
-                    Toast.makeText(SellersStatisticsActivity.this,
-                            "Seller: " + fullName + "\nTotal Revenue: RM " + String.format("%.2f", revenue),
-                            Toast.LENGTH_SHORT).show();
+                int monthIndex = (int) e.getX();
+                if (monthIndex >= 0 && monthIndex < monthNames.length) {
+                    filterSellersByMonth(monthNames[monthIndex]);
                 }
             }
 
             @Override
             public void onNothingSelected() {
+                showAllSellersFullYear();
             }
         });
     }
@@ -99,7 +103,6 @@ public class SellersStatisticsActivity extends AppCompatActivity {
         if (toolbar != null) {
             setSupportActionBar(toolbar);
             if (getSupportActionBar() != null) {
-                getSupportActionBar().setTitle("Seller Analytics");
                 getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             }
             toolbar.setNavigationOnClickListener(v -> finish());
@@ -109,144 +112,137 @@ public class SellersStatisticsActivity extends AppCompatActivity {
     private void setupProfessionalBarChart() {
         barChart.getDescription().setEnabled(false);
         barChart.setDrawGridBackground(false);
-        barChart.animateY(1500);
+        barChart.animateY(1000);
 
         XAxis xAxis = barChart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setGranularity(1f);
         xAxis.setDrawGridLines(false);
         xAxis.setLabelRotationAngle(-45);
-        xAxis.setTextColor(Color.DKGRAY);
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(monthNames));
 
         barChart.getAxisRight().setEnabled(false);
         barChart.getAxisLeft().setAxisMinimum(0f);
-        barChart.getAxisLeft().setDrawGridLines(true);
-
-        barChart.setFitBars(true); // Supaya bar tidak rapat ke tepi
     }
 
     private void fetchSellersStatistics() {
         usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot usersSnapshot) {
-                Map<String, String> sellerNamesMap = new HashMap<>();
+                sellerNamesMap.clear();
                 for (DataSnapshot ds : usersSnapshot.getChildren()) {
-                    // Berdasarkan input anda, role adalah HURUF BESAR
                     String role = ds.child("userType").getValue(String.class);
-
                     if ("SELLER".equalsIgnoreCase(role)) {
-                        String id = ds.getKey();
-                        String name = ds.child("username").getValue(String.class);
-                        sellerNamesMap.put(id, name != null ? name : "Unknown Seller");
+                        sellerNamesMap.put(ds.getKey(), ds.child("username").getValue(String.class));
                     }
                 }
 
                 ordersRef.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot ordersSnapshot) {
-                        Map<String, Float> salesMap = new HashMap<>();
+                        allOrders2026.clear();
+                        Map<String, Float> monthlyProfitMap = new HashMap<>();
+                        for (String m : monthNames) monthlyProfitMap.put(m, 0f);
 
-                        // Init RM 0 untuk semua seller
-                        for (String id : sellerNamesMap.keySet()) {
-                            salesMap.put(id, 0f);
-                        }
-
-                        // Di dalam method fetchSellersStatistics(), bahagian ordersRef
                         for (DataSnapshot ds : ordersSnapshot.getChildren()) {
-                            String status = ds.child("status").getValue(String.class);
+                            Order order = ds.getValue(Order.class);
+                            if (order != null && "Completed".equalsIgnoreCase(order.getStatus())) {
+                                Calendar cal = Calendar.getInstance();
+                                cal.setTimeInMillis(order.getOrderDate());
 
-                            // HANYA AMBIL YANG COMPLETED SAHAJA
-                            if ("Completed".equalsIgnoreCase(status)) {
-                                String sId = ds.child("sellerId").getValue(String.class);
-                                Object amt = ds.child("totalAmount").getValue();
+                                if (cal.get(Calendar.YEAR) == 2026) {
+                                    allOrders2026.add(order);
 
-                                float totalOrderAmount = 0f;
-                                if (amt instanceof Double) totalOrderAmount = ((Double) amt).floatValue();
-                                else if (amt instanceof Long) totalOrderAmount = ((Long) amt).floatValue();
+                                    SimpleDateFormat sdf = new SimpleDateFormat("MMM", Locale.getDefault());
+                                    String monthKey = sdf.format(cal.getTime());
 
-                                // LOGIK BARU: Tolak 10% komisen platform (Seller dapat 90%)
-                                float netSellerRevenue = totalOrderAmount * 0.90f;
-
-                                if (sId != null && salesMap.containsKey(sId)) {
-                                    // Simpan nilai yang telah ditolak komisen ke dalam map
-                                    salesMap.put(sId, salesMap.get(sId) + netSellerRevenue);
+                                    // Graf tunjuk Total Profit Admin (10%) ikut bulan
+                                    float profit = (float) (order.getTotalAmount() * 0.10);
+                                    monthlyProfitMap.put(monthKey, monthlyProfitMap.get(monthKey) + profit);
                                 }
                             }
                         }
-                        prepareFinalData(sellerNamesMap, salesMap);
+                        updateChart(monthlyProfitMap);
+                        showAllSellersFullYear();
                     }
 
                     @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                    }
+                    public void onCancelled(@NonNull DatabaseError error) {}
                 });
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
+
+    private void filterSellersByMonth(String month) {
+        Map<String, Float> sellerRevenueMap = new HashMap<>();
+        // Init semua seller RM 0
+        for (String id : sellerNamesMap.keySet()) sellerRevenueMap.put(id, 0f);
+
+        for (Order order : allOrders2026) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTimeInMillis(order.getOrderDate());
+            SimpleDateFormat sdf = new SimpleDateFormat("MMM", Locale.getDefault());
+
+            if (sdf.format(cal.getTime()).equalsIgnoreCase(month)) {
+                String sId = order.getSellerId();
+                if (sId != null && sellerRevenueMap.containsKey(sId)) {
+                    // Seller dapat 90%
+                    float net = (float) (order.getTotalAmount() * 0.90);
+                    sellerRevenueMap.put(sId, sellerRevenueMap.get(sId) + net);
+                }
             }
-        });
+        }
+        updateList(sellerRevenueMap, "Overview: " + month + " 2026");
     }
 
-    private void prepareFinalData(Map<String, String> namesMap, Map<String, Float> salesMap) {
-        sellerList.clear();
-        fullNamesForChart.clear();
+    private void showAllSellersFullYear() {
+        Map<String, Float> sellerRevenueMap = new HashMap<>();
+        for (String id : sellerNamesMap.keySet()) sellerRevenueMap.put(id, 0f);
 
-        for (Map.Entry<String, String> entry : namesMap.entrySet()) {
-            sellerList.add(new SellerStat(entry.getValue(), salesMap.get(entry.getKey())));
+        for (Order order : allOrders2026) {
+            String sId = order.getSellerId();
+            if (sId != null && sellerRevenueMap.containsKey(sId)) {
+                float net = (float) (order.getTotalAmount() * 0.90);
+                sellerRevenueMap.put(sId, sellerRevenueMap.get(sId) + net);
+            }
         }
-
-        // Susun Ranking Teratas ke Bawah
-        Collections.sort(sellerList, (o1, o2) -> Float.compare(o2.revenue, o1.revenue));
-
-        tvTotalSellersCount.setText(String.valueOf(sellerList.size()));
-        if (!sellerList.isEmpty()) {
-            tvTopSellerName.setText(sellerList.get(0).name);
-        }
-
-        List<BarEntry> chartEntries = new ArrayList<>();
-        List<String> chartLabels = new ArrayList<>();
-
-        // Hanya paparkan top 10 seller dalam carta supaya tidak terlalu sesak
-        int limit = Math.min(sellerList.size(), 10);
-        for (int i = 0; i < limit; i++) {
-            SellerStat stat = sellerList.get(i);
-            chartEntries.add(new BarEntry(i, stat.revenue));
-            fullNamesForChart.add(stat.name); // Simpan nama penuh
-
-            // Pendekkan nama pada Label Paksi-X
-            String shortName = stat.name.length() > 10 ? stat.name.substring(0, 8) + ".." : stat.name;
-            chartLabels.add(shortName);
-        }
-
-        updateUI(chartEntries, chartLabels);
+        updateList(sellerRevenueMap, "Overview: Full Year 2026");
     }
 
-    private void updateUI(List<BarEntry> entries, List<String> labels) {
-        BarDataSet dataSet = new BarDataSet(entries, "Revenue (RM)");
-        dataSet.setColors(new int[]{
-                Color.parseColor("#8a2128"),
-                Color.parseColor("#0984E3"),
-                Color.parseColor("#00B894"),
-                Color.parseColor("#6C5CE7")
-        });
-        dataSet.setValueTextSize(10f);
-        dataSet.setValueTextColor(Color.BLACK);
+    private void updateList(Map<String, Float> salesMap, String title) {
+        filteredSellerList.clear();
+        for (Map.Entry<String, String> entry : sellerNamesMap.entrySet()) {
+            filteredSellerList.add(new SellerStat(entry.getValue(), salesMap.get(entry.getKey())));
+        }
+        Collections.sort(filteredSellerList, (o1, o2) -> Float.compare(o2.revenue, o1.revenue));
 
-        barChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
-        barChart.getXAxis().setLabelCount(labels.size());
-
-        BarData barData = new BarData(dataSet);
-        barChart.setData(barData);
-        barChart.invalidate();
+        tvOverviewTitle.setText(title);
+        tvTotalSellersCount.setText(String.valueOf(sellerNamesMap.size()));
+        if (!filteredSellerList.isEmpty()) tvTopSellerName.setText(filteredSellerList.get(0).name);
 
         adapter.notifyDataSetChanged();
+    }
+
+    private void updateChart(Map<String, Float> monthlyProfitMap) {
+        List<BarEntry> entries = new ArrayList<>();
+        for (int i = 0; i < monthNames.length; i++) {
+            entries.add(new BarEntry(i, monthlyProfitMap.get(monthNames[i])));
+        }
+
+        BarDataSet dataSet = new BarDataSet(entries, "Admin Profit 10% (RM)");
+        dataSet.setColor(Color.parseColor("#8a2128"));
+
+        BarData data = new BarData(dataSet);
+        barChart.setData(data);
+        barChart.invalidate();
     }
 
     private static class SellerStat {
         String name;
         float revenue;
-
         SellerStat(String name, float revenue) {
             this.name = name;
             this.revenue = revenue;
@@ -255,10 +251,7 @@ public class SellersStatisticsActivity extends AppCompatActivity {
 
     private class SellerAdapter extends RecyclerView.Adapter<SellerAdapter.SellerViewHolder> {
         private List<SellerStat> list;
-
-        SellerAdapter(List<SellerStat> list) {
-            this.list = list;
-        }
+        SellerAdapter(List<SellerStat> list) { this.list = list; }
 
         @NonNull
         @Override
@@ -273,54 +266,23 @@ public class SellersStatisticsActivity extends AppCompatActivity {
             holder.tvName.setText(stat.name);
             holder.tvRevenue.setText(String.format("RM %.2f", stat.revenue));
             holder.tvRank.setText("Rank #" + (position + 1));
-
-            if (position == 0) holder.tvRank.setTextColor(Color.parseColor("#8a2128"));
-            else holder.tvRank.setTextColor(Color.GRAY);
-
-            holder.itemView.setOnClickListener(v -> {
-                Toast.makeText(SellersStatisticsActivity.this, "Seller: " + stat.name, Toast.LENGTH_SHORT).show();
-            });
+            holder.tvRank.setTextColor(position == 0 ? Color.parseColor("#8a2128") : Color.GRAY);
         }
 
         @Override
-        public int getItemCount() {
-            return list.size();
-        }
+        public int getItemCount() { return list.size(); }
 
         class SellerViewHolder extends RecyclerView.ViewHolder {
             TextView tvRank, tvName, tvRevenue;
-
             public SellerViewHolder(@NonNull View itemView) {
                 super(itemView);
-                // 1. Mapping ID utama
                 tvRank = itemView.findViewById(R.id.tv_order_id);
                 tvName = itemView.findViewById(R.id.tv_order_customer);
                 tvRevenue = itemView.findViewById(R.id.tv_order_amount);
 
-                // 2. Sembunyikan Status & Tarikh
-                View status = itemView.findViewById(R.id.tv_order_status);
-                if (status != null) status.setVisibility(View.GONE);
-
-                View date = itemView.findViewById(R.id.tv_order_date);
-                if (date != null) date.setVisibility(View.GONE);
-
-                // 3. Sembunyikan bahagian "Earn (10%)" (Seluruh kotak kanan)
-                View commissionValue = itemView.findViewById(R.id.tv_admin_commission);
-                if (commissionValue != null && commissionValue.getParent() instanceof View) {
-                    ((View) commissionValue.getParent()).setVisibility(View.GONE);
-                }
-
-                // 4. Sembunyikan label statik "Total Amount"
-                // Kita cari parent kepada tvRevenue (LinearLayout) dan sorokkan anak pertama (label)
-                if (tvRevenue != null && tvRevenue.getParent() instanceof View) {
-                    View container = (View) tvRevenue.getParent();
-                    if (container instanceof ViewGroup) {
-                        ViewGroup vg = (ViewGroup) container;
-                        if (vg.getChildCount() > 0) {
-                            vg.getChildAt(0).setVisibility(View.GONE);
-                        }
-                    }
-                }
+                // Hide unnecessary items
+                itemView.findViewById(R.id.tv_order_status).setVisibility(View.GONE);
+                itemView.findViewById(R.id.tv_admin_commission).setVisibility(View.GONE);
             }
         }
     }

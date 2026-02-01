@@ -93,12 +93,16 @@ public class AdminReportDetailsActivity extends AppCompatActivity {
                 }
 
                 // Kendali Gambar Bukti
+                // Kendali Gambar Bukti
                 if (imageUrl != null && !imageUrl.isEmpty()) {
                     binding.ivReportEvidence.setVisibility(View.VISIBLE);
                     Glide.with(AdminReportDetailsActivity.this)
                             .load(imageUrl)
                             .placeholder(R.drawable.ic_image_placeholder)
                             .into(binding.ivReportEvidence);
+
+                    // TAMBAH INI: Klik untuk besarkan gambar
+                    binding.ivReportEvidence.setOnClickListener(v -> showImagePreview(imageUrl));
                 } else {
                     binding.ivReportEvidence.setVisibility(View.GONE);
                 }
@@ -186,15 +190,15 @@ public class AdminReportDetailsActivity extends AppCompatActivity {
         update.put("adminNote", adminNote);
 
         reportRef.updateChildren(update).addOnSuccessListener(aVoid -> {
-            // Log Action ke AdminLogs
             saveAdminLog(currentAdminId, adminNote, timestamp);
-
             Toast.makeText(this, "Report status: RESOLVED", Toast.LENGTH_SHORT).show();
 
-            // Alur ke Notifikasi Emel
+            // SEMAK EMAIL: Jika ada email pengadu, tunjuk dialog hantar email
             if (senderEmail != null && !senderEmail.isEmpty()) {
                 showEmailNotificationDialog(adminNote);
             } else {
+                // Jika tiada email dalam DB, beritahu admin dan keluar
+                Toast.makeText(this, "Reporter email not found in database.", Toast.LENGTH_LONG).show();
                 finish();
             }
         });
@@ -222,25 +226,61 @@ public class AdminReportDetailsActivity extends AppCompatActivity {
     }
 
     private void sendEmail(String note) {
-        String subject = "BeautyHub Support: Report Update #" + (reportId.length() > 6 ? reportId.substring(0, 6) : reportId);
-        String message = "Dear " + (senderName != null ? senderName : "User") + ",\n\n" +
-                "We have reviewed your report regarding " + binding.tvReportReason.getText().toString() + ".\n\n" +
-                "Resolution Status: RESOLVED\n" +
-                "Admin Remarks: " + note + "\n\n" +
-                "Thank you for helping us maintain a safe community.\n\nRegards,\nBeautyHub Admin Team";
+        String reportType = binding.tvReportReason.getText().toString();
+        String subject = "Update: Your Report to BeautyHub Support [#" + reportId.substring(0, 5) + "]";
+
+        String message = "Hello " + (senderName != null ? senderName : "User") + ",\n\n" +
+                "This is an automated update regarding the report you submitted.\n\n" +
+                "Report Type: " + reportType + "\n" +
+                "Status: RESOLVED\n\n" +
+                "Admin Resolution Note:\n\"" + note + "\"\n\n" +
+                "We have taken the necessary actions based on our community guidelines. " +
+                "Thank you for your patience and for helping us keep BeautyHub safe.\n\n" +
+                "Regards,\nBeautyHub Admin Team";
 
         Intent intent = new Intent(Intent.ACTION_SENDTO);
-        intent.setData(Uri.parse("mailto:"));
+        intent.setData(Uri.parse("mailto:")); // Hanya aplikasi emel akan respon
         intent.putExtra(Intent.EXTRA_EMAIL, new String[]{senderEmail});
         intent.putExtra(Intent.EXTRA_SUBJECT, subject);
         intent.putExtra(Intent.EXTRA_TEXT, message);
 
         try {
-            startActivity(Intent.createChooser(intent, "Open Email App"));
+            // Gunakan createChooser supaya admin boleh pilih Gmail/Outlook/dll
+            startActivity(Intent.createChooser(intent, "Send email via..."));
             finish();
         } catch (Exception e) {
-            Toast.makeText(this, "No email application found.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Could not open email app.", Toast.LENGTH_SHORT).show();
             finish();
         }
+    }
+
+    private void showImagePreview(String imageUrl) {
+        // Gunakan tema Fullscreen untuk paparan lebih jelas
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+
+        // Inflate layout
+        View view = getLayoutInflater().inflate(R.layout.dialog_image_preview, null);
+
+        // Casting kepada PhotoView (kerana anda ada dependency PhotoView)
+        com.github.chrisbanes.photoview.PhotoView imageView = view.findViewById(R.id.ivFullImage);
+        android.widget.ImageButton btnClose = view.findViewById(R.id.btnClose);
+
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            // Gunakan Glide untuk load imej ke dalam PhotoView
+            Glide.with(this)
+                    .load(imageUrl)
+                    .timeout(60000) // Tambah timeout jika internet perlahan
+                    .placeholder(R.drawable.ic_image_placeholder)
+                    .error(R.drawable.ic_image_placeholder) // Imej error jika gagal load
+                    .into(imageView);
+        }
+
+        builder.setView(view);
+        AlertDialog dialog = builder.create();
+
+        // Pastikan butang close berfungsi
+        btnClose.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
     }
 }

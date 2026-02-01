@@ -6,6 +6,8 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -17,8 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.beautyhub.R;
 import com.example.beautyhub.models.Product;
-import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -32,7 +33,7 @@ public class ManageProductsActivity extends AppCompatActivity {
 
     private RecyclerView rvProducts;
     private EditText etSearchProducts;
-    private ChipGroup chipGroupCategories;
+    // ChipGroup sudah dibuang
     private ProductAdapter productAdapter;
     private List<Product> allProductsList;
     private LinearLayout emptyProductsState;
@@ -46,22 +47,23 @@ public class ManageProductsActivity extends AppCompatActivity {
 
         initViews();
         setupRecyclerView();
-        setupFilterChips();
         setupSearch();
+        // setupFilterChips() sudah dibuang
         fetchProductsFromFirebase();
     }
 
     private void initViews() {
         rvProducts = findViewById(R.id.rv_products);
         etSearchProducts = findViewById(R.id.et_search_products);
-        chipGroupCategories = findViewById(R.id.chipGroup_categories);
         emptyProductsState = findViewById(R.id.empty_products_state);
-        // Rujukan kepada ic_filter_products dan fabAddProduct telah dibuang
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        toolbar.setNavigationOnClickListener(v -> finish());
     }
 
     private void setupRecyclerView() {
         allProductsList = new ArrayList<>();
-        // Menggunakan this::showProductActionMenu sebagai callback apabila item diklik
         productAdapter = new ProductAdapter(new ArrayList<>(), this::showProductActionMenu);
         rvProducts.setLayoutManager(new LinearLayoutManager(this));
         rvProducts.setAdapter(productAdapter);
@@ -77,23 +79,33 @@ public class ManageProductsActivity extends AppCompatActivity {
                     Product product = productSnapshot.getValue(Product.class);
                     if (product != null) {
                         product.setProductId(productSnapshot.getKey());
+
+                        String sellerId = product.getSellerId();
+                        if (sellerId != null) {
+                            FirebaseDatabase.getInstance().getReference("Users").child(sellerId)
+                                    .child("username").addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot userSnapshot) {
+                                            if (userSnapshot.exists()) {
+                                                product.setSellerName(userSnapshot.getValue(String.class));
+                                            }
+                                            filterProducts(); // Kemaskini list apabila nama seller dimuatkan
+                                        }
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {}
+                                    });
+                        }
                         allProductsList.add(product);
                     }
                 }
-                // Tapis dan paparkan data selepas dimuat turun
                 filterProducts();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(ManageProductsActivity.this, "Failed to load products: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(ManageProductsActivity.this, "Failed to load products", Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private void setupFilterChips() {
-        // Menggunakan setOnCheckedStateChangeListener yang lebih moden untuk ChipGroup
-        chipGroupCategories.setOnCheckedStateChangeListener((group, checkedIds) -> filterProducts());
     }
 
     private void setupSearch() {
@@ -111,43 +123,23 @@ public class ManageProductsActivity extends AppCompatActivity {
         });
     }
 
-    // Fungsi setupFab() telah dibuang kerana FAB tidak lagi wujud
-
     private void filterProducts() {
-        String searchQuery = etSearchProducts.getText().toString().toLowerCase().trim();
-        List<String> selectedFilters = getSelectedFilters();
+        String query = etSearchProducts.getText().toString().toLowerCase().trim();
 
         List<Product> filteredList = new ArrayList<>();
-
         for (Product product : allProductsList) {
-            boolean matchesSearch = product.getName().toLowerCase().contains(searchQuery) ||
-                    product.getBrand().toLowerCase().contains(searchQuery);
+            // Logik Carian Sahaja (Nama, Brand, Seller)
+            String name = product.getName() != null ? product.getName().toLowerCase() : "";
+            String brand = product.getBrand() != null ? product.getBrand().toLowerCase() : "";
+            String seller = product.getSellerName() != null ? product.getSellerName().toLowerCase() : "";
 
-            // Logik penapisan berdasarkan cip yang dipilih
-            boolean matchesFilter = selectedFilters.isEmpty() ||
-                    selectedFilters.contains("All Products") ||
-                    (selectedFilters.contains("Skincare") && "Skincare".equalsIgnoreCase(product.getCategory())) ||
-                    (selectedFilters.contains("Makeup") && "Makeup".equalsIgnoreCase(product.getCategory()));
-
-            if (matchesSearch && matchesFilter) {
+            if (name.contains(query) || brand.contains(query) || seller.contains(query)) {
                 filteredList.add(product);
             }
         }
+
         productAdapter.updateList(filteredList);
         updateEmptyState();
-    }
-
-    private List<String> getSelectedFilters() {
-        List<String> selectedFilters = new ArrayList<>();
-        int checkedChipId = chipGroupCategories.getCheckedChipId();
-        if (checkedChipId != View.NO_ID) {
-            Chip chip = chipGroupCategories.findViewById(checkedChipId);
-            selectedFilters.add(chip.getText().toString());
-        } else {
-            // Jika tiada cip yang dipilih (walaupun mustahil dengan selectionRequired=true), anggap "All Products"
-            selectedFilters.add("All Products");
-        }
-        return selectedFilters;
     }
 
     private void updateEmptyState() {
@@ -159,8 +151,6 @@ public class ManageProductsActivity extends AppCompatActivity {
             rvProducts.setVisibility(View.VISIBLE);
         }
     }
-
-    // Fungsi showAddProductDialog() telah dibuang
 
     private void showProductActionMenu(Product product) {
         final CharSequence[] options = {"Edit Product", "Toggle Status", "Delete Product", "Cancel"};
@@ -191,58 +181,94 @@ public class ManageProductsActivity extends AppCompatActivity {
         LayoutInflater inflater = LayoutInflater.from(this);
         View dialogView = inflater.inflate(R.layout.a_dialog_edit_product, null);
 
-        final EditText etEditName = dialogView.findViewById(R.id.et_edit_product_name);
-        final EditText etEditBrand = dialogView.findViewById(R.id.et_edit_product_brand);
-        final EditText etEditPrice = dialogView.findViewById(R.id.et_edit_product_price);
-        final EditText etEditStock = dialogView.findViewById(R.id.et_edit_product_stock);
+        final EditText etName = dialogView.findViewById(R.id.et_edit_product_name);
+        final EditText etBrand = dialogView.findViewById(R.id.et_edit_product_brand);
+        final AutoCompleteTextView actvCategory = dialogView.findViewById(R.id.et_edit_product_category);
+        final EditText etSkinType = dialogView.findViewById(R.id.et_edit_product_skintype);
+        final EditText etIngredients = dialogView.findViewById(R.id.et_edit_product_ingredients);
 
-        etEditName.setText(product.getName());
-        etEditBrand.setText(product.getBrand());
-        etEditPrice.setText(String.valueOf(product.getPrice()));
-        etEditStock.setText(String.valueOf(product.getStock()));
+        fetchCategoriesForDialog(actvCategory);
+
+        etName.setText(product.getName());
+        etBrand.setText(product.getBrand());
+        actvCategory.setText(product.getCategory(), false);
+        etSkinType.setText(product.getSkinType());
+        etIngredients.setText(product.getIngredients());
 
         new AlertDialog.Builder(this)
-                .setTitle("Edit Product")
+                .setTitle("Edit Product Information")
                 .setView(dialogView)
-                .setPositiveButton("Save Changes", (dialog, which) -> {
-                    String newName = etEditName.getText().toString().trim();
-                    String newBrand = etEditBrand.getText().toString().trim();
-                    String newPriceStr = etEditPrice.getText().toString().trim();
-                    String newStockStr = etEditStock.getText().toString().trim();
+                .setPositiveButton("Update", (dialog, which) -> {
+                    String name = etName.getText().toString().trim();
+                    String brand = etBrand.getText().toString().trim();
+                    String category = actvCategory.getText().toString().trim();
+                    String skinType = etSkinType.getText().toString().trim();
+                    String ingredients = etIngredients.getText().toString().trim();
 
-                    if (newName.isEmpty() || newBrand.isEmpty() || newPriceStr.isEmpty() || newStockStr.isEmpty()) {
-                        Toast.makeText(this, "All fields are required.", Toast.LENGTH_SHORT).show();
+                    if (name.isEmpty() || brand.isEmpty()) {
+                        Toast.makeText(this, "Name and Brand are required", Toast.LENGTH_SHORT).show();
                         return;
                     }
 
-                    DatabaseReference productRef = FirebaseDatabase.getInstance().getReference("Products").child(product.getProductId());
-                    productRef.child("name").setValue(newName);
-                    productRef.child("brand").setValue(newBrand);
-                    productRef.child("price").setValue(Double.parseDouble(newPriceStr));
-                    productRef.child("stock").setValue(Integer.parseInt(newStockStr))
-                            .addOnSuccessListener(aVoid -> Toast.makeText(this, "Product updated!", Toast.LENGTH_SHORT).show())
-                            .addOnFailureListener(e -> Toast.makeText(this, "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Products")
+                            .child(product.getProductId());
+
+                    java.util.HashMap<String, Object> updates = new java.util.HashMap<>();
+                    updates.put("name", name);
+                    updates.put("brand", brand);
+                    updates.put("category", category);
+                    updates.put("skinType", skinType);
+                    updates.put("ingredients", ingredients);
+
+                    ref.updateChildren(updates).addOnSuccessListener(aVoid -> {
+                        Toast.makeText(this, "Product updated successfully!", Toast.LENGTH_SHORT).show();
+                    }).addOnFailureListener(e -> {
+                        Toast.makeText(this, "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
                 })
                 .setNegativeButton("Cancel", null)
-                .create()
                 .show();
+    }
+
+    private void fetchCategoriesForDialog(AutoCompleteTextView actv) {
+        FirebaseDatabase.getInstance().getReference("Categories")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        List<String> categories = new ArrayList<>();
+                        for (DataSnapshot ds : snapshot.getChildren()) {
+                            String name = ds.child("categoryName").getValue(String.class);
+                            if (name == null) name = ds.getValue(String.class);
+                            if (name != null) categories.add(name);
+                        }
+                        if (!categories.isEmpty()) {
+                            ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                                    ManageProductsActivity.this,
+                                    android.R.layout.simple_dropdown_item_1line,
+                                    categories);
+                            actv.setAdapter(adapter);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {}
+                });
     }
 
     private void toggleProductStatus(Product product) {
         DatabaseReference productNode = FirebaseDatabase.getInstance().getReference("Products").child(product.getProductId());
         boolean newStatus = !product.isActive();
         productNode.child("active").setValue(newStatus)
-                .addOnSuccessListener(aVoid -> Toast.makeText(this, "Status changed to " + (newStatus ? "Active" : "Inactive"), Toast.LENGTH_SHORT).show());
+                .addOnSuccessListener(aVoid -> Toast.makeText(this, "Status updated", Toast.LENGTH_SHORT).show());
     }
 
     private void deleteProduct(Product product) {
         new AlertDialog.Builder(this)
                 .setTitle("Delete Product")
-                .setMessage("Are you sure you want to delete '" + product.getName() + "'? This action cannot be undone.")
+                .setMessage("Delete this product?")
                 .setPositiveButton("Delete", (dialog, which) -> {
-                    DatabaseReference productNode = FirebaseDatabase.getInstance().getReference("Products").child(product.getProductId());
-                    productNode.removeValue()
-                            .addOnSuccessListener(aVoid -> Toast.makeText(this, "Product deleted.", Toast.LENGTH_SHORT).show());
+                    FirebaseDatabase.getInstance().getReference("Products")
+                            .child(product.getProductId()).removeValue();
                 })
                 .setNegativeButton("Cancel", null)
                 .show();

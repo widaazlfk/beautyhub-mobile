@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <!-- The Background Container for the Color -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/category_card"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        app:cardCornerRadius="35dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="0dp">
+
+        <!-- The Icon -->
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/iv_category_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="16dp"
+            android:src="@drawable/product_placeholder"
+            app:civ_border_width="0dp" />
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Category Label -->
+    <TextView
+        android:id="@+id/tv_category_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxWidth="85dp"
+        android:maxLines="1"
+        android:textColor="#222222"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        tools:text="Moisturizer" />
+
+</LinearLayout>
