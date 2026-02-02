@@ -27,6 +27,7 @@ import com.example.beautyhub.models.CartItem;
 import com.example.beautyhub.models.Product;
 import com.example.beautyhub.seller.SellerProfileActivity;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -37,10 +38,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 public class SearchActivity extends AppCompatActivity implements BuyerProductAdapter.OnProductInteractionListener {
 
@@ -55,6 +54,7 @@ public class SearchActivity extends AppCompatActivity implements BuyerProductAda
     private List<Product> productList;
     private DatabaseReference productsRef;
     private DatabaseReference favoritesRef;
+    private DatabaseReference cartRef;
     private FirebaseUser currentUser;
 
     private static final int VOICE_SEARCH_REQUEST_CODE = 1001;
@@ -68,6 +68,11 @@ public class SearchActivity extends AppCompatActivity implements BuyerProductAda
         setupRecyclerView();
         setupListeners();
         showKeyboardAndFocus();
+
+        // Load favourites jika user sudah login
+        if (currentUser != null) {
+            loadFavourites();
+        }
     }
 
     private void initViews() {
@@ -82,8 +87,9 @@ public class SearchActivity extends AppCompatActivity implements BuyerProductAda
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         if (currentUser != null) {
-            // Gunakan "Favourites" untuk selaras dengan BuyerActivity anda
-            favoritesRef = FirebaseDatabase.getInstance().getReference("Favourites").child(currentUser.getUid());
+            String userId = currentUser.getUid();
+            favoritesRef = FirebaseDatabase.getInstance().getReference("Favourites").child(userId);
+            cartRef = FirebaseDatabase.getInstance().getReference("Carts").child(userId);
         }
     }
 
@@ -171,6 +177,28 @@ public class SearchActivity extends AppCompatActivity implements BuyerProductAda
         });
     }
 
+    private void loadFavourites() {
+        if (favoritesRef == null || currentUser == null) return;
+
+        favoritesRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                List<String> favouriteIds = new ArrayList<>();
+                for (DataSnapshot idSnapshot : snapshot.getChildren()) {
+                    if (Boolean.TRUE.equals(idSnapshot.getValue(Boolean.class))) {
+                        favouriteIds.add(idSnapshot.getKey());
+                    }
+                }
+                productAdapter.setFavouriteProductIds(favouriteIds);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Error handling
+            }
+        });
+    }
+
     private void updateUiForLoading() {
         progressBar.setVisibility(View.VISIBLE);
         emptySearchText.setVisibility(View.GONE);
@@ -231,6 +259,8 @@ public class SearchActivity extends AppCompatActivity implements BuyerProductAda
         if (imm != null) imm.hideSoftInputFromWindow(searchInput.getWindowToken(), 0);
     }
 
+    // ==================== IMPLEMENTASI INTERFACE ====================
+
     @Override
     public void onProductClick(Product product) {
         Intent intent = new Intent(this, ProductDetailActivity.class);
@@ -239,78 +269,162 @@ public class SearchActivity extends AppCompatActivity implements BuyerProductAda
     }
 
     @Override
-    public void onBuyNowClick(Product product) {
-        if (currentUser != null) {
-            if (product.getStock() <= 0) {
-                Toast.makeText(this, "Out of stock", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            Intent intent = new Intent(this, CheckoutActivity.class);
-            ArrayList<CartItem> items = new ArrayList<>();
-            String img = (product.getImageUrls() != null && !product.getImageUrls().isEmpty()) ? product.getImageUrls().get(0) : "";
-
-            CartItem item = new CartItem(product.getProductId(), product.getName(), product.getFinalPrice(), 1, img, product.getSellerProfileImageUrl());
-            item.setSellerId(product.getSellerId());
-            item.setSellerName(product.getSellerName());
-
-            items.add(item);
-            intent.putParcelableArrayListExtra("CHECKOUT_ITEMS", items);
-            intent.putExtra("SOURCE", "BUY_NOW");
-            startActivity(intent);
-        } else {
-            startActivity(new Intent(this, LoginActivity.class));
-        }
-    }
-
-    @Override
     public void onAddToCartClick(Product product) {
         if (currentUser == null) {
+            Toast.makeText(this, "Please log in to add items to your cart.", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this, LoginActivity.class));
             return;
         }
-        // Logik ringkas tambah ke Cart (selaraskan dengan logic BuyerActivity anda jika perlu)
-        DatabaseReference cartRef = FirebaseDatabase.getInstance().getReference("Carts").child(currentUser.getUid());
-        cartRef.child(product.getSellerId()).child(product.getProductId()).setValue(true)
-                .addOnSuccessListener(aVoid -> Toast.makeText(this, "Added to cart", Toast.LENGTH_SHORT).show());
+
+        if (!product.hasStock()) {
+            Toast.makeText(this, "This item is out of stock.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        addToCartDirectly(product, 1);
     }
 
     @Override
-    public void onSellerClick(String sellerId) {
-        if (sellerId != null && !sellerId.isEmpty()) {
-            Intent intent = new Intent(this, SellerProfileActivity.class);
-            intent.putExtra("SELLER_ID", sellerId);
-            startActivity(intent);
+    public void onBuyNowClick(Product product) {
+        if (currentUser == null) {
+            Toast.makeText(this, "Please log in to purchase.", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, LoginActivity.class));
+            return;
         }
+
+        if (!product.hasStock()) {
+            Toast.makeText(this, "This item is out of stock.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        proceedToCheckout(product, 1);
     }
 
     @Override
     public void onFavouriteClick(Product product, boolean isFavourite) {
         if (currentUser == null) {
-            Toast.makeText(this, "Please login to manage favorites", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please log in to manage favourites.", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this, LoginActivity.class));
             return;
         }
 
         String productId = product.getProductId();
-        // favoritesRef sudah di-init di initViews() merujuk ke Favourites/uid
-        favoritesRef.child(productId).addListenerForSingleValueEvent(new ValueEventListener() {
+        DatabaseReference favRef = FirebaseDatabase.getInstance().getReference("Favourites")
+                .child(currentUser.getUid())
+                .child(productId);
+
+        if (isFavourite) {
+            favRef.setValue(true);
+        } else {
+            favRef.removeValue();
+        }
+    }
+
+    @Override
+    public void onSellerClick(String sellerId) {
+        if (sellerId == null || sellerId.isEmpty() || sellerId.startsWith("json_")) {
+            Toast.makeText(this, "This is an official store.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Intent intent = new Intent(this, ShopViewActivity.class);
+        intent.putExtra("SELLER_ID", sellerId);
+        startActivity(intent);
+    }
+
+    // ==================== CART LOGIC (SELARAS DENGAN BUYERACTIVITY) ====================
+
+    private void addToCartDirectly(Product product, int quantity) {
+        String sellerId = product.getSellerId();
+        if (sellerId == null || sellerId.isEmpty()) {
+            Toast.makeText(this, "Cannot add to cart: Seller info is missing.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        DatabaseReference cartItemRef = FirebaseDatabase.getInstance()
+                .getReference("Carts")
+                .child(currentUser.getUid())
+                .child(sellerId)
+                .child(product.getProductId());
+
+        cartItemRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    // Jika sudah wujud (toggle off), buang
-                    favoritesRef.child(productId).removeValue()
-                            .addOnSuccessListener(aVoid -> Toast.makeText(SearchActivity.this, "Removed from Favourites", Toast.LENGTH_SHORT).show());
+                    // Product already in cart, update quantity
+                    Integer currentQuantity = snapshot.child("quantity").getValue(Integer.class);
+                    int newQuantity = (currentQuantity != null ? currentQuantity : 0) + quantity;
+
+                    if (newQuantity > product.getStock()) {
+                        Toast.makeText(SearchActivity.this, "Maximum stock reached!", Toast.LENGTH_SHORT).show();
+                        cartItemRef.child("quantity").setValue(product.getStock());
+                    } else {
+                        cartItemRef.child("quantity").setValue(newQuantity);
+                        showSuccessSnackbar("Cart updated!");
+                    }
                 } else {
-                    // Jika belum wujud (toggle on), simpan
-                    favoritesRef.child(productId).setValue(true)
-                            .addOnSuccessListener(aVoid -> Toast.makeText(SearchActivity.this, "Added to Favourites", Toast.LENGTH_SHORT).show());
+                    // New product to cart
+                    String imageUrl = (product.getImageUrls() != null && !product.getImageUrls().isEmpty()) ?
+                            product.getImageUrls().get(0) : "";
+
+                    CartItem cartItem = new CartItem(
+                            product.getProductId(),
+                            product.getName(),
+                            product.getFinalPrice(),
+                            quantity,
+                            imageUrl,
+                            product.getSellerProfileImageUrl()
+                    );
+                    cartItem.setSellerId(sellerId);
+                    cartItem.setSellerName(product.getSellerName());
+                    cartItem.setCartItemId(product.getProductId());
+
+                    cartItemRef.setValue(cartItem)
+                            .addOnSuccessListener(aVoid -> showSuccessSnackbar("Added to cart!"));
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(SearchActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(SearchActivity.this, "Failed to add to cart.", Toast.LENGTH_SHORT).show();
             }
         });
     }
-} 
+
+    private void proceedToCheckout(Product product, int quantity) {
+        String imageUrl = (product.getImageUrls() != null && !product.getImageUrls().isEmpty()) ?
+                product.getImageUrls().get(0) : "";
+
+        CartItem buyNowItem = new CartItem(
+                product.getProductId(),
+                product.getName(),
+                product.getFinalPrice(),
+                quantity,
+                imageUrl,
+                product.getSellerProfileImageUrl()
+        );
+        buyNowItem.setSellerId(product.getSellerId());
+        buyNowItem.setSellerName(product.getSellerName());
+        buyNowItem.setCartItemId(product.getProductId());
+
+        ArrayList<CartItem> itemsForCheckout = new ArrayList<>();
+        itemsForCheckout.add(buyNowItem);
+
+        Intent intent = new Intent(this, CheckoutActivity.class);
+        intent.putExtra("SOURCE", "BUY_NOW");
+        intent.putParcelableArrayListExtra("CHECKOUT_ITEMS", itemsForCheckout);
+        startActivity(intent);
+    }
+
+    private void showSuccessSnackbar(String message) {
+        Snackbar snackbar = Snackbar.make(
+                findViewById(android.R.id.content),
+                message,
+                Snackbar.LENGTH_LONG
+        );
+        snackbar.setAction("VIEW CART", v -> {
+            Intent intent = new Intent(SearchActivity.this, CartActivity.class);
+            startActivity(intent);
+        });
+        snackbar.show();
+    }
+}

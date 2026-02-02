@@ -3,7 +3,6 @@ package com.example.beautyhub.buyer;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import java.util.List;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -32,7 +31,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-
+import java.util.List;
 
 public class ShopActivity extends AppCompatActivity implements
         FilterBottomSheetDialog.FilterListener,
@@ -45,8 +44,8 @@ public class ShopActivity extends AppCompatActivity implements
     private ProgressBar progressBar;
     private TextView tvNoProducts;
     private SearchView searchView;
-    private View cartIconLayout; // <-- PENGISYTIHARAN DITAMBAH
-    private TextView cartBadge; // <-- PENGISYTIHARAN DITAMBAH
+    private View cartIconLayout;
+    private TextView cartBadge;
 
     // Adapter and Data List
     private BuyerProductAdapter buyerProductAdapter;
@@ -66,8 +65,8 @@ public class ShopActivity extends AppCompatActivity implements
     private FirebaseUser currentUser;
     private ValueEventListener favouritesListener;
     private DatabaseReference favouritesRef;
-    private DatabaseReference cartRef; // <-- Tambah untuk cart badge
-    private ValueEventListener cartListener; // <-- Tambah untuk cart badge
+    private DatabaseReference cartRef;
+    private ValueEventListener cartListener;
 
     // ViewModel untuk produk
     private ProductViewModel productViewModel;
@@ -90,7 +89,7 @@ public class ShopActivity extends AppCompatActivity implements
         setupToolbar();
         setupRecyclerView();
         handleIncomingIntent();
-        setupCartBadge(); // <-- Panggil kaedah setup badge
+        setupCartBadge();
 
         loadProductsWithViewModel();
 
@@ -104,8 +103,8 @@ public class ShopActivity extends AppCompatActivity implements
         progressBar = findViewById(R.id.progress_bar_shop);
         tvNoProducts = findViewById(R.id.tv_no_products_shop);
         searchView = findViewById(R.id.search_view_shop);
-        cartIconLayout = findViewById(R.id.btn_cart_icon); // <-- Gunakan ID FrameLayout
-        cartBadge = findViewById(R.id.cart_badge_shop); // <-- Gunakan ID TextView badge
+        cartIconLayout = findViewById(R.id.btn_cart_icon);
+        cartBadge = findViewById(R.id.cart_badge_shop);
     }
 
     private void setupCartBadge() {
@@ -168,12 +167,13 @@ public class ShopActivity extends AppCompatActivity implements
             }
         });
 
-        // 'findViewById' di sini sudah betul kerana ia merujuk pada layout yang baru disambungkan
         findViewById(R.id.btn_cart_icon).setOnClickListener(v ->
                 startActivity(new Intent(ShopActivity.this, CartActivity.class)));
 
+        // FILTER BUTTON - FIXED
+        // DI SHOP ACTIVITY - ganti showNow() dengan show()
         findViewById(R.id.btn_filter_icon).setOnClickListener(v -> {
-            FilterBottomSheetDialog.newInstance(
+            FilterBottomSheetDialog filterDialog = FilterBottomSheetDialog.newInstance(
                     currentCategoryFilter,
                     new ArrayList<>(currentSubCategoryFilter),
                     currentBrandFilter,
@@ -181,27 +181,24 @@ public class ShopActivity extends AppCompatActivity implements
                     currentMaxPrice,
                     currentSkinTypeFilter,
                     currentIngredientFilter
-            ).show(getSupportFragmentManager(), FilterBottomSheetDialog.TAG);
+            );
+
+            // GANTI: showNow() -> show()
+            filterDialog.show(getSupportFragmentManager(), FilterBottomSheetDialog.TAG);
         });
     }
 
-    // ... (Kod yang lain tidak perlu diubah)
-
-
-    // --- KEMAS KINI onStop untuk menguruskan listener ---
     @Override
     protected void onStop() {
         super.onStop();
         if (favouritesRef != null && favouritesListener != null) {
             favouritesRef.removeEventListener(favouritesListener);
         }
-        // Hentikan cart listener apabila activity tidak lagi kelihatan
         if (cartRef != null && cartListener != null) {
             cartRef.removeEventListener(cartListener);
         }
     }
 
-    // ... (Semua kod lain kekal sama) ...
     private void setupRecyclerView() {
         allProductsList = new ArrayList<>();
         buyerProductAdapter = new BuyerProductAdapter(this, allProductsList, this);
@@ -242,17 +239,14 @@ public class ShopActivity extends AppCompatActivity implements
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar_shop);
 
-        // KES 1: Menerima senarai sub-kategori (apabila klik Skincare/Makeup)
         if (intent.hasExtra("SUB_CATEGORIES")) {
             currentSubCategoryFilter = intent.getStringArrayListExtra("SUB_CATEGORIES");
             String parentCategoryName = intent.getStringExtra("PARENT_CATEGORY_NAME");
 
             if (parentCategoryName != null) {
                 toolbar.setTitle(parentCategoryName);
-                // Reset penapis kategori tunggal untuk elak konflik
                 currentCategoryFilter = "All";
             }
-            // KES 2: Menerima satu nama kategori (logik sedia ada)
         } else if (intent.hasExtra("CATEGORY_NAME")) {
             String categoryFromIntent = intent.getStringExtra("CATEGORY_NAME");
             if (categoryFromIntent != null && !categoryFromIntent.isEmpty()) {
@@ -261,7 +255,6 @@ public class ShopActivity extends AppCompatActivity implements
             }
         }
     }
-
 
     private void filterProducts() {
         allProductsList.clear();
@@ -280,13 +273,10 @@ public class ShopActivity extends AppCompatActivity implements
                 (product.getBrand() != null && product.getBrand().toLowerCase().contains(currentSearchQuery)) ||
                 (product.getSellerName() != null && product.getSellerName().toLowerCase().contains(currentSearchQuery));
 
-        // --- Kod seterusnya kekal sama ---
         boolean matchesCategory;
         if (currentSubCategoryFilter != null && !currentSubCategoryFilter.isEmpty()) {
-            // Jika ada senarai sub-kategori, semak jika kategori produk ada dalam senarai itu
             matchesCategory = product.getCategory() != null && currentSubCategoryFilter.contains(product.getCategory());
         } else {
-            // Jika tidak, guna logik penapis kategori tunggal sedia ada
             matchesCategory = currentCategoryFilter.equalsIgnoreCase("All") ||
                     (product.getCategory() != null && product.getCategory().equalsIgnoreCase(currentCategoryFilter));
         }
@@ -317,7 +307,6 @@ public class ShopActivity extends AppCompatActivity implements
         }
     }
 
-
     private void listenToFavourites() {
         if (currentUser == null) return;
         favouritesRef = FirebaseDatabase.getInstance().getReference("Favourites").child(currentUser.getUid());
@@ -344,14 +333,9 @@ public class ShopActivity extends AppCompatActivity implements
         favouritesRef.addValueEventListener(favouritesListener);
     }
 
-    // In ShopActivity.java
-
-    // Example: Let's assume the correct signature has 7 parameters.
-    // YOU MUST CHECK your FilterListener interface to confirm the correct order and type.
     @Override
-    public void onFilterApplied(String category, List<String> subCategories, String brand, float minPrice, float maxPrice, String skinType, String ingredient) {
-
-        // Reset single category if multiple sub-categories are applied
+    public void onFilterApplied(String category, List<String> subCategories, String brand,
+                                float minPrice, float maxPrice, String skinType, String ingredient) {
         if (subCategories != null && !subCategories.isEmpty()) {
             this.currentCategoryFilter = "All";
             this.currentSubCategoryFilter = subCategories;
@@ -366,11 +350,9 @@ public class ShopActivity extends AppCompatActivity implements
         this.currentSkinTypeFilter = skinType;
         this.currentIngredientFilter = ingredient;
 
-        // Update toolbar title logic
         if (!category.equals("All")) {
             ((MaterialToolbar) findViewById(R.id.toolbar_shop)).setTitle(category);
         } else if (getIntent().hasExtra("PARENT_CATEGORY_NAME")) {
-            // Keep the parent category title if we came from there
             ((MaterialToolbar) findViewById(R.id.toolbar_shop)).setTitle(getIntent().getStringExtra("PARENT_CATEGORY_NAME"));
         } else {
             ((MaterialToolbar) findViewById(R.id.toolbar_shop)).setTitle("Shop");
@@ -379,8 +361,6 @@ public class ShopActivity extends AppCompatActivity implements
         filterProducts();
     }
 
-
-
     @Override
     public void onProductClick(Product product) {
         Intent intent = new Intent(this, ProductDetailActivity.class);
@@ -388,7 +368,6 @@ public class ShopActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
-    // --- PERUBAHAN 3: Kemas kini kaedah onAddToCartClick ---
     @Override
     public void onAddToCartClick(Product product) {
         if (currentUser == null) {
@@ -396,7 +375,6 @@ public class ShopActivity extends AppCompatActivity implements
             return;
         }
 
-        // Semak stok sebelum menambah
         if (!product.hasStock()) {
             Toast.makeText(this, "This item is out of stock.", Toast.LENGTH_SHORT).show();
             return;
@@ -405,7 +383,6 @@ public class ShopActivity extends AppCompatActivity implements
         addToCartDirectly(product, 1);
     }
 
-    // --- PERUBAHAN 4: Kemas kini kaedah onBuyNowClick ---
     @Override
     public void onBuyNowClick(Product product) {
         if (currentUser == null) {
@@ -421,17 +398,6 @@ public class ShopActivity extends AppCompatActivity implements
         proceedToCheckout(product, 1);
     }
 
-    // --- PERUBAHAN 5: Padam kaedah berkaitan VariantSelectionListener ---
-    /*
-    @Override
-    public void onVariantSelected(Product product, Variant variant, int quantity) { ... }
-
-    private void showVariantSelectionDialog(Product product, boolean isBuyNow) { ... }
-
-    private void showFallbackVariantSelection(Product product, boolean isBuyNow) { ... }
-    */
-
-    // --- PERUBAHAN 6: Permudahkan kaedah addToCartDirectly ---
     private void addToCartDirectly(Product product, int quantity) {
         String sellerId = product.getSellerId();
         if (sellerId == null || sellerId.isEmpty()) {
@@ -443,13 +409,12 @@ public class ShopActivity extends AppCompatActivity implements
                 .getReference("Carts")
                 .child(currentUser.getUid())
                 .child(sellerId)
-                .child(product.getProductId()); // ID Item kini sama dengan ID Produk
+                .child(product.getProductId());
 
         cartItemRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    // Item sudah ada, tambah kuantiti
                     Integer currentQuantity = snapshot.child("quantity").getValue(Integer.class);
                     int newQuantity = (currentQuantity != null ? currentQuantity : 0) + quantity;
 
@@ -461,7 +426,6 @@ public class ShopActivity extends AppCompatActivity implements
                         Toast.makeText(ShopActivity.this, "Cart updated!", Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    // Item baru
                     String imageUrl = (product.getImageUrls() != null && !product.getImageUrls().isEmpty()) ?
                             product.getImageUrls().get(0) : "";
 
@@ -489,7 +453,6 @@ public class ShopActivity extends AppCompatActivity implements
         });
     }
 
-    // --- PERUBAHAN 7: Permudahkan kaedah proceedToCheckout ---
     private void proceedToCheckout(Product product, int quantity) {
         String imageUrl = (product.getImageUrls() != null && !product.getImageUrls().isEmpty()) ?
                 product.getImageUrls().get(0) : "";
@@ -533,8 +496,6 @@ public class ShopActivity extends AppCompatActivity implements
         }
     }
 
-
-
     @Override
     public void onSellerClick(String sellerId) {
         if (sellerId == null || sellerId.isEmpty() || sellerId.startsWith("json_")) {
@@ -545,5 +506,4 @@ public class ShopActivity extends AppCompatActivity implements
         intent.putExtra("SELLER_ID", sellerId);
         startActivity(intent);
     }
-
 }
