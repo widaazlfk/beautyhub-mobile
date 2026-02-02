@@ -2,6 +2,7 @@ package com.example.beautyhub.adapters;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,9 +44,8 @@ public class BuyerCategoryAdapter extends RecyclerView.Adapter<BuyerCategoryAdap
     @Override
     public void onBindViewHolder(@NonNull CategoryViewHolder holder, int position) {
         Category category = categoryList.get(position);
+        Log.d("DEBUG_CATEGORY", "Binding category: " + category.getCategoryName() + " at position " + position);
 
-        // 1. Ambil nama dan bersihkan (Contoh: " Cleansers " -> "cleanser")
-        // Kita buang jarak, tukar huruf kecil, dan buang 's' di hujung supaya lebih tepat
         String originalName = category.getCategoryName();
         String name = "";
         if (originalName != null) {
@@ -57,7 +57,7 @@ public class BuyerCategoryAdapter extends RecyclerView.Adapter<BuyerCategoryAdap
         int imageResId;
         int bgColor;
 
-        // --- ICON MAPPING (Guna .contains() supaya 'cleansers' padan dengan 'cleanser') ---
+        // --- ICON MAPPING ---
         if (name.contains("moisturizer")) {
             imageResId = R.drawable.moisturizer_icon;
             bgColor = Color.parseColor("#E3F2FD");
@@ -67,10 +67,10 @@ public class BuyerCategoryAdapter extends RecyclerView.Adapter<BuyerCategoryAdap
         } else if (name.contains("toner")) {
             imageResId = R.drawable.toner_icon;
             bgColor = Color.parseColor("#E8F5E9");
-        } else if (name.contains("cleanser")) { // Akan padan dengan "Cleansers"
+        } else if (name.contains("cleanser")) {
             imageResId = R.drawable.cleanser_icon;
             bgColor = Color.parseColor("#E0F7FA");
-        } else if (name.contains("mask")) { // Padan dengan "Face Mask" atau "FaceMask"
+        } else if (name.contains("mask")) {
             imageResId = R.drawable.facemask_icon;
             bgColor = Color.parseColor("#F1F8E9");
         } else if (name.contains("sunscreen")) {
@@ -114,7 +114,35 @@ public class BuyerCategoryAdapter extends RecyclerView.Adapter<BuyerCategoryAdap
                 .load(imageResId)
                 .into(holder.ivCategoryImage);
 
-        holder.itemView.setOnClickListener(v -> listener.onCategoryClick(category));
+        // ============== PERUBAHAN UTAMA: FIX SYNTAX ERROR ==============
+        // Buat CardView boleh click
+        holder.categoryCard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("DEBUG_CATEGORY", "CARD CLICKED: " + category.getCategoryName());
+                if (listener != null) {
+                    Log.d("DEBUG_CATEGORY", "Calling listener.onCategoryClick()");
+                    listener.onCategoryClick(category);
+                } else {
+                    Log.e("DEBUG_CATEGORY", "ERROR: Listener is NULL!");
+                }
+            }
+        }); // <-- INI YANG ANDA TERLEPAS: TUTUP KURUNGAN SETONCLICKLISTENER
+
+        // Buat TextView boleh click
+        holder.tvCategoryName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("DEBUG_CATEGORY", "TEXT CLICKED: " + category.getCategoryName());
+                if (listener != null) {
+                    Log.d("DEBUG_CATEGORY", "Calling listener.onCategoryClick()");
+                    listener.onCategoryClick(category);
+                } else {
+                    Log.e("DEBUG_CATEGORY", "ERROR: Listener is NULL!");
+                }
+            }
+        });
+        // ============== AKHIR PERUBAHAN ==============
     }
 
     @Override
@@ -125,7 +153,7 @@ public class BuyerCategoryAdapter extends RecyclerView.Adapter<BuyerCategoryAdap
     static class CategoryViewHolder extends RecyclerView.ViewHolder {
         private final TextView tvCategoryName;
         private final CircleImageView ivCategoryImage;
-        private final MaterialCardView categoryCard; // CardView untuk background warna
+        private final MaterialCardView categoryCard;
 
         public CategoryViewHolder(@NonNull View itemView) {
             super(itemView);

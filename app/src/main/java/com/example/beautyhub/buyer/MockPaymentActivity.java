@@ -5,14 +5,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log; // JANGAN LUPA IMPORT INI
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.beautyhub.R;
 import com.example.beautyhub.databinding.ActivityMockPaymentBinding;
 
 import java.util.Locale;
@@ -29,7 +27,19 @@ public class MockPaymentActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         // 1. Dapatkan jumlah bayaran dari Intent
-        totalPayment = getIntent().getDoubleExtra("TOTAL_PAYMENT", 0.0);
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra("TOTAL_PAYMENT")) {
+            totalPayment = intent.getDoubleExtra("TOTAL_PAYMENT", 0.0);
+            Log.d("MockPayment", "Received total payment: " + totalPayment);
+        } else if (intent != null && intent.hasExtra("TOTAL_AMOUNT")) {
+            // Fallback untuk keserasian
+            totalPayment = intent.getDoubleExtra("TOTAL_AMOUNT", 0.0);
+            Log.d("MockPayment", "Received TOTAL_AMOUNT as fallback: " + totalPayment);
+        } else {
+            Toast.makeText(this, "Error: No payment amount received", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
         // 2. Sediakan semua komponen UI
         setupToolbar();
@@ -39,25 +49,32 @@ public class MockPaymentActivity extends AppCompatActivity {
     }
 
     private void setupToolbar() {
-        // Tetapkan fungsi untuk butang kembali di toolbar
         binding.toolbar.setNavigationOnClickListener(v -> {
-            // Pengguna membatalkan pembayaran
             setResult(Activity.RESULT_CANCELED);
             finish();
         });
     }
 
     private void setupPaymentDetails() {
-        // Paparkan jumlah bayaran dalam format RM XX.XX
-        binding.tvTotalPayment.setText(String.format(Locale.US, "RM %.2f", totalPayment));
+        // PERBETULAN: Hanya ada tv_total_payment dalam XML
+        if (totalPayment > 0) {
+            binding.tvTotalPayment.setText(String.format(Locale.US, "RM %.2f", totalPayment));
+        } else {
+            binding.tvTotalPayment.setText("RM 0.00");
+            Toast.makeText(this, "Payment amount is invalid", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void setupBankSpinner() {
         // Senarai bank olok-olok untuk dipilih
-        String[] banks = {"Select a bank", "Maybank2u", "CIMB Clicks", "BSN", "Bank Islam"};
+        String[] banks = {"Select a bank", "Maybank2u", "CIMB Clicks", "Public Bank", "RHB Bank", "Hong Leong Bank"};
 
-        // Cipta adapter untuk Spinner
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, banks);
+        // Gunakan ArrayAdapter biasa (tidak perlu Material Components)
+        android.widget.ArrayAdapter<String> adapter = new android.widget.ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_item,
+                banks
+        );
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         // Tetapkan adapter pada Spinner
@@ -66,7 +83,6 @@ public class MockPaymentActivity extends AppCompatActivity {
 
     private void setupPayButton() {
         binding.btnPay.setOnClickListener(v -> {
-            // Panggil fungsi untuk mengesahkan input dan memulakan pembayaran
             processMockPayment();
         });
     }
@@ -82,47 +98,71 @@ public class MockPaymentActivity extends AppCompatActivity {
             Toast.makeText(this, "Please select a bank", Toast.LENGTH_SHORT).show();
             return;
         }
+
         if (username.isEmpty()) {
             binding.layoutUsername.setError("Username cannot be empty");
+            binding.etUsername.requestFocus();
             return;
         } else {
             binding.layoutUsername.setError(null);
         }
+
         if (password.isEmpty()) {
             binding.layoutPassword.setError("Password cannot be empty");
+            binding.etPassword.requestFocus();
             return;
         } else {
             binding.layoutPassword.setError(null);
         }
 
+        if (totalPayment <= 0) {
+            Toast.makeText(this, "Invalid payment amount", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         // 5. Mulakan simulasi proses pembayaran
         setLoading(true);
 
-        // Gunakan Handler untuk mencipta lengah masa selama 3 saat untuk meniru proses sebenar
+        Toast.makeText(this,
+                "Processing payment of RM" + String.format(Locale.US, "%.2f", totalPayment) + "...",
+                Toast.LENGTH_SHORT).show();
+
+        // Gunakan Handler untuk mencipta lengah masa selama 3 saat
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            // Kod ini akan berjalan selepas 3 saat
             setLoading(false);
 
-            Toast.makeText(this, "Mock Payment Successful!", Toast.LENGTH_LONG).show();
+            String successMessage = String.format(Locale.US,
+                    "Payment Successful!\nAmount: RM%.2f\nBank: %s",
+                    totalPayment, selectedBank);
 
-            // 6. Cipta Intent hasil dan hantar kembali data pembayaran
+            Toast.makeText(this, successMessage, Toast.LENGTH_LONG).show();
+
+            // 6. Cipta Intent hasil
             Intent resultIntent = new Intent();
-            // Kita juga boleh hantar balik bank yang dipilih jika perlu
+            resultIntent.putExtra("PAID_AMOUNT", totalPayment);
             resultIntent.putExtra("PAYMENT_METHOD_DETAIL", selectedBank);
             setResult(Activity.RESULT_OK, resultIntent);
 
-            // Tutup aktiviti ini dan kembali ke CheckoutActivity
             finish();
 
-        }, 3000); // 3000ms = 3 saat
+        }, 3000);
     }
 
     private void setLoading(boolean isLoading) {
-        // Tunjukkan atau sembunyikan overlay pemuatan
         binding.loadingOverlay.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+
+        binding.btnPay.setEnabled(!isLoading);
+        binding.spinnerBanks.setEnabled(!isLoading);
+        binding.etUsername.setEnabled(!isLoading);
+        binding.etPassword.setEnabled(!isLoading);
+
+        if (isLoading) {
+            binding.btnPay.setText("Processing...");
+        } else {
+            binding.btnPay.setText("Pay Now");
+        }
     }
 
-    // Pastikan pengguna kembali dengan RESULT_CANCELED jika mereka tekan butang back fizikal
     @Override
     public void onBackPressed() {
         setResult(Activity.RESULT_CANCELED);

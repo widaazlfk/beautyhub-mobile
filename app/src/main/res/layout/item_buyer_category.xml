@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    android:gravity="center"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:gravity="center">
 
-    <!-- The Background Container for the Color -->
+    <!-- CONTAINER YANG CLICKABLE -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/category_card"
         android:layout_width="70dp"
@@ -17,10 +16,9 @@
         android:focusable="true"
         android:foreground="?attr/selectableItemBackground"
         app:cardCornerRadius="35dp"
-        app:cardElevation="0dp"
+        app:cardElevation="2dp"
         app:strokeWidth="0dp">
 
-        <!-- The Icon -->
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/iv_category_image"
             android:layout_width="match_parent"
@@ -44,6 +42,6 @@
         android:textColor="#222222"
         android:textSize="11sp"
         android:textStyle="bold"
-        tools:text="Moisturizer" />
+        android:text="Category Name" />
 
 </LinearLayout>

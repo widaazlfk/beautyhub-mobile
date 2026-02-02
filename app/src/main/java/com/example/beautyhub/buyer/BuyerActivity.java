@@ -3,6 +3,7 @@ package com.example.beautyhub.buyer;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -34,8 +35,6 @@ import com.example.beautyhub.models.CartItem;
 import com.example.beautyhub.models.Category;
 import com.example.beautyhub.models.NotificationModel;
 import com.example.beautyhub.models.Product;
-// --- PERUBAHAN 1: Padam import Variant ---
-// import com.example.beautyhub.models.Variant;
 import com.example.beautyhub.seller.SellerProfileActivity;
 import com.example.beautyhub.ui.ProductViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -51,9 +50,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
 
 public class BuyerActivity extends AppCompatActivity implements
         BuyerCategoryAdapter.OnCategoryClickListener,
@@ -94,7 +91,7 @@ public class BuyerActivity extends AppCompatActivity implements
     private ProductViewModel productViewModel;
     private FrameLayout notificationIconLayout;
     private TextView notificationBadge;
-    private DatabaseReference notificationRef; // Untuk tarik data notifikasi
+    private DatabaseReference notificationRef;
     private ValueEventListener notificationListener;
     private androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefreshLayout;
     private android.os.Handler carouselHandler = new android.os.Handler();
@@ -108,7 +105,6 @@ public class BuyerActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.b_activity_buyer);
-
 
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
@@ -130,7 +126,6 @@ public class BuyerActivity extends AppCompatActivity implements
         setupNotificationBadge();
     }
 
-    // ... (initViews, setupNavigation, setupPromoCarousel, setupCategories, fetchCategoriesFromFirebase, setupNewestProducts tetap sama) ...
     private void initViews() {
         drawerLayout = findViewById(R.id.drawer_layout);
         swipeRefreshLayout = findViewById(R.id.swipe_refresh);
@@ -149,14 +144,13 @@ public class BuyerActivity extends AppCompatActivity implements
         newestProductsRecyclerView = findViewById(R.id.newest_products_grid);
         productsProgressBar = findViewById(R.id.products_progress_bar);
     }
+
     private void setupSwipeRefresh() {
         swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
         swipeRefreshLayout.setOnRefreshListener(() -> {
-            // Panggil semula data dari Firebase
             fetchCategoriesFromFirebase();
             productViewModel.loadAllProducts();
 
-            // Hentikan animasi loading selepas 2 saat atau selepas data siap
             new android.os.Handler().postDelayed(() -> {
                 swipeRefreshLayout.setRefreshing(false);
             }, 2000);
@@ -178,8 +172,8 @@ public class BuyerActivity extends AppCompatActivity implements
                 startActivity(new Intent(BuyerActivity.this, AboutUsActivity.class));
             } else if (itemId == R.id.nav_contact_us) {
                 startActivity(new Intent(BuyerActivity.this, ContactUsActivity.class));
-            }else if (itemId == R.id.nav_report) {
-                    startActivity(new Intent(BuyerActivity.this, ReportProblemActivity.class));
+            } else if (itemId == R.id.nav_report) {
+                startActivity(new Intent(BuyerActivity.this, ReportProblemActivity.class));
             } else if (itemId == R.id.nav_logout) {
                 showLogoutConfirmation();
             }
@@ -187,19 +181,18 @@ public class BuyerActivity extends AppCompatActivity implements
             return true;
         });
 
-        // Jika anda mahu search bar nampak lebih 'klik-able'
         searchButton.setOnClickListener(v -> {
-            // Animasi skala kecil apabila diklik
             v.animate().scaleX(0.95f).scaleY(0.95f).setDuration(100).withEndAction(() -> {
                 v.animate().scaleX(1.0f).scaleY(1.0f).setDuration(100);
                 startActivity(new Intent(BuyerActivity.this, SearchActivity.class));
             });
         });
+
         notificationIconLayout.setOnClickListener(v -> {
-            // Ganti NotificationActivity.class dengan nama activity notifikasi anda
             Intent intent = new Intent(BuyerActivity.this, NotificationActivity.class);
             startActivity(intent);
         });
+
         cartIconLayout.setOnClickListener(v -> startActivity(new Intent(BuyerActivity.this, CartActivity.class)));
 
         bottomNavigationView.setSelectedItemId(R.id.nav_home);
@@ -228,30 +221,27 @@ public class BuyerActivity extends AppCompatActivity implements
 
     private void setupPromoCarousel() {
         promoImageList = new ArrayList<>();
-        promoImageList.add(R.drawable.promo_placeholder_1);
-        promoImageList.add(R.drawable.promo_placeholder_2);
+        promoImageList.add(R.drawable.skincare);
+        promoImageList.add(R.drawable.makeip);
         promoImageList.add(R.drawable.model);
 
         promoCarouselAdapter = new PromoCarouselAdapter(promoImageList);
         promoCarousel.setAdapter(promoCarouselAdapter);
 
-        // --- INTERAKTIF: Auto Scroll ---
         carouselRunnable = () -> {
             int currentItem = promoCarousel.getCurrentItem();
             int nextItem = (currentItem + 1) % promoImageList.size();
             promoCarousel.setCurrentItem(nextItem, true);
-            carouselHandler.postDelayed(carouselRunnable, 4000); // Tukar setiap 4 saat
+            carouselHandler.postDelayed(carouselRunnable, 4000);
         };
         carouselHandler.postDelayed(carouselRunnable, 4000);
 
-        // Tambah effect transformation (Zoom out/in sedikit)
         promoCarousel.setPageTransformer((page, position) -> {
             float r = 1 - Math.abs(position);
             page.setScaleY(0.85f + r * 0.15f);
         });
     }
 
-    // Tambah kawalan Lifecycle untuk mengelakkan memory leak pada Carousel
     @Override
     protected void onPause() {
         super.onPause();
@@ -274,7 +264,6 @@ public class BuyerActivity extends AppCompatActivity implements
         categoriesRecyclerView.setLayoutManager(layoutManager);
         categoriesRecyclerView.setAdapter(categoryAdapter);
 
-        // Tambah SnapHelper supaya item berhenti tepat di tengah/tepi (lebih smooth)
         androidx.recyclerview.widget.SnapHelper snapHelper = new androidx.recyclerview.widget.LinearSnapHelper();
         if (categoriesRecyclerView.getOnFlingListener() == null) {
             snapHelper.attachToRecyclerView(categoriesRecyclerView);
@@ -290,10 +279,16 @@ public class BuyerActivity extends AppCompatActivity implements
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     Category category = dataSnapshot.getValue(Category.class);
                     if (category != null) {
-                        categoryList.add(category);
+                        // FILTER: Hanya ambil subkategori, bukan kategori utama
+                        String catName = category.getCategoryName().toLowerCase().trim();
+
+                        // Skip kategori utama seperti "Skincare", "Makeup"
+                        if (!catName.equals("skincare") && !catName.equals("makeup") &&
+                                !catName.equals("haircare") && !catName.equals("bodycare")) {
+                            categoryList.add(category);
+                        }
                     }
                 }
-                // Susun supaya Skincare & Makeup sentiasa di depan jika anda mahu
                 categoryAdapter.notifyDataSetChanged();
             }
 
@@ -304,14 +299,9 @@ public class BuyerActivity extends AppCompatActivity implements
         });
     }
 
-
     private void setupBrands() {
-        // brandList kini menyimpan objek Product supaya kita boleh akses URL Logo & SellerID
         List<Product> brandProductList = new ArrayList<>();
-
-        // BrandAdapter dikemaskini untuk menerima List<Product>
         brandAdapter = new BrandAdapter(this, brandProductList, product -> {
-            // Apabila logo ditekan, terus ke kedai menggunakan SellerID produk tersebut
             Intent intent = new Intent(BuyerActivity.this, ShopViewActivity.class);
             intent.putExtra("SELLER_ID", product.getSellerId());
             startActivity(intent);
@@ -320,6 +310,7 @@ public class BuyerActivity extends AppCompatActivity implements
         brandsRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         brandsRecyclerView.setAdapter(brandAdapter);
     }
+
     private void fetchProductsWithViewModel() {
         productsProgressBar.setVisibility(View.VISIBLE);
         newestProductsRecyclerView.setVisibility(View.GONE);
@@ -338,23 +329,18 @@ public class BuyerActivity extends AppCompatActivity implements
                 }
                 productAdapter.updateProductList(productList);
 
-                // 2. LOGIK BRAND DENGAN LOGO (Macam Categories)
-                // Kita guna HashMap supaya 1 Jenama = 1 Logo unik
-                java.util.Map<String, Product> brandLogoMap = new java.util.HashMap<>();
+                // 2. LOGIK BRAND DENGAN LOGO
+                Map<String, Product> brandLogoMap = new java.util.HashMap<>();
                 for (Product p : products) {
                     if (p.getBrand() != null && !p.getBrand().isEmpty()) {
-                        // Jika jenama belum ada dalam map, masukkan produk ini sebagai wakil logo
                         if (!brandLogoMap.containsKey(p.getBrand())) {
                             brandLogoMap.put(p.getBrand(), p);
                         }
                     }
                 }
 
-                // Masukkan hasil unik ke dalam list brandAdapter
                 List<Product> uniqueBrandLogos = new ArrayList<>(brandLogoMap.values());
-
-                // Pastikan anda mempunyai method updateList di dalam BrandAdapter
-                brandAdapter.updateList(uniqueBrandLogos); // Betul
+                brandAdapter.updateList(uniqueBrandLogos);
             }
 
             productsProgressBar.setVisibility(View.GONE);
@@ -378,9 +364,7 @@ public class BuyerActivity extends AppCompatActivity implements
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 long itemCount = 0;
                 if (snapshot.exists()) {
-                    // Perlu iterate semua seller folder
                     for (DataSnapshot sellerSnapshot : snapshot.getChildren()) {
-                        // Pastikan ini adalah seller folder (bukan corrupted data)
                         if (sellerSnapshot.hasChildren()) {
                             itemCount += sellerSnapshot.getChildrenCount();
                         }
@@ -402,76 +386,66 @@ public class BuyerActivity extends AppCompatActivity implements
         };
         cartRef.addValueEventListener(cartListener);
     }
-  private void setupNotificationBadge() {
-      if (currentUser == null) {
-          notificationBadge.setVisibility(View.GONE);
-          return;
-      }
 
-      String userId = currentUser.getUid();
-      notificationRef = FirebaseDatabase.getInstance().getReference("Notifications").child(userId);
+    private void setupNotificationBadge() {
+        if (currentUser == null) {
+            notificationBadge.setVisibility(View.GONE);
+            return;
+        }
 
-      notificationListener = new ValueEventListener() {
-          @Override
-          public void onDataChange(@NonNull DataSnapshot snapshot) {
-              int unreadCount = 0;
+        String userId = currentUser.getUid();
+        notificationRef = FirebaseDatabase.getInstance().getReference("Notifications").child(userId);
 
-              for (DataSnapshot ds : snapshot.getChildren()) {
-                  // PENTING: Gunakan key "unread" (boolean) bukan "read"
-                  // Dan pastikan ia disemak sebagai Boolean object untuk elak NullPointerException
-                  Boolean isUnread = ds.child("unread").getValue(Boolean.class);
+        notificationListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int unreadCount = 0;
 
-                  if (isUnread != null && isUnread) {
-                      unreadCount++;
-                  }
-              }
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    Boolean isUnread = ds.child("unread").getValue(Boolean.class);
+                    if (isUnread != null && isUnread) {
+                        unreadCount++;
+                    }
+                }
 
-              // Kemaskini UI Badge
-              if (unreadCount > 0) {
-                  notificationBadge.setVisibility(View.VISIBLE);
-                  notificationBadge.setText(String.valueOf(unreadCount));
-              } else {
-                  notificationBadge.setVisibility(View.GONE);
-              }
-          }
+                if (unreadCount > 0) {
+                    notificationBadge.setVisibility(View.VISIBLE);
+                    notificationBadge.setText(String.valueOf(unreadCount));
+                } else {
+                    notificationBadge.setVisibility(View.GONE);
+                }
+            }
 
-          @Override
-          public void onCancelled(@NonNull DatabaseError error) {
-              Log.e("BuyerActivity", "NotificationBadge Error: " + error.getMessage());
-          }
-      };
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("BuyerActivity", "NotificationBadge Error: " + error.getMessage());
+            }
+        };
 
-      // Guna addValueEventListener untuk update real-time
-      notificationRef.addValueEventListener(notificationListener);
-  }
-    // Fungsi tambahan untuk paparkan Pop-up ringkas
-    private void showInAppNotification(String title, String message) {
-        // Gunakan Snackbar supaya tidak terlalu mengganggu tapi nampak moden
-        View parentLayout = findViewById(android.R.id.content);
-        com.google.android.material.snackbar.Snackbar.make(parentLayout, title + ": " + message, 5000)
-                .setAction("VIEW", v -> {
-                    startActivity(new Intent(this, NotificationActivity.class));
-                })
-                .show();
+        notificationRef.addValueEventListener(notificationListener);
     }
 
+    // Implementasi OnCategoryClickListener - PERUBAHAN UTAMA DI SINI
     @Override
     public void onCategoryClick(Category category) {
-        // Gunakan 'category' (dari parameter), bukan 'categories'
-        Intent intent = new Intent(this, ShopActivity.class);
+        // TAMBAH LOG INI
+        Log.d("DEBUG_BUYER", "onCategoryClick RECEIVED: " + category.getCategoryName());
 
-        // Ambil nama kategori terus dari objek yang ditekan (contoh: "Cleansers")
-        String categoryName = category.getCategoryName();
+        // TEST DENGAN TOAST
+        Toast.makeText(this,
+                "✓ Clicked: " + category.getCategoryName(),
+                Toast.LENGTH_SHORT).show();
 
-        // Hantar nama kategori ke ShopActivity supaya produk boleh ditapis
-        intent.putExtra("CATEGORY_NAME", categoryName);
-
-        startActivity(intent);
+        // Tunggu 2 saat sebelum pergi ke ShopActivity
+        new Handler().postDelayed(() -> {
+            Intent intent = new Intent(this, ShopActivity.class);
+            intent.putExtra("CATEGORY_NAME", category.getCategoryName());
+            startActivity(intent);
+        }, 2000);
     }
 
     private void setupNewestProducts() {
         productList = new ArrayList<>();
-        // Inisialisasi adapter. 'this' kedua merujuk kepada OnProductInteractionListener
         productAdapter = new BuyerProductAdapter(this, productList, this);
 
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
@@ -479,7 +453,6 @@ public class BuyerActivity extends AppCompatActivity implements
         newestProductsRecyclerView.setAdapter(productAdapter);
     }
 
-    // --- Product Interaction Listener Implementation ---
     @Override
     public void onProductClick(Product product) {
         Intent intent = new Intent(this, ProductDetailActivity.class);
@@ -487,11 +460,9 @@ public class BuyerActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
-    // --- PERUBAHAN 2: Tandatangan kaedah dikemas kini ---
     @Override
     public void onBuyNowClick(Product product) {
         if (currentUser != null) {
-            // Semak stok produk utama
             if (product.getStock() <= 0) {
                 Toast.makeText(this, "Product is out of stock", Toast.LENGTH_SHORT).show();
                 return;
@@ -503,10 +474,8 @@ public class BuyerActivity extends AppCompatActivity implements
             String imageUrl = (product.getImageUrls() != null && !product.getImageUrls().isEmpty())
                     ? product.getImageUrls().get(0) : "";
 
-            // Gunakan harga akhir produk
             double finalPrice = product.getFinalPrice();
 
-            // Cipta CartItem tanpa maklumat varian
             CartItem item = new CartItem(
                     product.getProductId(),
                     product.getName(),
@@ -516,7 +485,6 @@ public class BuyerActivity extends AppCompatActivity implements
                     product.getSellerProfileImageUrl()
             );
 
-            // Tetapkan maklumat seller
             item.setSellerId(product.getSellerId());
             item.setSellerName(product.getSellerName());
             item.setSellerProfileImageUrl(product.getSellerProfileImageUrl());
@@ -532,9 +500,6 @@ public class BuyerActivity extends AppCompatActivity implements
         }
     }
 
-
-    // --- PERUBAHAN 3: Tandatangan kaedah dikemas kini ---
-
     @Override
     public void onAddToCartClick(Product product) {
         if (currentUser == null) {
@@ -543,16 +508,12 @@ public class BuyerActivity extends AppCompatActivity implements
             return;
         }
 
-        // Semak stok produk utama
         if (!product.hasStock()) {
             Toast.makeText(this, "Product is out of stock", Toast.LENGTH_SHORT).show();
             return;
         }
 
         String userId = currentUser.getUid();
-
-        // --- PEMBETULAN UTAMA DI SINI ---
-        // Terus dapatkan sellerId dan pastikan ia wujud. Tiada lagi logik gantian.
         String sellerId = product.getSellerId();
 
         if (sellerId == null || sellerId.isEmpty()) {
@@ -560,19 +521,15 @@ public class BuyerActivity extends AppCompatActivity implements
             Log.e("BuyerActivity", "Attempted to add product with missing sellerId: " + product.getProductId());
             return;
         }
-        // --- AKHIR PEMBETULAN UTAMA ---
 
-        // Rujukan ke troli seller kini menggunakan sellerId yang sah
         DatabaseReference sellerCartRef = FirebaseDatabase.getInstance()
                 .getReference("Carts")
                 .child(userId)
-                .child(sellerId); // <-- Guna sellerId yang betul dan sah
+                .child(sellerId);
 
-        // ID item dalam troli adalah sama dengan ID produk
         String cartItemId = product.getProductId();
         DatabaseReference cartItemRef = sellerCartRef.child(cartItemId);
 
-        // Guna Transaction untuk mengendalikan penambahan kuantiti dengan selamat
         cartItemRef.runTransaction(new com.google.firebase.database.Transaction.Handler() {
             @NonNull
             @Override
@@ -580,7 +537,6 @@ public class BuyerActivity extends AppCompatActivity implements
                 CartItem currentItem = mutableData.getValue(CartItem.class);
 
                 if (currentItem == null) {
-                    // Item belum wujud, cipta item baru
                     String imageUrl = (product.getImageUrls() != null && !product.getImageUrls().isEmpty())
                             ? product.getImageUrls().get(0) : null;
 
@@ -590,20 +546,16 @@ public class BuyerActivity extends AppCompatActivity implements
                     newItem.setPrice(product.getFinalPrice());
                     newItem.setQuantity(1);
                     newItem.setImageUrls(imageUrl);
-                    newItem.setSelected(true); // Pilih secara lalai apabila ditambah
+                    newItem.setSelected(true);
                     newItem.setSellerId(sellerId);
                     newItem.setSellerName(product.getSellerName());
                     newItem.setSellerProfileImageUrl(product.getSellerProfileImageUrl());
 
                     mutableData.setValue(newItem);
                 } else {
-                    // Item sudah ada, hanya tambah kuantiti
                     int newQuantity = currentItem.getQuantity() + 1;
 
-                    // Semak semula stok sebelum mengemas kini
                     if (newQuantity > product.getStock()) {
-                        // Jangan teruskan transaksi jika melebihi stok
-                        // Mesej Toast akan dipaparkan dalam onComplete
                         return com.google.firebase.database.Transaction.abort();
                     }
 
@@ -620,39 +572,12 @@ public class BuyerActivity extends AppCompatActivity implements
                 } else if (committed) {
                     Toast.makeText(BuyerActivity.this, "Item added to cart", Toast.LENGTH_SHORT).show();
                 } else {
-                    // Transaksi dibatalkan (kemungkinan besar kerana melebihi stok)
                     Toast.makeText(BuyerActivity.this, "Maximum quantity in cart reached", Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
 
-
-    // --- PERUBAHAN 4: Helper method dipermudahkan ---
-    private void createNewCartItem(Product product, String sellerId, DatabaseReference cartItemRef) {
-        String productImageUrl = (product.getImageUrls() != null && !product.getImageUrls().isEmpty())
-                ? product.getImageUrls().get(0) : "";
-
-        CartItem newCartItem = new CartItem(
-                product.getProductId(),
-                product.getName(),
-                product.getFinalPrice(),
-                1,
-                productImageUrl,
-                product.getSellerProfileImageUrl()
-        );
-
-        newCartItem.setSellerId(sellerId);
-        newCartItem.setSellerName(product.getSellerName());
-
-        cartItemRef.setValue(newCartItem)
-                .addOnSuccessListener(aVoid -> Toast.makeText(BuyerActivity.this, "Added to cart", Toast.LENGTH_SHORT).show())
-                .addOnFailureListener(e -> Toast.makeText(BuyerActivity.this, "Failed to add to cart", Toast.LENGTH_SHORT).show());
-    }
-
-
-
-    // ... (handleFavouriteClick, onFavouriteClick, onSellerClick, showLogoutConfirmation, onDestroy tetap sama) ...
     private void handleFavouriteClick(Product product, boolean isFavourite) {
         if (currentUser == null) {
             Toast.makeText(this, "Please log in to manage your favourites", Toast.LENGTH_SHORT).show();
@@ -665,7 +590,6 @@ public class BuyerActivity extends AppCompatActivity implements
                 .child(product.getProductId());
 
         if (isFavourite) {
-            // Simpan hanya ID, bukan keseluruhan objek untuk kecekapan
             favRef.setValue(true)
                     .addOnSuccessListener(aVoid -> Log.d("BuyerActivity", product.getName() + " added to favourites."))
                     .addOnFailureListener(e -> Log.e("BuyerActivity", "Failed to add favourite", e));
@@ -693,6 +617,7 @@ public class BuyerActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
+
     private void showLogoutConfirmation() {
         new AlertDialog.Builder(this)
                 .setTitle("Logout")
@@ -712,10 +637,8 @@ public class BuyerActivity extends AppCompatActivity implements
         if (cartRef != null && cartListener != null) {
             cartRef.removeEventListener(cartListener);
         }
-        // Tambah ini
         if (notificationRef != null && notificationListener != null) {
             notificationRef.removeEventListener(notificationListener);
         }
     }
-
 }

@@ -1,24 +1,59 @@
 package com.example.beautyhub.models;
 
-import com.google.firebase.database.Exclude;
-
 public class Category {
     private String categoryId;
-    private String categoryName;
+    private String categoryName; // Nama field di Firebase
+    private String categoryImage;
+    private boolean isActive;
 
-    // Constructor kosong - WAJIB untuk Firebase
+    // Empty constructor untuk Firebase
     public Category() {}
 
+    // Constructor yang betul
     public Category(String categoryId, String categoryName) {
         this.categoryId = categoryId;
+        this.categoryName = categoryName; // Set categoryName
+        this.isActive = true;
+    }
+
+    // Constructor dengan semua field
+    public Category(String categoryId, String categoryName, String categoryImage, boolean isActive) {
+        this.categoryId = categoryId;
+        this.categoryName = categoryName;
+        this.categoryImage = categoryImage;
+        this.isActive = isActive;
+    }
+
+    // Getters and Setters
+    public String getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(String categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
     }
 
-    // --- GETTERS ---
-    public String getCategoryId() { return categoryId; }
-    public String getCategoryName() { return categoryName; }
+    public String getCategoryImage() {
+        return categoryImage;
+    }
 
-    // --- SETTERS ---
-    public void setCategoryId(String categoryId) { this.categoryId = categoryId; }
-    public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
+    public void setCategoryImage(String categoryImage) {
+        this.categoryImage = categoryImage;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
 }

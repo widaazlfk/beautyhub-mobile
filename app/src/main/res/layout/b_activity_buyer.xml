@@ -106,14 +106,7 @@
                             android:textSize="18sp"
                             android:textStyle="bold"
                             android:textColor="@color/black" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="See More"
-                            android:textColor="?attr/colorPrimary"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
+                        
                     </LinearLayout>
 
                     <androidx.recyclerview.widget.RecyclerView

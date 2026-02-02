@@ -18,6 +18,7 @@ public class Order implements Parcelable {
     private long orderDate;
     private String paymentMethod;
     private String orderSource;
+    private double shippingFee;
 
     // Seller Info & Discount
     private List<OrderItem> orderItems;
@@ -34,7 +35,7 @@ public class Order implements Parcelable {
 
     // Constructor Utama
     public Order(String orderId, String userId, String username, ShippingAddress shippingAddress,
-                 double totalAmount, String status, long orderDate, String paymentMethod, double discountAmount) {
+                 double totalAmount, String status, long orderDate, String paymentMethod, double discountAmount,  double shippingFee) {
         this();
         this.orderId = orderId;
         this.userId = userId;
@@ -45,8 +46,16 @@ public class Order implements Parcelable {
         this.orderDate = orderDate;
         this.paymentMethod = paymentMethod;
         this.discountAmount = discountAmount;
+        this.shippingFee = shippingFee;
     }
 
+    public double getShippingFee() {
+        return shippingFee;
+    }
+
+    public void setShippingFee(double shippingFee) {
+        this.shippingFee = shippingFee;
+    }
     // --- Getters & Setters ---
     public String getOrderId() { return orderId; }
     public void setOrderId(String orderId) { this.orderId = orderId; }
@@ -111,6 +120,7 @@ public class Order implements Parcelable {
         orderDate = in.readLong();
         paymentMethod = in.readString();
         orderSource = in.readString();
+        shippingFee = in.readDouble();
         orderItems = in.createTypedArrayList(OrderItem.CREATOR);
         sellerId = in.readString();
         sellerName = in.readString();
@@ -130,6 +140,7 @@ public class Order implements Parcelable {
         dest.writeLong(orderDate);
         dest.writeString(paymentMethod);
         dest.writeString(orderSource);
+        dest.writeDouble(shippingFee);
         dest.writeTypedList(orderItems);
         dest.writeString(sellerId);
         dest.writeString(sellerName);
